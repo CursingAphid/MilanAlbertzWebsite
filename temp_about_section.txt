@@ -1,0 +1,21 @@
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 text-center">
+              <div className="w-32 h-32 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <span className="text-white text-4xl font-bold">MA</span>
+              </div>
+              <h4 className="text-xl font-semibold text-gray-900 mb-2">Milan</h4>
+              <p className="text-gray-600">Full-Stack Developer</p>
+            </div>
+            <div>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">My Journey</h3>
+              <p className="text-gray-600 mb-4">
+                I started my coding journey with curiosity and a desire to solve problems. 
+                Over the years, I've worked with various technologies and frameworks, always 
+                staying up-to-date with the latest trends in web development.
+              </p>
+              <p className="text-gray-600">
+                When I'm not coding, you can find me exploring new technologies, contributing 
+                to open source projects, or sharing knowledge with the developer community.
+              </p>
+            </div>
+          </div>
