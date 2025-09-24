@@ -1,203 +1,252 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import milanImage from './assets/milan_albertz.png'
+import palmTreeImage from './assets/palmtree.png'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentSkill, setCurrentSkill] = useState(0)
+  const [currentAnimation, setCurrentAnimation] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  
+  const skills = [
+    'Web Development',
+    'UI/UX Design', 
+    'Mobile Apps',
+    'Data Science',
+    'Machine Learning',
+    'DevOps',
+    'API Development',
+    "LLM",
+    "Azure",
+    "Docker",
+    "Git",
+    "CI/CD",
+    "Testing",
+    "Agile",
+    "React",
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "C#",
+    "SQL",
+    "Python",
+    "Node.js",
+    "Agentic AI",
+  ]
+
+  const animations = [
+    'glowPulse'
+  ]
+
+
+  useEffect(() => {
+    if (isHovered) return // Stop cycling when hovered
+    
+    const skillInterval = setInterval(() => {
+      setCurrentSkill((prev) => (prev + 1) % skills.length)
+    }, 2000)
+    
+    return () => clearInterval(skillInterval)
+  }, [skills.length, isHovered])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #222831 0%, #393E46 100%)' }}>
+
+
+      <nav className="backdrop-blur-sm shadow-sm sticky top-0 z-50" style={{ backgroundColor: 'rgba(34, 40, 49, 0.8)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Milan</h1>
+              <h1 className="text-xl font-bold" style={{ color: '#00ADB5' }}>Milan</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="#about" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">About</a>
-              <a href="#projects" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Projects</a>
-              <a href="#skills" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Skills</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">Contact</a>
+              <a href="#hero" className="px-3 py-2 rounded-md text-sm font-medium transition-colors" style={{ color: '#EEEEEE' }}>Home</a>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-32 relative z-10">
+        {/* Floating geometric shapes - only in first section */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-16 h-16 rounded-full animate-float-slow" style={{ backgroundColor: '#00ADB5', opacity: 0.2 }}></div>
+          <div className="absolute top-40 right-20 w-12 h-12 rounded-lg rotate-45 animate-float-reverse" style={{ backgroundColor: '#393E46', opacity: 0.3 }}></div>
+          <div className="absolute bottom-40 left-20 w-20 h-20 rounded-full animate-float-slow" style={{ backgroundColor: '#00ADB5', opacity: 0.15 }}></div>
+          <div className="absolute bottom-20 right-10 w-14 h-14 rounded-lg animate-float-reverse" style={{ backgroundColor: '#EEEEEE', opacity: 0.1 }}></div>
+          <div className="absolute top-1/2 left-1/4 w-8 h-8 rounded-full animate-float-slow" style={{ backgroundColor: '#393E46', opacity: 0.2 }}></div>
+          <div className="absolute top-1/3 right-1/3 w-10 h-10 rounded-lg rotate-12 animate-float-reverse" style={{ backgroundColor: '#00ADB5', opacity: 0.25 }}></div>
+        </div>
+        
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Milan</span>
+          {/* Image above text */}
+          <div className="flex justify-center mb-8">
+            <div className="w-32 h-32 backdrop-blur-sm rounded-full shadow-xl overflow-hidden" style={{ backgroundColor: 'rgba(57, 62, 70, 0.8)', border: '4px solid rgba(0, 173, 181, 0.5)' }}>
+              <img 
+                src={milanImage} 
+                alt="Milan Albertz" 
+                className="w-full h-full object-cover"
+                style={{ objectPosition: '80% 30%' }}
+              />
+            </div>
+          </div>
+
+          {/* Text content */}
+          <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ color: '#EEEEEE' }}>
+            Hi, I'm <span style={{ 
+              background: 'linear-gradient(135deg, #00ADB5 0%, #EEEEEE 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>Milan</span>
           </h1>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            A passionate full-stack developer crafting beautiful, performant web applications with modern technologies.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <a 
-              href="#projects" 
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              View My Work
-            </a>
-            <a 
-              href="#contact" 
-              className="bg-white hover:bg-gray-50 text-blue-600 font-semibold py-3 px-8 rounded-lg border-2 border-blue-600 transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Get In Touch
-            </a>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Fun Counter</h2>
-            <div className="text-center">
-              <div className="text-6xl font-bold text-blue-600 mb-4">{count}</div>
-              <button 
-                onClick={() => setCount((count) => count + 1)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          <div className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: '#EEEEEE' }}>
+            <p className="mb-2">Experience with among others:</p>
+            <div className="h-12 flex items-center justify-center relative">
+              <span 
+                key={currentSkill}
+                className="text-2xl font-semibold cursor-pointer transition-all duration-300 hover:scale-110"
+                style={{
+                  background: 'linear-gradient(135deg, #00ADB5 0%, #EEEEEE 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  animation: isHovered ? 'none' : 'glowPulse 2s ease-in-out'
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
               >
-                Click me!
-              </button>
+                {skills[currentSkill]}
+              </span>
+              
+              {/* Horizontal skills on hover */}
+              {isHovered && (
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 flex flex-wrap justify-center items-center gap-x-8 gap-y-2 pointer-events-none w-full max-w-4xl">
+                  {skills
+                    .filter((_, index) => index !== currentSkill)
+                    .map((skill, index) => (
+                    <span
+                      key={skill}
+                      className="text-base font-semibold opacity-0 animate-fade-in-up whitespace-nowrap"
+                      style={{
+                        background: 'linear-gradient(135deg, #00ADB5 0%, #EEEEEE 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        animationDelay: `${index * 0.08}s`
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <div id="about" className="bg-white py-16">
+      {/* Projects Section */}
+      <div className="pt-8 pb-20 relative z-10" style={{ backgroundColor: 'rgba(34, 40, 49, 0.8)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">About Me</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              I'm a passionate developer who loves creating digital experiences that make a difference. 
-              With expertise in modern web technologies, I build applications that are not only beautiful 
-              but also performant and user-friendly.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 text-center">
-              <div className="w-32 h-32 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span className="text-white text-4xl font-bold">MA</span>
-              </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">Milan</h4>
-              <p className="text-gray-600">Full-Stack Developer</p>
-            </div>
-            <div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4">My Journey</h3>
-              <p className="text-gray-600 mb-4">
-                I started my coding journey with curiosity and a desire to solve problems.
-                Over the years, I've worked with various technologies and frameworks, always
-                staying up-to-date with the latest trends in web development.
-              </p>
-              <p className="text-gray-600">
-                When I'm not coding, you can find me exploring new technologies, contributing
-                to open source projects, or sharing knowledge with the developer community.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="skills" className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Skills & Technologies</h2>
-            <p className="text-lg text-gray-600">Tools and technologies I work with</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Frontend</h3>
-              <p className="text-gray-600">React, TypeScript, Tailwind CSS, Next.js, Vite</p>
-            </div>
-            
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Backend</h3>
-              <p className="text-gray-600">Node.js, Express, PostgreSQL, MongoDB, APIs</p>
-            </div>
-            
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Tools</h3>
-              <p className="text-gray-600">Git, Docker, AWS, Vercel, Figma</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="projects" className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Projects</h2>
-            <p className="text-lg text-gray-600">Some of my recent work</p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4" style={{ color: '#EEEEEE' }}>
+              Featured Projects
+            </h2>
+            <p className="text-xl" style={{ color: '#EEEEEE' }}>Some of my coolest work</p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">Project 1</span>
+            {/* Project 1 - Brazil Theme */}
+            <div className="group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 relative" style={{ backgroundColor: 'rgba(57, 62, 70, 0.3)', border: '1px solid rgba(0, 173, 181, 0.2)' }}>
+              {/* Default state */}
+              <div className="h-48 flex items-center justify-center transition-all duration-500 group-hover:opacity-0" style={{ background: 'linear-gradient(135deg, #00ADB5 0%, #393E46 100%)' }}>
+                <span className="text-2xl font-bold" style={{ color: '#EEEEEE' }}>University App</span>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">E-Commerce Platform</h3>
-                <p className="text-gray-600 mb-4">A full-stack e-commerce solution built with React, Node.js, and PostgreSQL.</p>
+              
+              {/* Brazil theme on hover */}
+              <div className="absolute inset-0 h-48 flex items-center justify-center transition-all duration-500 opacity-0 group-hover:opacity-100 overflow-hidden" style={{ background: 'linear-gradient(135deg, #009639 0%, #FEDD00 50%, #002776 100%)' }}>
+                {/* Palm trees - only in header area */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Left palm tree */}
+                  <div className="absolute -left-56 -top-48 transform transition-all duration-300 group-hover:-left-16 group-hover:-top-8 group-hover:rotate-6">
+                    <img 
+                      src={palmTreeImage} 
+                      alt="Palm Tree" 
+                      className="w-64 h-64 object-contain"
+                    />
+                  </div>
+                  {/* Right palm tree */}
+                  <div className="absolute -right-56 -top-48 transform transition-all duration-300 group-hover:-right-16 group-hover:-top-8 group-hover:-rotate-6">
+                    <img 
+                      src={palmTreeImage} 
+                      alt="Palm Tree" 
+                      className="w-64 h-64 object-contain"
+                      style={{ transform: 'scaleX(-1)' }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Text above trees */}
+                <div className="text-center relative z-10">
+                  <span className="text-2xl font-bold block text-white" style={{ 
+                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.7), 0 0 30px rgba(255, 255, 255, 0.5)',
+                    filter: 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))',
+                    letterSpacing: '1px'
+                  }}>Universidade App</span>
+                </div>
+              </div>
+              
+              <div className="p-6 transition-all duration-500 group-hover:bg-opacity-30" style={{ backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
+                <h3 className="text-xl font-semibold mb-2 transition-colors duration-500 group-hover:text-yellow-300" style={{ color: '#EEEEEE' }}>University Management System</h3>
+                <p className="mb-4 transition-colors duration-500 group-hover:text-green-100" style={{ color: '#EEEEEE' }}>A comprehensive React application for Inteli (a university in São Paulo, Brazil), for managing projects with partners from different companies.</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">React</span>
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">Node.js</span>
-                  <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">PostgreSQL</span>
+                  <span className="px-3 py-1 rounded-full text-sm transition-all duration-500 group-hover:!bg-yellow-400 group-hover:!text-green-800" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>React</span>
+                  <span className="px-3 py-1 rounded-full text-sm transition-all duration-500 group-hover:!bg-green-500 group-hover:!text-white" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>JavaScript</span>
+                  <span className="px-3 py-1 rounded-full text-sm transition-all duration-500 group-hover:!bg-blue-600 group-hover:!text-yellow-300" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>CSS</span>
                 </div>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">Live Demo</a>
-                  <a href="#" className="text-gray-600 hover:text-gray-800 font-medium">GitHub</a>
+                  <a href="#" className="font-medium transition-colors hover:opacity-80 group-hover:text-yellow-300" style={{ color: '#00ADB5' }}>Live Demo</a>
+                  <a href="#" className="font-medium transition-colors hover:opacity-80 group-hover:text-green-200" style={{ color: '#EEEEEE' }}>GitHub</a>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="h-48 bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">Project 2</span>
+            {/* Project 2 */}
+            <div className="group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105" style={{ backgroundColor: 'rgba(57, 62, 70, 0.3)', border: '1px solid rgba(0, 173, 181, 0.2)' }}>
+              <div className="h-48 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #393E46 0%, #00ADB5 100%)' }}>
+                <span className="text-2xl font-bold" style={{ color: '#EEEEEE' }}>E-Commerce</span>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Task Management App</h3>
-                <p className="text-gray-600 mb-4">A collaborative task management tool with real-time updates and team features.</p>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: '#EEEEEE' }}>Full-Stack E-Commerce Platform</h3>
+                <p className="mb-4" style={{ color: '#EEEEEE' }}>Complete e-commerce solution with payment integration, inventory management, and admin dashboard.</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">Next.js</span>
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">TypeScript</span>
-                  <span className="px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">MongoDB</span>
+                  <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>Next.js</span>
+                  <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>PostgreSQL</span>
+                  <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>Stripe</span>
                 </div>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">Live Demo</a>
-                  <a href="#" className="text-gray-600 hover:text-gray-800 font-medium">GitHub</a>
+                  <a href="#" className="font-medium transition-colors hover:opacity-80" style={{ color: '#00ADB5' }}>Live Demo</a>
+                  <a href="#" className="font-medium transition-colors hover:opacity-80" style={{ color: '#EEEEEE' }}>GitHub</a>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-              <div className="h-48 bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">Project 3</span>
+            {/* Project 3 */}
+            <div className="group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:scale-105" style={{ backgroundColor: 'rgba(57, 62, 70, 0.3)', border: '1px solid rgba(0, 173, 181, 0.2)' }}>
+              <div className="h-48 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #00ADB5 0%, #EEEEEE 20%, #00ADB5 100%)' }}>
+                <span className="text-2xl font-bold" style={{ color: '#222831' }}>Data Viz</span>
               </div>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Portfolio Website</h3>
-                <p className="text-gray-600 mb-4">A responsive portfolio website showcasing my work and skills.</p>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: '#EEEEEE' }}>Interactive Data Visualization</h3>
+                <p className="mb-4" style={{ color: '#EEEEEE' }}>Dynamic data visualization tool with real-time charts and interactive dashboards.</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">React</span>
-                  <span className="px-3 py-1 bg-cyan-100 text-cyan-800 text-sm rounded-full">Tailwind</span>
-                  <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">Vite</span>
+                  <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>D3.js</span>
+                  <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>Python</span>
+                  <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'rgba(0, 173, 181, 0.2)', color: '#00ADB5' }}>API</span>
                 </div>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">Live Demo</a>
-                  <a href="#" className="text-gray-600 hover:text-gray-800 font-medium">GitHub</a>
+                  <a href="#" className="font-medium transition-colors hover:opacity-80" style={{ color: '#00ADB5' }}>Live Demo</a>
+                  <a href="#" className="font-medium transition-colors hover:opacity-80" style={{ color: '#EEEEEE' }}>GitHub</a>
                 </div>
               </div>
             </div>
@@ -205,48 +254,6 @@ function App() {
         </div>
       </div>
 
-      <div id="contact" className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Let's Work Together</h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            I'm always interested in new opportunities and exciting projects. 
-            Let's discuss how we can bring your ideas to life!
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <a 
-              href="mailto:your.email@example.com" 
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Send Email
-            </a>
-            <a 
-              href="https://github.com/yourusername" 
-              className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              View GitHub
-            </a>
-          </div>
-
-          <div className="flex justify-center space-x-6">
-            <a href="https://linkedin.com/in/yourusername" className="text-gray-400 hover:text-white transition-colors">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-            </a>
-            <a href="https://twitter.com/yourusername" className="text-gray-400 hover:text-white transition-colors">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-              </svg>
-            </a>
-            <a href="https://github.com/yourusername" className="text-gray-400 hover:text-white transition-colors">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
