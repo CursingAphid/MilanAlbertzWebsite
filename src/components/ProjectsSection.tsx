@@ -14,7 +14,8 @@ export default function ProjectsSection({ emojiPositions }: Props) {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 relative scroll-fade-in`} data-scroll-section id="project-1" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
+          <a href="/university-app" className="block" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/university-app'); window.dispatchEvent(new PopStateEvent('popstate')); }}>
+            <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 relative scroll-fade-in cursor-pointer`} data-scroll-section id="project-1" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
             <div className="h-48 flex items-center justify-center transition-all duration-500 group-hover:opacity-0 card-header-gradient-1">
               <span className="text-2xl font-bold text-on-dark">University App</span>
             </div>
@@ -40,10 +41,11 @@ export default function ProjectsSection({ emojiPositions }: Props) {
                 <span className="px-3 py-1 rounded-full text-sm transition-all duration-500 group-hover:!bg-blue-600 group-hover:!text-yellow-300 bg-chip text-accent">CSS</span>
               </div>
               <div className="mt-auto">
-                <a href="#" className="font-medium transition-colors hover:opacity-80 text-accent group-hover:text-yellow-300">Learn More</a>
+                <span className="font-medium transition-colors text-accent group-hover:text-yellow-300">Learn More →</span>
               </div>
             </div>
-          </div>
+            </div>
+          </a>
 
           <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 scroll-fade-in-delayed`} data-scroll-section id="project-2" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
             <div className="h-48 flex items-center justify-center transition-all duration-500 group-hover:opacity-0 card-header-gradient-2">
