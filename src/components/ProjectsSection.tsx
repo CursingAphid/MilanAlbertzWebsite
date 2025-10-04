@@ -47,7 +47,8 @@ export default function ProjectsSection({ emojiPositions }: Props) {
             </div>
           </a>
 
-          <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 scroll-fade-in-delayed`} data-scroll-section id="project-2" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
+          <a href="/cgi-projects" className="block" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/cgi-projects'); window.dispatchEvent(new PopStateEvent('popstate')); }}>
+            <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 scroll-fade-in-delayed cursor-pointer`} data-scroll-section id="project-2" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
             <div className="h-48 flex items-center justify-center transition-all duration-500 group-hover:opacity-0 card-header-gradient-2">
               <span className="text-2xl font-bold text-on-dark">CGI Projects</span>
             </div>
@@ -73,9 +74,11 @@ export default function ProjectsSection({ emojiPositions }: Props) {
                 <a href="#" className="font-medium transition-colors hover:opacity-80 text-accent group-hover:text-red-300">Learn More</a>
               </div>
             </div>
-          </div>
+            </div>
+          </a>
 
-          <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 scroll-fade-in-delayed`} data-scroll-section id="project-3" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
+          <a href="/hobby-projects" className="block" onClick={(e) => { e.preventDefault(); window.history.pushState({}, '', '/hobby-projects'); window.dispatchEvent(new PopStateEvent('popstate')); }}>
+            <div className={`group bg-opacity-20 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:scale-105 scroll-fade-in-delayed cursor-pointer`} data-scroll-section id="project-3" style={{ border: '1px solid rgba(0, 173, 181, 0.2)', backgroundColor: 'rgba(57, 62, 70, 0.3)' }}>
             <div className="h-48 flex items-center justify-center transition-all duration-500 group-hover:opacity-0 group-hover:scale-110 group-hover:blur-sm card-header-gradient-3">
               <span className="text-2xl font-bold text-on-dark">Hobby Projects</span>
             </div>
@@ -112,10 +115,11 @@ export default function ProjectsSection({ emojiPositions }: Props) {
                 <span className="px-3 py-1 rounded-full text-sm transition-all duration-500 group-hover:!bg-yellow-500 group-hover:!text-orange-800 bg-chip text-accent">AI/ML</span>
               </div>
               <div className="mt-auto">
-                <a href="#" className="font-medium transition-colors hover:opacity-80 text-accent group-hover:text-yellow-300">Learn More</a>
+                <span className="font-medium transition-colors text-accent group-hover:text-yellow-300">Learn More →</span>
               </div>
             </div>
-          </div>
+            </div>
+          </a>
         </div>
       </div>
     </div>

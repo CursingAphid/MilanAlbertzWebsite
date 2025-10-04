@@ -4,9 +4,14 @@ import HeroSection from './components/HeroSection.tsx'
 import NavBar from './components/NavBar'
 import ProjectsSection from './components/ProjectsSection'
 import WorkExperienceSection from './components/WorkExperienceSection'
-import aboutMeImage from './assets/AboutMe.jpeg'
-import aboutMe2 from './assets/aboutme2.jpeg'
-import aboutMe3 from './assets/aboutme3.jpeg'
+import milanOffice from './assets/about_me_carousel/milan-office.jpg'
+import milanPortrait from './assets/about_me_carousel/milan-portrait.jpeg'
+import milanCityHall from './assets/about_me_carousel/milan-city-hall.jpg'
+import milanCasual from './assets/about_me_carousel/milan-casual.jpeg'
+import milanProfessional from './assets/about_me_carousel/milan-professional.jpg'
+import milanProject from './assets/about_me_carousel/milan-project.webp'
+import milanTravel from './assets/about_me_carousel/milan-travel.jpg'
+import milanAdditional from './assets/about_me_carousel/milan-additional.webp'
 import { useScrollVisibility } from './hooks/useScrollVisibility'
 
 function App() {
@@ -26,14 +31,14 @@ function App() {
   
   // Array of all images for the carousel - ordered clockwise starting from top
   const carouselImages = [
-    aboutMeImage,  // 0 - Top
-    aboutMe2,      // 1 - Top Right  
-    aboutMe3,      // 2 - Right
-    aboutMeImage,  // 3 - Bottom Right
-    aboutMe2,      // 4 - Bottom
-    aboutMe3,      // 5 - Bottom Left
-    aboutMeImage,  // 6 - Left
-    aboutMe2       // 7 - Top Left
+    milanPortrait,     // 0 - Top
+    milanOffice,       // 1 - Top Right  
+    milanProfessional, // 2 - Right
+    milanProject,      // 3 - Bottom Right
+    milanTravel,       // 4 - Bottom
+    milanCityHall,     // 5 - Bottom Left
+    milanCasual,       // 6 - Left
+    milanAdditional    // 7 - Top Left
   ]
   
   const skills = [

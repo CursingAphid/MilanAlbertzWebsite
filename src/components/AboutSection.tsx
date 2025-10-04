@@ -2,7 +2,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { EffectFade, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-fade'
-import { RefObject, useState, useEffect } from 'react'
+import { type RefObject, useState, useEffect } from 'react'
 
 type Props = {
   lineRef: RefObject<HTMLDivElement | null>
@@ -122,7 +122,14 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
               >
                 {carouselImages.map((image, index) => (
                   <SwiperSlide key={index}>
-                    <img src={image} alt="About Milan" className="w-full h-full object-cover" />
+                    <img 
+                      src={image} 
+                      alt="About Milan" 
+                      className="w-full h-full object-cover" 
+                      style={{ 
+                        objectPosition: index === 1 ? 'top right' : index === 7 ? 'left center' : 'center' 
+                      }}
+                    />
                   </SwiperSlide>
                 ))}
               </Swiper>
@@ -155,7 +162,7 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
             </div>
           </div>
 
-          <div className="lg:col-span-3 order-2 lg:order-none relative flex items-center h-[500px] md:h-[400px] mt-[-100px]">
+          <div className="lg:col-span-3 order-2 lg:order-none relative flex items-center h-[500px] md:h-[400px] mt-[-100px] md:mt-0">
             {/* Spaceship window frame */}
             <div className="absolute inset-0 border-2 rounded-lg bg-black/20 backdrop-blur-sm" style={{borderColor: '#00ADB5'}}>
               {/* Corner decorations */}
@@ -174,14 +181,14 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
             {/* Text content with padding for frame */}
             <div className="relative z-10 p-8 space-y-6">
             <p className="text-lg leading-relaxed text-muted-on-dark">
-              I'm a passionate software engineer and consultant who started my professional journey at just 18 years old.
+              I'm a passionate software engineer and consultant from Kerkrade, Netherlands, who started my professional journey at just 18 years old.
               What drives me is the intersection of technology and real-world impact - whether that's building smart city
-              solutions for governments or creating innovative projects that solve everyday problems.
+              solutions for governments or diving into the immersive world of virtual reality.
             </p>
             <p className="text-lg leading-relaxed text-muted-on-dark">
-              When I'm not coding, you'll find me exploring new technologies, working on personal projects, or
-              contributing to the tech community. I'm always excited to collaborate on projects that make a
-              real difference in people's lives.
+              When I'm not coding, you'll find me lost in music, planning my next adventure to eat desserts around the world, 
+              or dancing at funk parties. I'm always excited to collaborate on projects that blend technology with creativity 
+              and make a real difference in people's lives.
             </p>
             </div>
           </div>

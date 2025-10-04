@@ -9,7 +9,9 @@ type Props = {
 
 export default function HeroSection({ skills, currentSkill, isHovered, setIsHovered }: Props) {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-32 relative z-10" id="hero">
+    <div className="relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-600/20 to-transparent"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-32 relative z-10" id="hero">
       <div className={`text-center scroll-fade-in`} data-scroll-section id="hero-section">
         <div className="flex justify-center mb-8">
           <div className="w-56 h-56 backdrop-blur-sm rounded-full shadow-xl overflow-hidden border-4 border-accent" style={{ backgroundColor: 'rgba(57, 62, 70, 0.8)' }}>
@@ -51,6 +53,7 @@ export default function HeroSection({ skills, currentSkill, isHovered, setIsHove
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
