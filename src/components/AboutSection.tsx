@@ -162,9 +162,9 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
             </div>
           </div>
 
-          <div className="lg:col-span-3 order-2 lg:order-none relative flex items-center h-[500px] md:h-[400px] mt-[-100px] md:mt-0">
+          <div className="lg:col-span-3 order-2 lg:order-none relative flex items-center h-auto min-h-[420px] md:min-h-[400px] mt-4 md:mt-0">
             {/* Spaceship window frame */}
-            <div className="absolute inset-0 border-2 rounded-lg bg-black/20 backdrop-blur-sm" style={{borderColor: '#00ADB5'}}>
+            <div className="absolute inset-0 border-2 rounded-lg bg-black/20 backdrop-blur-sm pointer-events-none" style={{borderColor: '#00ADB5'}}>
               {/* Corner decorations */}
               <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2" style={{borderColor: '#00ADB5'}}></div>
               <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2" style={{borderColor: '#00ADB5'}}></div>
@@ -179,7 +179,7 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
             </div>
             
             {/* Text content with padding for frame */}
-            <div className="relative z-10 p-8 space-y-6">
+            <div className="relative z-10 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 break-words">
             <p className="text-lg leading-relaxed text-muted-on-dark">
               I'm a passionate software engineer and consultant from Kerkrade, Netherlands, who started my professional journey at just 18 years old.
               What drives me is the intersection of technology and real-world impact - whether that's building smart city

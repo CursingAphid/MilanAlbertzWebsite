@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import NavBar from '../components/NavBar'
 import { useScrollVisibility } from '../hooks/useScrollVisibility'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -53,6 +53,10 @@ export default function HobbyProjectsPage() {
   // Carousel state for each project
   const [currentImages, setCurrentImages] = useState<{[key: number]: number}>({})
   
+  // Touch swipe tracking per project
+  const touchStartXRef = useRef<{ [key: number]: number | null }>({})
+  const swipeThreshold = 40
+  
   // Initialize carousel states
   useEffect(() => {
     const initialStates: {[key: number]: number} = {}
@@ -75,6 +79,24 @@ export default function HobbyProjectsPage() {
       ...prev,
       [projectId]: (prev[projectId] - 1 + project.images.length) % project.images.length
     }))
+  }
+
+  const handleTouchStart = (projectId: number) => (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0]
+    touchStartXRef.current[projectId] = touch.clientX
+  }
+
+  const handleTouchEnd = (projectId: number) => (e: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartXRef.current[projectId]
+    if (startX == null) return
+    const endX = e.changedTouches[0].clientX
+    const deltaX = endX - startX
+    if (deltaX <= -swipeThreshold) {
+      goNextImage(projectId)
+    } else if (deltaX >= swipeThreshold) {
+      goPrevImage(projectId)
+    }
+    touchStartXRef.current[projectId] = null
   }
 
   return (
@@ -102,7 +124,11 @@ export default function HobbyProjectsPage() {
               {/* Image Carousel */}
               <div className={`${index % 2 === 1 ? 'lg:col-start-2' : ''}`}>
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                  <div className="relative h-80 overflow-hidden">
+                  <div
+                    className="relative h-80 overflow-hidden"
+                    onTouchStart={project.images.length > 1 ? handleTouchStart(project.id) : undefined}
+                    onTouchEnd={project.images.length > 1 ? handleTouchEnd(project.id) : undefined}
+                  >
                     {project.images.map((image, idx) => (
                       <img 
                         key={idx}
