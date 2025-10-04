@@ -124,7 +124,7 @@ export default function UniversityAppPage() {
       </div>
 
       {/* The City That Never Sleeps section */}
-      <div className="w-full py-16 bg-gradient-to-b from-gray-800 to-gray-900">
+      <div className="w-full py-16 bg-gradient-to-b from-gray-800 to-gray-900" style={{ contentVisibility: 'auto', containIntrinsicSize: '1200px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Text content */}
@@ -212,6 +212,8 @@ export default function UniversityAppPage() {
                           src={image} 
                           alt={spImageNames[idx]} 
                           className="w-full h-80 object-cover"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     ))}
@@ -340,7 +342,7 @@ export default function UniversityAppPage() {
       </div>
 
       {/* Travels section - carousel with changing backgrounds */}
-      <section className="relative w-full h-[80vh] overflow-hidden">
+      <section className="relative w-full h-[80vh] overflow-hidden" style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' }}>
         {/* Background slides */}
         <div
           className="flex h-full transition-transform duration-1000 ease-in-out"
@@ -354,6 +356,8 @@ export default function UniversityAppPage() {
                   src={cityImages[idx]} 
                   alt={city} 
                   className="absolute inset-0 w-full h-full object-cover" 
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-black/50" />
               </div>
