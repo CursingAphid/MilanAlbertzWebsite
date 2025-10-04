@@ -87,11 +87,16 @@ export default function UniversityAppPage() {
       
       {/* Full-screen background section */}
       <div className="w-full h-screen relative overflow-hidden">
-        <img 
-          src={spBgImage} 
-          alt="São Paulo Background" 
-          className="absolute inset-0 w-full h-full object-cover object-bottom"
-        />
+        <picture>
+          <source srcSet={spBgImage} type="image/webp" />
+          <img 
+            src={spBgImage} 
+            alt="São Paulo Background" 
+            className="absolute inset-0 w-full h-full object-cover object-bottom"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-center">

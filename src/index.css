@@ -676,7 +676,7 @@
 }
 
 .bg-navbar {
-  background-color: #22C55E; /* Tailwind green-500 */
+  background-color: rgba(34, 40, 49, 0.8);
 }
 
 .text-gradient-accent {
