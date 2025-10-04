@@ -35,8 +35,8 @@ export default function UniversityAppPage() {
   const spContainerRef = useRef<HTMLDivElement | null>(null)
   const spTouchStartXRef = useRef<number | null>(null)
   const [spDragPx, setSpDragPx] = useState(0)
-  const goNextSP = () => setSpIndex((prev) => (prev + 1) % spImages.length)
-  const goPrevSP = () => setSpIndex((prev) => (prev - 1 + spImages.length) % spImages.length)
+  const goNextSP = () => setSpIndex((prev) => Math.min(prev + 1, spImages.length - 1))
+  const goPrevSP = () => setSpIndex((prev) => Math.max(prev - 1, 0))
   // Percent kept for potential easing/animation future use; currently rely on exact dot centering
   // const planePercent = (travelIndex / (travelCities.length - 1)) * 100
   const routeRef = useRef<HTMLDivElement | null>(null)
@@ -152,7 +152,7 @@ export default function UniversityAppPage() {
                 <div className="relative overflow-hidden rounded-lg shadow-2xl">
                   <div 
                     ref={spContainerRef}
-                    className="flex"
+                    className="flex touch-pan-y"
                     style={(() => {
                       const width = spContainerRef.current?.clientWidth || 1
                       const dragPercent = (spDragPx / width) * 100
@@ -168,16 +168,23 @@ export default function UniversityAppPage() {
                     onTouchMove={(e) => {
                       if (spTouchStartXRef.current == null) return
                       const deltaX = e.touches[0].clientX - spTouchStartXRef.current
-                      setSpDragPx(deltaX)
+                      // Prevent dragging beyond first/last
+                      if (spIndex === 0 && deltaX > 0) {
+                        setSpDragPx(0)
+                      } else if (spIndex === spImages.length - 1 && deltaX < 0) {
+                        setSpDragPx(0)
+                      } else {
+                        setSpDragPx(deltaX)
+                      }
                     }}
                     onTouchEnd={(e) => {
                       if (spTouchStartXRef.current == null) return
                       const deltaX = e.changedTouches[0].clientX - spTouchStartXRef.current
                       const width = spContainerRef.current?.clientWidth || window.innerWidth
                       const threshold = Math.max(40, width * 0.15)
-                      if (deltaX <= -threshold) {
+                      if (deltaX <= -threshold && spIndex < spImages.length - 1) {
                         goNextSP()
-                      } else if (deltaX >= threshold) {
+                      } else if (deltaX >= threshold && spIndex > 0) {
                         goPrevSP()
                       }
                       spTouchStartXRef.current = null
@@ -234,11 +241,11 @@ export default function UniversityAppPage() {
                   </div>
                   
                   {/* Image name overlay */}
-                  <div className="absolute top-4 left-4 bg-black/50 px-3 py-1 rounded-lg backdrop-blur-sm">
+                  <div className="absolute top-4 left-4 bg-black/50 px-3 py-1 rounded-lg backdrop-blur-sm pointer-events-none">
                     <span className="text-white text-sm font-medium">{spImageNames[spIndex]}</span>
                   </div>
                   
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg pointer-events-none"></div>
                 </div>
               </div>
             </div>
