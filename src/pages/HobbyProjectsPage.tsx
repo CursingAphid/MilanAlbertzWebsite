@@ -56,6 +56,9 @@ export default function HobbyProjectsPage() {
   // Touch swipe tracking per project
   const touchStartXRef = useRef<{ [key: number]: number | null }>({})
   const swipeThreshold = 40
+  const containerRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
+  const [dragOffsetByProject, setDragOffsetByProject] = useState<{ [key: number]: number }>({})
+  const [isDraggingByProject, setIsDraggingByProject] = useState<{ [key: number]: boolean }>({})
   
   // Initialize carousel states
   useEffect(() => {
@@ -84,6 +87,8 @@ export default function HobbyProjectsPage() {
   const handleTouchStart = (projectId: number) => (e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0]
     touchStartXRef.current[projectId] = touch.clientX
+    setIsDraggingByProject(prev => ({ ...prev, [projectId]: true }))
+    setDragOffsetByProject(prev => ({ ...prev, [projectId]: 0 }))
   }
 
   const handleTouchEnd = (projectId: number) => (e: React.TouchEvent<HTMLDivElement>) => {
@@ -91,12 +96,25 @@ export default function HobbyProjectsPage() {
     if (startX == null) return
     const endX = e.changedTouches[0].clientX
     const deltaX = endX - startX
-    if (deltaX <= -swipeThreshold) {
+    const width = containerRefs.current[projectId]?.clientWidth || window.innerWidth
+    const dynamicThreshold = Math.max(swipeThreshold, width * 0.15)
+    if (deltaX <= -dynamicThreshold) {
       goNextImage(projectId)
-    } else if (deltaX >= swipeThreshold) {
+    } else if (deltaX >= dynamicThreshold) {
       goPrevImage(projectId)
     }
     touchStartXRef.current[projectId] = null
+    setIsDraggingByProject(prev => ({ ...prev, [projectId]: false }))
+    // snap back offset; transition handled by images when not dragging
+    setDragOffsetByProject(prev => ({ ...prev, [projectId]: 0 }))
+  }
+
+  const handleTouchMove = (projectId: number) => (e: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartXRef.current[projectId]
+    if (startX == null) return
+    const currentX = e.touches[0].clientX
+    const deltaX = currentX - startX
+    setDragOffsetByProject(prev => ({ ...prev, [projectId]: deltaX }))
   }
 
   return (
@@ -126,7 +144,9 @@ export default function HobbyProjectsPage() {
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                   <div
                     className="relative h-80 overflow-hidden"
+                    ref={(el) => { containerRefs.current[project.id] = el }}
                     onTouchStart={project.images.length > 1 ? handleTouchStart(project.id) : undefined}
+                    onTouchMove={project.images.length > 1 ? handleTouchMove(project.id) : undefined}
                     onTouchEnd={project.images.length > 1 ? handleTouchEnd(project.id) : undefined}
                   >
                     {project.images.map((image, idx) => (
@@ -134,10 +154,18 @@ export default function HobbyProjectsPage() {
                         key={idx}
                         src={image} 
                         alt={`${project.title} ${idx + 1}`}
-                        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-in-out ${
-                          idx === (currentImages[project.id] || 0) ? 'translate-x-0' : 
-                          idx < (currentImages[project.id] || 0) ? '-translate-x-full' : 'translate-x-full'
-                        }`}
+                        className={`absolute inset-0 w-full h-full object-cover`}
+                        style={(() => {
+                          const current = currentImages[project.id] || 0
+                          const width = containerRefs.current[project.id]?.clientWidth || 1
+                          const dragPx = dragOffsetByProject[project.id] || 0
+                          const dragPercent = (dragPx / width) * 100
+                          const basePercent = (idx - current) * 100
+                          return {
+                            transform: `translateX(calc(${basePercent}% + ${dragPercent}%))`,
+                            transition: isDraggingByProject[project.id] ? 'none' : 'transform 500ms ease-in-out'
+                          } as React.CSSProperties
+                        })()}
                       />
                     ))}
                     

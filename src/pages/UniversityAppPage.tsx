@@ -32,6 +32,9 @@ export default function UniversityAppPage() {
   const spImages = [saoPauloImage, itaimBibiImage, ibirapueraImage, paulistaAvenueImage, libertadeImage]
   const spImageNames = ['São Paulo Skyline', 'Itaim Bibi', 'Ibirapuera Park', 'Paulista Avenue', 'Liberdade']
   const [spIndex, setSpIndex] = useState(0)
+  const spContainerRef = useRef<HTMLDivElement | null>(null)
+  const spTouchStartXRef = useRef<number | null>(null)
+  const [spDragPx, setSpDragPx] = useState(0)
   const goNextSP = () => setSpIndex((prev) => (prev + 1) % spImages.length)
   const goPrevSP = () => setSpIndex((prev) => (prev - 1 + spImages.length) % spImages.length)
   // Percent kept for potential easing/animation future use; currently rely on exact dot centering
@@ -148,8 +151,38 @@ export default function UniversityAppPage() {
                 {/* Carousel container */}
                 <div className="relative overflow-hidden rounded-lg shadow-2xl">
                   <div 
-                    className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${spIndex * 100}%)` }}
+                    ref={spContainerRef}
+                    className="flex"
+                    style={(() => {
+                      const width = spContainerRef.current?.clientWidth || 1
+                      const dragPercent = (spDragPx / width) * 100
+                      return {
+                        transform: `translateX(calc(-${spIndex * 100}% + ${dragPercent}%))`,
+                        transition: spTouchStartXRef.current !== null ? 'none' : 'transform 500ms ease-in-out'
+                      } as React.CSSProperties
+                    })()}
+                    onTouchStart={(e) => {
+                      spTouchStartXRef.current = e.touches[0].clientX
+                      setSpDragPx(0)
+                    }}
+                    onTouchMove={(e) => {
+                      if (spTouchStartXRef.current == null) return
+                      const deltaX = e.touches[0].clientX - spTouchStartXRef.current
+                      setSpDragPx(deltaX)
+                    }}
+                    onTouchEnd={(e) => {
+                      if (spTouchStartXRef.current == null) return
+                      const deltaX = e.changedTouches[0].clientX - spTouchStartXRef.current
+                      const width = spContainerRef.current?.clientWidth || window.innerWidth
+                      const threshold = Math.max(40, width * 0.15)
+                      if (deltaX <= -threshold) {
+                        goNextSP()
+                      } else if (deltaX >= threshold) {
+                        goPrevSP()
+                      }
+                      spTouchStartXRef.current = null
+                      setSpDragPx(0)
+                    }}
                   >
                     {spImages.map((image, idx) => (
                       <div key={idx} className="w-full flex-shrink-0">
