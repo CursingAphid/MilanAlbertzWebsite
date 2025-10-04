@@ -45,6 +45,16 @@ export default function UniversityAppPage() {
   const brazilRef = useRef<HTMLSpanElement | null>(null)
   const [confettiFired, setConfettiFired] = useState(false)
 
+  // Preload Brazil hero image to improve LCP
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = spBgImage
+    document.head.appendChild(link)
+    return () => { document.head.removeChild(link) }
+  }, [])
+
   const handleBrazilAnimationEnd = () => {
     if (confettiFired) return
     setConfettiFired(true)
@@ -87,16 +97,16 @@ export default function UniversityAppPage() {
       
       {/* Full-screen background section */}
       <div className="w-full h-screen relative overflow-hidden">
-        <picture>
-          <source srcSet={spBgImage} type="image/webp" />
-          <img 
-            src={spBgImage} 
-            alt="São Paulo Background" 
-            className="absolute inset-0 w-full h-full object-cover object-bottom"
-            loading="eager"
-            decoding="async"
-          />
-        </picture>
+        <img 
+          src={spBgImage} 
+          alt="São Paulo Background" 
+          className="absolute inset-0 w-full h-full object-cover object-bottom"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          width={1920}
+          height={1080}
+        />
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-center">
