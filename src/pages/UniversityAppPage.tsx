@@ -25,8 +25,11 @@ export default function UniversityAppPage() {
   // Travels carousel state
   const travelCities = ['Rio de Janeiro', 'Belo Horizonte', 'Salvador']
   const [travelIndex, setTravelIndex] = useState(0)
-  const goNextTravel = () => setTravelIndex((prev) => (prev + 1) % travelCities.length)
-  const goPrevTravel = () => setTravelIndex((prev) => (prev - 1 + travelCities.length) % travelCities.length)
+  const goNextTravel = () => setTravelIndex((prev) => Math.min(prev + 1, travelCities.length - 1))
+  const goPrevTravel = () => setTravelIndex((prev) => Math.max(prev - 1, 0))
+  const travelsSwipeRef = useRef<HTMLDivElement | null>(null)
+  const travelTouchStartXRef = useRef<number | null>(null)
+  const [travelDragPx, setTravelDragPx] = useState(0)
   
   // São Paulo carousel state
   const spImages = [saoPauloImage, itaimBibiImage, ibirapueraImage, paulistaAvenueImage, libertadeImage]
@@ -345,8 +348,15 @@ export default function UniversityAppPage() {
       <section className="relative w-full h-[80vh] overflow-hidden" style={{ contentVisibility: 'auto', containIntrinsicSize: '800px' }}>
         {/* Background slides */}
         <div
-          className="flex h-full transition-transform duration-1000 ease-in-out"
-          style={{ transform: `translateX(-${travelIndex * 100}%)` }}
+          className="flex h-full"
+          style={(() => {
+            const width = travelsSwipeRef.current?.clientWidth || 1
+            const dragPercent = (travelDragPx / width) * 100
+            return {
+              transform: `translateX(calc(-${travelIndex * 100}% + ${dragPercent}%))`,
+              transition: travelTouchStartXRef.current !== null ? 'none' : 'transform 1000ms ease-in-out'
+            } as React.CSSProperties
+          })()}
         >
           {travelCities.map((city, idx) => {
             const cityImages = [rioImage, beloHorizonteImage, salvadorImage]
@@ -369,7 +379,38 @@ export default function UniversityAppPage() {
         <div className="absolute top-0 left-0 w-full leaves-top-divider z-10"></div>
 
         {/* Content overlay */}
-        <div className="absolute inset-0 z-20 flex flex-col justify-center items-center">
+        <div
+          ref={travelsSwipeRef}
+          className="absolute inset-0 z-20 flex flex-col justify-center items-center touch-pan-y"
+          onTouchStart={(e) => {
+            travelTouchStartXRef.current = e.touches[0].clientX
+            setTravelDragPx(0)
+          }}
+          onTouchMove={(e) => {
+            if (travelTouchStartXRef.current == null) return
+            const deltaX = e.touches[0].clientX - travelTouchStartXRef.current
+            if (travelIndex === 0 && deltaX > 0) {
+              setTravelDragPx(0)
+            } else if (travelIndex === travelCities.length - 1 && deltaX < 0) {
+              setTravelDragPx(0)
+            } else {
+              setTravelDragPx(deltaX)
+            }
+          }}
+          onTouchEnd={(e) => {
+            if (travelTouchStartXRef.current == null) return
+            const deltaX = e.changedTouches[0].clientX - travelTouchStartXRef.current
+            const width = travelsSwipeRef.current?.clientWidth || window.innerWidth
+            const threshold = Math.max(40, width * 0.15)
+            if (deltaX <= -threshold && travelIndex < travelCities.length - 1) {
+              setTravelIndex((prev) => Math.min(prev + 1, travelCities.length - 1))
+            } else if (deltaX >= threshold && travelIndex > 0) {
+              setTravelIndex((prev) => Math.max(prev - 1, 0))
+            }
+            travelTouchStartXRef.current = null
+            setTravelDragPx(0)
+          }}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
 
             {/* Header */}
