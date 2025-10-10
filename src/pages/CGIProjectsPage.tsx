@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import NavBar from '../components/NavBar'
 import { useScrollVisibility } from '../hooks/useScrollVisibility'
 import { Code, Database, Server, Globe } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function CGIProjectsPage() {
+  const { t } = useTranslation()
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -19,57 +22,39 @@ export default function CGIProjectsPage() {
   const projects = [
     {
       id: 1,
-      title: "CGI UnityControl",
-      description: "An innovative solution for a safer and more manageable environment. CGI UnityControl connects all dynamic objects in the outdoor space and provides integrated control over these objects.",
+      title: t('cgiProjects.unityControl.title'),
+      description: t('cgiProjects.unityControl.description'),
       technologies: ["Polymer", "C#", "Kubernetes", "Azure"],
-      category: "Smart City Solutions",
-      duration: "6 months",
-      teamSize: "8 developers",
-      features: [
-        "Improved safety and mobility in outdoor spaces",
-        "Management of the entire outdoor space in one geographic interface",
-        "Extensive display options, from control room to mobile",
-        "Control is transferable for collaboration during events",
-        "Exact insight into energy consumption with integration to financial systems"
-      ],
-      challenges: "Integration of different management systems and vendor-independent implementation",
-      impact: "Savings in time and money through more efficient maintenance and management, with significant energy savings on street lighting"
+      category: t('cgiProjects.unityControl.category'),
+      duration: t('cgiProjects.unityControl.duration'),
+      teamSize: t('cgiProjects.unityControl.teamSize'),
+      features: t('cgiProjects.unityControl.features', { returnObjects: true }),
+      challenges: t('cgiProjects.unityControl.challenge'),
+      impact: t('cgiProjects.unityControl.impact')
     },
     {
       id: 2,
-      title: "AI Chatbot Solutions",
-      description: "Intelligent chatbot solutions developed for various clients across different industries, designed to help with complex issues, minimize manual labor, enhance security, reduce manual errors, and save time through automated problem-solving.",
+      title: t('cgiProjects.aiChatbot.title'),
+      description: t('cgiProjects.aiChatbot.description'),
       technologies: ["Python", "Azure", "Streamlit", "AI Foundry", "Knowledge Graphs"],
-      category: "AI/ML Solutions",
-      duration: "4 months", 
-      teamSize: "5 developers",
-      features: [
-        "Automated problem-solving for complex issues",
-        "Security enhancement through intelligent monitoring",
-        "Reduction of manual errors in critical processes",
-        "Integration with existing client systems",
-        "Time-saving automation for repetitive tasks"
-      ],
-      challenges: "Adapting AI models to different client domains and ensuring consistent performance across various use cases",
-      impact: "Reduced manual labor, enhanced security monitoring, and minimized manual errors while saving significant time on complex issue resolution"
+      category: t('cgiProjects.aiChatbot.category'),
+      duration: t('cgiProjects.aiChatbot.duration'), 
+      teamSize: t('cgiProjects.aiChatbot.teamSize'),
+      features: t('cgiProjects.aiChatbot.features', { returnObjects: true }),
+      challenges: t('cgiProjects.aiChatbot.challenge'),
+      impact: t('cgiProjects.aiChatbot.impact')
     },
     {
       id: 3,
-      title: "Smart Store Sensor System",
-      description: "An intelligent sensor-based solution for retail stores that monitors temperature, power consumption, and environmental factors to optimize energy usage and reduce carbon emissions.",
+      title: t('cgiProjects.smartStore.title'),
+      description: t('cgiProjects.smartStore.description'),
       technologies: ["C#", "Azure IoT", "Arduino", "Web Development", "REST APIs"],
-      category: "IoT Solutions",
-      duration: "5 months",
-      teamSize: "6 developers",
-      features: [
-        "Real-time temperature monitoring and control",
-        "Power consumption tracking and optimization",
-        "Carbon emission reduction through smart automation",
-        "Environmental sensor integration",
-        "Automated energy management systems"
-      ],
-      challenges: "Integrating multiple sensor types and ensuring reliable data collection across different store environments",
-      impact: "Reduction in carbon emissions and energy costs while maintaining optimal store conditions"
+      category: t('cgiProjects.smartStore.category'),
+      duration: t('cgiProjects.smartStore.duration'),
+      teamSize: t('cgiProjects.smartStore.teamSize'),
+      features: t('cgiProjects.smartStore.features', { returnObjects: true }),
+      challenges: t('cgiProjects.smartStore.challenge'),
+      impact: t('cgiProjects.smartStore.impact')
     }
   ]
 
@@ -87,14 +72,14 @@ export default function CGIProjectsPage() {
             data-scroll-section
             className="text-5xl md:text-7xl font-bold text-white mb-6 scroll-fade-in"
           >
-            CGI Projects
+            {t('cgiProjects.hero.title')}
           </h1>
           <p
             id="cgi-hero-subtitle"
             data-scroll-section
             className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto scroll-fade-in-delayed"
           >
-            Enterprise solutions and digital transformation projects I've worked on during my time at CGI
+            {t('cgiProjects.hero.subtitle')}
           </p>
         </div>
       </div>
@@ -146,7 +131,7 @@ export default function CGIProjectsPage() {
                 <div className="mb-6">
                   <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                     <Code className="h-5 w-5 text-blue-400" />
-                    Technologies Used
+                    {t('cgiProjects.technologiesUsed')}
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {currentProject.technologies.map((tech, idx) => (
@@ -164,10 +149,10 @@ export default function CGIProjectsPage() {
                 <div className="mb-6">
                   <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                     <Server className="h-5 w-5 text-green-400" />
-                    Key Features
+                    {t('cgiProjects.keyFeatures')}
                   </h4>
                   <ul className="space-y-2">
-                    {currentProject.features.map((feature, idx) => (
+                    {(currentProject.features as string[]).map((feature: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-gray-300">
                         <span className="text-green-400 mt-1">•</span>
                         {feature}
@@ -183,7 +168,7 @@ export default function CGIProjectsPage() {
                 <div className="rounded-xl p-6 border border-accent" style={{ backgroundColor: '#36393F' }}>
                   <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                     <Database className="h-5 w-5 text-yellow-400" />
-                    Challenge
+                    {t('cgiProjects.challenge')}
                   </h4>
                   <p className="text-gray-300">{currentProject.challenges}</p>
                 </div>
@@ -192,7 +177,7 @@ export default function CGIProjectsPage() {
                 <div className="rounded-xl p-6 border border-accent" style={{ backgroundColor: '#36393F' }}>
                   <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                     <Globe className="h-5 w-5 text-purple-400" />
-                    Impact
+                    {t('cgiProjects.impact')}
                   </h4>
                   <p className="text-gray-300">{currentProject.impact}</p>
                 </div>

@@ -3,6 +3,7 @@ import { EffectFade, Autoplay } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/effect-fade'
 import { type RefObject, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   lineRef: RefObject<HTMLDivElement | null>
@@ -13,6 +14,8 @@ type Props = {
 }
 
 export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ringCurrentImage, carouselImages }: Props) {
+  const { t } = useTranslation()
+  
   // Responsive ring radius - smaller on mobile/tablet, larger on desktop
   const getRingRadius = () => {
     if (typeof window !== 'undefined') {
@@ -85,7 +88,7 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
       </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         <div className={`text-center mb-16 md:mb-32 scroll-fade-in`} data-scroll-section id="about-header">
-          <h2 className="text-4xl font-bold mb-4 text-on-dark">About Me</h2>
+          <h2 className="text-4xl font-bold mb-4 text-on-dark">{t('about.title')}</h2>
         </div>
 
         <div className={`flex flex-col lg:grid lg:grid-cols-5 gap-8 md:gap-0 lg:gap-[14rem] xl:gap-[16rem] items-center scroll-fade-in-delayed`} data-scroll-section id="about-content">
@@ -181,14 +184,10 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
             {/* Text content with padding for frame */}
             <div className="relative z-10 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 break-words">
             <p className="text-lg leading-relaxed text-muted-on-dark">
-              I'm a passionate software engineer and consultant from Kerkrade, Netherlands, who started my professional journey at just 18 years old.
-              What drives me is the intersection of technology and real-world impact - whether that's building smart city
-              solutions for governments or diving into the immersive world of virtual reality.
+              {t('about.description1')}
             </p>
             <p className="text-lg leading-relaxed text-muted-on-dark">
-              When I'm not coding, you'll find me lost in music, planning my next adventure to eat desserts around the world, 
-              or dancing at funk parties. I'm always excited to collaborate on projects that blend technology with creativity 
-              and make a real difference in people's lives.
+              {t('about.description2')}
             </p>
             </div>
           </div>

@@ -1,0 +1,160 @@
+{
+  "nav": {
+    "home": "Home",
+    "universityProject": "Universiteitsproject",
+    "cgiProjects": "CGI Projecten",
+    "hobbyProjects": "Hobby Projecten"
+  },
+  "hero": {
+    "greeting": "Hoi, ik ben",
+    "experienceWith": "Ervaring met onder andere:"
+  },
+  "about": {
+    "title": "Over Mij",
+    "description1": "Ik ben een gepassioneerde software engineer en consultant uit Kerkrade, Nederland, die mijn professionele carrière begon op slechts 18-jarige leeftijd. Wat me drijft is de kruising van technologie en echte wereldimpact - of dat nu het bouwen van slimme stad oplossingen voor overheden is of duiken in de meeslepende wereld van virtual reality.",
+    "description2": "Wanneer ik niet aan het programmeren ben, vind je me verloren in muziek, mijn volgende avontuur plannen om desserts over de hele wereld te eten, of dansen op funk feesten. Ik ben altijd enthousiast om samen te werken aan projecten die technologie met creativiteit combineren en een echt verschil maken in mensenlevens."
+  },
+  "projects": {
+    "title": "Dingen waar ik aan heb gewerkt",
+    "universityApp": {
+      "title": "Universiteitsapp",
+      "titlePortuguese": "Universidade App",
+      "subtitle": "Universiteitsbeheersysteem",
+      "description": "Een uitgebreide React applicatie voor Inteli (een universiteit in São Paulo, Brazilië), voor het beheren van projecten met partners van verschillende bedrijven.",
+      "learnMore": "Meer Informatie →"
+    },
+    "cgiProjects": {
+      "title": "CGI Projecten",
+      "subtitle": "Enterprise Software Oplossingen",
+      "description": "Projecten waar ik aan heb gewerkt tijdens mijn tijd bij CGI voor klanten uit verschillende industrieën.",
+      "learnMore": "Meer Informatie"
+    },
+    "hobbyProjects": {
+      "title": "Hobby Projecten",
+      "subtitle": "Persoonlijke Zijprojecten",
+      "description": "Verschillende persoonlijke projecten en experimenten waar ik in mijn vrije tijd aan werk om nieuwe technologieën en ideeën te verkennen.",
+      "learnMore": "Meer Informatie →"
+    }
+  },
+  "workExperience": {
+    "title": "Werkervaring",
+    "cgi": {
+      "title": "CGI",
+      "period": "2023 - Heden",
+      "position": "Software Engineer & Consultant",
+      "description": "Op slechts 18-jarige leeftijd begon ik bij CGI als jongste medewerker, bijdragend aan een project voor de Vlaamse overheid. Ik werk nu fulltime als software engineer en consultant binnen CGI SmartLab, leverend innovatieve oplossingen en technische expertise aan klanten uit meerdere industrieën.",
+      "skills": ["Software Engineering", "AI/ML", "Consultancy"]
+    },
+    "inteli": {
+      "title": "Inteli - Instituto de Tecnologia e Liderança",
+      "period": "2025",
+      "position": "IT Project Stagiair",
+      "description": "Ik werkte aan een afstudeerproject bij Inteli, gefocust op software engineering, UI/UX design, en projectmanagement.",
+      "skills": ["Projectmanagement", "Software Engineering", "UI/UX Design"]
+    },
+    "zuyd": {
+      "title": "Zuyd Hogeschool",
+      "period": "2022 - 2025",
+      "position": "Werkstudent & Studentenvertegenwoordiger",
+      "description": "Werkte als studentenassistent die medestudenten hielp terwijl ik diende in zowel de Studenten Academische Raad als Centrale Raad, vertegenwoordigend studentenbelangen en bijdragend aan academisch bestuur.",
+      "skills": ["Studentenondersteuning", "Leiderschap", "Academisch Bestuur"]
+    }
+  },
+  "universityApp": {
+    "hero": {
+      "title": "Afstudeerproject in",
+      "brazil": "Brazilië"
+    },
+    "cityNeverSleeps": {
+      "title": "De Stad Die Nooit Slaapt",
+      "description": "Voor mijn afstudeerproject besloot ik te reizen naar São Paulo, een van 's werelds grootste metropolen en het economische centrum van Brazilië. Het biedt een mix van cultuur, eten, levendig nachtleven, en natuurlijk geweldig weer.\n\nIk verbleef 5 maanden in São Paulo en tijdens mijn verblijf werd ik verliefd op de stad en de mensen. Ik maakte zoveel vrienden en had zoveel geweldige ervaringen. Ik hield ervan Uber te gebruiken om door de stad te reizen en eten te bestellen via Ifood, evenals het bezoeken van zoveel coole restaurants en bars. Het maakt niet uit hoe laat het is, er is altijd iets te doen. Werkelijk een stad die nooit slaapt.\n\nIn de beeldcarrousel kun je enkele van mijn favoriete plekken in São Paulo zien. Ik raad echt aan om ze te bezoeken als je ooit de kans krijgt."
+    },
+    "inteliProject": {
+      "title": "Project bij Inteli",
+      "description": "Ik heb succesvol mijn afstudeerproject voltooid bij Inteli, een IT en business universiteit in São Paulo, Brazilië. Een non-profit tech-gerichte hogeschool die projectgebaseerde undergraduate programma's aanbiedt in computer engineering, software engineering, computer science, en informatiesystemen. De campus bevindt zich in de Butantã buurt, binnen University City, en wordt erkend voor zijn hands-on methodologie, directe verbinding met bedrijven, en missie om leiders op te leiden die Brazilië zullen transformeren door technologie.\n\nIk heb een systeem gecreëerd dat werknemers in het projectmanagement kantoor toestaat om projecten en partners te beheren. Het systeem is een web applicatie met een backend in Node.js en een frontend in React.\n\nBezoek Inteli"
+    },
+    "travels": {
+      "title": "Plaatsen Die Ik Heb Bezocht",
+      "rio": "De levendige kuststad bekend om zijn prachtige stranden, iconisch Christus de Verlosser standbeeld, en levendige Carnaval vieringen.",
+      "beloHorizonte": "De op twee na grootste stad van Brazilië, beroemd om zijn rijke culturele erfgoed, heerlijke keuken, en prachtige koloniale architectuur.",
+      "salvador": "De historische hoofdstad van Bahia, bekend om zijn Afro-Braziliaanse cultuur, kleurrijke koloniale gebouwen, en levendige muziekscene."
+    }
+  },
+  "cgiProjects": {
+    "hero": {
+      "title": "CGI Projecten",
+      "subtitle": "Enterprise oplossingen en digitale transformatie projecten waar ik aan heb gewerkt tijdens mijn tijd bij CGI"
+    },
+    "unityControl": {
+      "title": "CGI UnityControl",
+      "description": "Een innovatieve oplossing voor een veiligere en beter beheerbare omgeving. CGI UnityControl verbindt alle dynamische objecten in de buitenruimte en biedt geïntegreerde controle over deze objecten.",
+      "category": "Slimme Stad Oplossingen",
+      "duration": "6 maanden",
+      "teamSize": "8 ontwikkelaars",
+      "features": [
+        "Verbeterde veiligheid en mobiliteit in buitenruimtes",
+        "Beheer van de hele buitenruimte in één geografische interface",
+        "Uitgebreide weergave opties, van controlekamer tot mobiel",
+        "Controle is overdraagbaar voor samenwerking tijdens evenementen",
+        "Exact inzicht in energieverbruik met integratie naar financiële systemen"
+      ],
+      "challenge": "Integratie van verschillende beheersystemen en leverancier-onafhankelijke implementatie",
+      "impact": "Besparingen in tijd en geld door efficiënter onderhoud en beheer, met significante energiebesparingen op straatverlichting"
+    },
+    "aiChatbot": {
+      "title": "AI Chatbot Oplossingen",
+      "description": "Intelligente chatbot oplossingen ontwikkeld voor verschillende klanten uit verschillende industrieën, ontworpen om te helpen met complexe problemen, handmatige arbeid te minimaliseren, beveiliging te verbeteren, handmatige fouten te verminderen, en tijd te besparen door geautomatiseerde probleemoplossing.",
+      "category": "AI/ML Oplossingen",
+      "duration": "4 maanden",
+      "teamSize": "5 ontwikkelaars",
+      "features": [
+        "Geautomatiseerde probleemoplossing voor complexe problemen",
+        "Beveiligingsverbetering door intelligente monitoring",
+        "Vermindering van handmatige fouten in kritieke processen",
+        "Integratie met bestaande klantsystemen",
+        "Tijdbesparende automatisering voor repetitieve taken"
+      ],
+      "challenge": "Aanpassen van AI modellen aan verschillende klantdomeinen en zorgen voor consistente prestaties over verschillende use cases",
+      "impact": "Verminderde handmatige arbeid, verbeterde beveiligingsmonitoring, en geminimaliseerde handmatige fouten terwijl significante tijd wordt bespaard op complexe probleemoplossing"
+    },
+    "smartStore": {
+      "title": "Slimme Winkel Sensor Systeem",
+      "description": "Een intelligente sensor-gebaseerde oplossing voor retail winkels die temperatuur, stroomverbruik, en omgevingsfactoren monitort om energiegebruik te optimaliseren en koolstofemissies te verminderen.",
+      "category": "IoT Oplossingen",
+      "duration": "5 maanden",
+      "teamSize": "6 ontwikkelaars",
+      "features": [
+        "Real-time temperatuurmonitoring en controle",
+        "Stroomverbruik tracking en optimalisatie",
+        "Koolstofemissie reductie door slimme automatisering",
+        "Omgevingssensor integratie",
+        "Geautomatiseerde energiemanagement systemen"
+      ],
+      "challenge": "Integreren van meerdere sensortypes en zorgen voor betrouwbare datacollectie over verschillende winkelomgevingen",
+      "impact": "Reductie in koolstofemissies en energiekosten terwijl optimale winkelomstandigheden worden behouden"
+    },
+    "technologiesUsed": "Gebruikte Technologieën",
+    "keyFeatures": "Belangrijkste Functies",
+    "challenge": "Uitdaging",
+    "impact": "Impact"
+  },
+  "hobbyProjects": {
+    "hero": {
+      "title": "Hobby Projecten",
+      "subtitle": "Persoonlijke projecten waar creativiteit technologie ontmoet"
+    },
+    "breadWaste": {
+      "title": "Broodafval Tracker",
+      "description": "Werkend in een supermarkt merkte ik op dat er te veel brood werd weggegooid en werknemers alles handmatig moesten tellen, wat geen betrouwbare dataset creëerde. Ik wilde de manier waarop broodserving werd genoteerd digitaliseren door een web app te maken met C# backend en HTML, CSS, en JavaScript frontend om voedselverspilling te volgen en verminderen. Dit was een van de eerste webontwikkelingsprojecten die ik deed en die me verliefd maakte op programmeren."
+    },
+    "terrariaModding": {
+      "title": "Terraria Modding",
+      "description": "Ik heb veel leuke mods voor Terraria gemaakt, maar mijn beste werk was de Copper Shortsword mod. Deze mod voegde verschillende nieuwe content toe inclusief nieuwe vijanden, biomen, wapens, armor, en zelfs een baas - allemaal gebaseerd rond de copper shortsword, het allereerste wapen dat je gebruikt in het spel. Het was een uitgebreide uitbreiding die nieuw leven inblaasde in het startwapen."
+    },
+    "stylemate": {
+      "title": "StyleMate",
+      "description": "Een mobiele shopping app die revolutie brengt in hoe mensen kleding ontdekken. Zoals Tinder voor mode, swipen gebruikers door kledingstukken die ze leuk vinden, en als ze een item willen kopen, worden ze doorgestuurd naar de productpagina. Gebouwd met een React frontend en C# backend, maakt StyleMate shoppen meer boeiend en gepersonaliseerd."
+    },
+    "technologiesUsed": "Gebruikte Technologieën"
+  }
+}

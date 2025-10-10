@@ -7,8 +7,11 @@ import breadImage from '../assets/bread.jpg'
 import copperSSImage from '../assets/copperSS.png'
 import copperSSbossImage from '../assets/copperSSboss.gif'
 import stylemateImage from '../assets/Stylemate.png'
+import { useTranslation } from 'react-i18next'
 
 export default function HobbyProjectsPage() {
+  const { t } = useTranslation()
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -21,8 +24,8 @@ export default function HobbyProjectsPage() {
   const hobbyProjects = [
     {
       id: 1,
-      title: "Bread Waste Tracker",
-      description: "Working in a supermarket, I noticed that too much bread was being thrown away and employees had to manually count everything, creating no reliable dataset. I wanted to digitalize the way the bread serving was noted by creating a web app using C# backend with HTML, CSS, and JavaScript frontend to track and reduce food waste. This was one of the first web development projects I did that made me fall in love with programming.",
+      title: t('hobbyProjects.breadWaste.title'),
+      description: t('hobbyProjects.breadWaste.description'),
       images: [
         aldibreadImage,
         breadImage
@@ -31,8 +34,8 @@ export default function HobbyProjectsPage() {
     },
     {
       id: 2,
-      title: "Terraria Modding",
-      description: "I created lots of fun mods for Terraria, but my best work was the Copper Shortsword mod. This mod added various new content including new enemies, biomes, weapons, armor, and even a boss - all based around the copper shortsword, the very first weapon you use in the game. It was a comprehensive expansion that breathed new life into the starting weapon.",
+      title: t('hobbyProjects.terrariaModding.title'),
+      description: t('hobbyProjects.terrariaModding.description'),
       images: [
         copperSSImage,
         copperSSbossImage
@@ -41,8 +44,8 @@ export default function HobbyProjectsPage() {
     },
     {
       id: 3,
-      title: "StyleMate",
-      description: "A mobile shopping app that revolutionizes how people discover clothing. Like Tinder for fashion, users swipe through clothing pieces they like, and if they want to buy an item, they get redirected to the product page. Built with a React frontend and C# backend, StyleMate makes shopping more engaging and personalized.",
+      title: t('hobbyProjects.stylemate.title'),
+      description: t('hobbyProjects.stylemate.description'),
       images: [
         stylemateImage
       ],
@@ -125,10 +128,10 @@ export default function HobbyProjectsPage() {
       <div className="w-full py-20 pt-32 header-gradient-hobby relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            Hobby Projects
+            {t('hobbyProjects.hero.title')}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
-            Personal projects where creativity meets technology
+            {t('hobbyProjects.hero.subtitle')}
           </p>
         </div>
       </div>
@@ -221,7 +224,7 @@ export default function HobbyProjectsPage() {
 
                   {/* Technologies */}
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Technologies Used</h3>
+                    <h3 className="text-lg font-semibold text-white mb-3">{t('hobbyProjects.technologiesUsed')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {project.technologies.map((tech, idx) => (
                         <span

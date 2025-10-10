@@ -1,4 +1,5 @@
 import milanImage from '../assets/milan_albertz.png'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   skills: string[]
@@ -8,6 +9,8 @@ type Props = {
 }
 
 export default function HeroSection({ skills, currentSkill, isHovered, setIsHovered }: Props) {
+  const { t } = useTranslation()
+  
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-b from-gray-600/20 to-transparent"></div>
@@ -20,11 +23,11 @@ export default function HeroSection({ skills, currentSkill, isHovered, setIsHove
         </div>
 
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-on-dark">
-          Hi, I'm <span className="text-gradient-accent">Milan</span>
+          {t('hero.greeting')} <span className="text-gradient-accent">Milan</span>
         </h1>
 
         <div className="text-xl mb-8 max-w-2xl mx-auto text-on-dark">
-          <p className="mb-2">Experience with among others:</p>
+          <p className="mb-2">{t('hero.experienceWith')}</p>
           <div className="h-12 flex items-center justify-center relative">
             <span
               key={currentSkill}

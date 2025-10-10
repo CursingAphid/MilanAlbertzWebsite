@@ -14,8 +14,11 @@ import { useEffect, useState, useRef } from 'react'
 import { useScrollVisibility } from '../hooks/useScrollVisibility'
 import confetti from 'canvas-confetti'
 import { Plane, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function UniversityAppPage() {
+  const { t } = useTranslation()
+  
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -114,12 +117,12 @@ export default function UniversityAppPage() {
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white text-center drop-shadow-2xl mb-4 animate-fade-in-up">
-              Graduation Project in
+              {t('universityApp.hero.title')}
             </h1>
             <h2 className="text-6xl md:text-8xl font-bold text-center drop-shadow-2xl animate-fade-in-up-delayed" onAnimationStart={handleBrazilAnimationEnd}>
               <span className="relative inline-block">
                 <span className="absolute inset-0 bg-gradient-to-r from-green-500 to-yellow-400 blur-lg opacity-60 scale-110"></span>
-                <span className="relative text-white" ref={brazilRef}>Brazil</span>
+                <span className="relative text-white" ref={brazilRef}>{t('universityApp.hero.brazil')}</span>
               </span>
             </h2>
           </div>
@@ -137,25 +140,19 @@ export default function UniversityAppPage() {
                 data-scroll-section
                 className="text-5xl md:text-6xl font-bold text-white mb-8 scroll-fade-in"
               >
-                The City That Never Sleeps
+                {t('universityApp.cityNeverSleeps.title')}
               </h2>
               <p
                 id="city-never-sleeps-text"
                 data-scroll-section
                 className="text-xl text-gray-300 leading-relaxed scroll-fade-in-delayed"
               >
-                For my graduation project, I decided to travel to São Paulo,
-                one of the world's largest metropolises and Brazil's economic center.
-                It offers a blend of culture, food, vibrant nightlife, and of course, amazing weather. 
-                <br />
-                <br />
-                I stayed in São Paulo for 5 months and during my stay, I fell in love with the city and the people. 
-                I made so many friends and had so many amazing experiences. I loved using Uber to get around the city and
-                ordering food from Ifood, as well as visiting so many cool restaurants and bars.
-                No matter what time of day it is, there's always something to do. truly a city that never sleeps. 
-                <br />
-                <br />
-                In the image carousel, you can see some of my favourite places in São Paulo. I really recommend visiting them if you ever get the chance.
+                {t('universityApp.cityNeverSleeps.description').split('\n').map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    {index < t('universityApp.cityNeverSleeps.description').split('\n').length - 1 && <><br /><br /></>}
+                  </span>
+                ))}
               </p>
             </div>
             
@@ -282,7 +279,7 @@ export default function UniversityAppPage() {
                 data-scroll-section
                 className="text-5xl md:text-6xl font-bold text-white mb-12 scroll-fade-in"
               >
-              Project at Inteli
+              {t('universityApp.inteliProject.title')}
             </h2>
             
             {/* Content section with image left, text right */}
@@ -304,15 +301,12 @@ export default function UniversityAppPage() {
                 className="text-left scroll-fade-in-delayed"
               >
                 <p className="text-lg text-gray-300 leading-relaxed">
-                  I successfully completed my graduation project at Inteli, an IT and business university in São Paulo, Brazil. 
-                  A non-profit tech-focused college that offers project-based undergraduate programs in computer engineering,
-                  software engineering, computer science, and information systems. Its campus is located in the Butantã neighborhood,
-                  within University City, and is recognized for its hands-on methodology, direct connection to companies, and mission
-                  to train leaders who will transform Brazil through technology.
-                  <br />
-                  <br />
-                  I created a system that allows the employees working at the project management office to manage the projects and the partners.
-                  The system is a web application with a backend in Node.js and a frontend in React.
+                  {t('universityApp.inteliProject.description').split('\n').map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      {index < t('universityApp.inteliProject.description').split('\n').length - 1 && <><br /><br /></>}
+                    </span>
+                  ))}
                   <br />
                   <br />
                   <a 
@@ -322,7 +316,7 @@ export default function UniversityAppPage() {
                     className="inline-flex items-center px-6 py-3 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out"
                     style={{ backgroundColor: '#40A0A0' }}
                   >
-                    <span>Visit Inteli</span>
+                    <span>{t('universityApp.inteliProject.visitInteli')}</span>
                     <svg 
                       className="ml-2 w-4 h-4" 
                       fill="none" 
@@ -421,7 +415,7 @@ export default function UniversityAppPage() {
                 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-2xl scroll-fade-in"
                 style={{ textShadow: '0 0 8px rgba(0, 0, 0, 0.8)' }}
               >
-                Places I Visited
+                {t('universityApp.travels.title')}
               </h2>
             </div>
 
@@ -507,15 +501,15 @@ export default function UniversityAppPage() {
             >
               {travelIndex === 0 ? (
                 <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed drop-shadow-lg" style={{ textShadow: '0 0 6px rgba(0, 0, 0, 0.8)' }}>
-                  The vibrant coastal city known for its stunning beaches, iconic Christ the Redeemer statue, and lively Carnival celebrations.
+                  {t('universityApp.travels.rio')}
                 </p>
               ) : travelIndex === 1 ? (
                 <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed drop-shadow-lg" style={{ textShadow: '0 0 6px rgba(0, 0, 0, 0.8)' }}>
-                  Brazil's third-largest city, famous for its rich cultural heritage, delicious cuisine, and beautiful colonial architecture.
+                  {t('universityApp.travels.beloHorizonte')}
                 </p>
               ) : (
                 <p className="text-xl md:text-2xl text-gray-200 max-w-4xl mx-auto leading-relaxed drop-shadow-lg" style={{ textShadow: '0 0 6px rgba(0, 0, 0, 0.8)' }}>
-                  The historic capital of Bahia, known for its Afro-Brazilian culture, colorful colonial buildings, and vibrant music scene.
+                  {t('universityApp.travels.salvador')}
                 </p>
               )}
             </div>
