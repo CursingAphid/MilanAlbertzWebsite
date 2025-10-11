@@ -120,6 +120,7 @@ export default function AboutSection({ lineRef, lineAngle, setSwiperInstance, ri
                 autoplay={{ delay: 3000, disableOnInteraction: false }}
                 speed={1000}
                 loop={true}
+                allowTouchMove={false}
                 className="w-full h-full"
                 onSwiper={setSwiperInstance}
               >
