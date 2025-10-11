@@ -71,7 +71,8 @@
     },
     "inteliProject": {
       "title": "Project at Inteli",
-      "description": "I successfully completed my graduation project at Inteli, an IT and business university in São Paulo, Brazil. A non-profit tech-focused college that offers project-based undergraduate programs in computer engineering, software engineering, computer science, and information systems. Its campus is located in the Butantã neighborhood, within University City, and is recognized for its hands-on methodology, direct connection to companies, and mission to train leaders who will transform Brazil through technology.\n\nI created a system that allows the employees working at the project management office to manage the projects and the partners. The system is a web application with a backend in Node.js and a frontend in React.\n\nVisit Inteli"
+      "description": "I successfully completed my graduation project at Inteli, an IT and business university in São Paulo, Brazil. A non-profit tech-focused college that offers project-based undergraduate programs in computer engineering, software engineering, computer science, and information systems. Its campus is located in the Butantã neighborhood, within University City, and is recognized for its hands-on methodology, direct connection to companies, and mission to train leaders who will transform Brazil through technology.\n\nI created a system that allows the employees working at the project management office to manage the projects and the partners. The system is a web application with a backend in Node.js and a frontend in React.",
+      "visitInteli": "Visit Inteli"
     },
     "travels": {
       "title": "Places I Visited",

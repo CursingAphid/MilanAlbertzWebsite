@@ -71,7 +71,8 @@
     },
     "inteliProject": {
       "title": "Project bij Inteli",
-      "description": "Ik heb succesvol mijn afstudeerproject voltooid bij Inteli, een IT en business universiteit in São Paulo, Brazilië. Een non-profit tech-gerichte hogeschool die projectgebaseerde undergraduate programma's aanbiedt in computer engineering, software engineering, computer science, en informatiesystemen. De campus bevindt zich in de Butantã buurt, binnen University City, en wordt erkend voor zijn hands-on methodologie, directe verbinding met bedrijven, en missie om leiders op te leiden die Brazilië zullen transformeren door technologie.\n\nIk heb een systeem gecreëerd dat werknemers in het projectmanagement kantoor toestaat om projecten en partners te beheren. Het systeem is een web applicatie met een backend in Node.js en een frontend in React.\n\nBezoek Inteli"
+      "description": "Ik heb succesvol mijn afstudeerproject voltooid bij Inteli, een IT en business universiteit in São Paulo, Brazilië. Een non-profit tech-gerichte hogeschool die projectgebaseerde undergraduate programma's aanbiedt in computer engineering, software engineering, computer science, en informatiesystemen. De campus bevindt zich in de Butantã buurt, binnen University City, en wordt erkend voor zijn hands-on methodologie, directe verbinding met bedrijven, en missie om leiders op te leiden die Brazilië zullen transformeren door technologie.\n\nIk heb een systeem gecreëerd dat werknemers in het projectmanagement kantoor toestaat om projecten en partners te beheren. Het systeem is een web applicatie met een backend in Node.js en een frontend in React.",
+      "visitInteli": "Bezoek Inteli"
     },
     "travels": {
       "title": "Plaatsen Die Ik Heb Bezocht",

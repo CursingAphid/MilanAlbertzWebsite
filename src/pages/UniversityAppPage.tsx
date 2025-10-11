@@ -150,7 +150,7 @@ export default function UniversityAppPage() {
                 {t('universityApp.cityNeverSleeps.description').split('\n').map((line, index) => (
                   <span key={index}>
                     {line}
-                    {index < t('universityApp.cityNeverSleeps.description').split('\n').length - 1 && <><br /><br /></>}
+                    {index < t('universityApp.cityNeverSleeps.description').split('\n').length - 1 && <br />}
                   </span>
                 ))}
               </p>
@@ -304,9 +304,10 @@ export default function UniversityAppPage() {
                   {t('universityApp.inteliProject.description').split('\n').map((line, index) => (
                     <span key={index}>
                       {line}
-                      {index < t('universityApp.inteliProject.description').split('\n').length - 1 && <><br /><br /></>}
+                      {index < t('universityApp.inteliProject.description').split('\n').length - 1 && <br />}
                     </span>
                   ))}
+                  <br />
                   <br />
                   <br />
                   <a 
