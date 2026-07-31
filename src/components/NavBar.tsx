@@ -31,6 +31,9 @@ export default function NavBar() {
             <Link to="/hobby-projects" className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-on-dark hover:text-accent">
               {t('nav.hobbyProjects')}
             </Link>
+            <Link to="/trips" className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-on-dark hover:text-accent">
+              {t('nav.trips')}
+            </Link>
             <LanguageSelector />
           </div>
           {/* Mobile hamburger */}
@@ -77,6 +80,13 @@ export default function NavBar() {
                 className="block px-3 py-2 rounded-md text-base font-medium transition-colors text-on-dark hover:text-accent"
               >
                 {t('nav.hobbyProjects')}
+              </Link>
+              <Link
+                to="/trips"
+                onClick={() => setMobileOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium transition-colors text-on-dark hover:text-accent"
+              >
+                {t('nav.trips')}
               </Link>
               <div className="px-3 py-2">
                 <LanguageSelector />

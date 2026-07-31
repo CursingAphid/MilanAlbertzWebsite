@@ -3,7 +3,23 @@
     "home": "Home",
     "universityProject": "Universiteitsproject",
     "cgiProjects": "CGI Projecten",
-    "hobbyProjects": "Hobby Projecten"
+    "hobbyProjects": "Hobby Projecten",
+    "trips": "Reizen"
+  },
+  "trips": {
+    "hero": {
+      "title": "Mijn reizen",
+      "subtitle": "Een interactieve wereldbol — de gemarkeerde landen heb ik bezocht."
+    },
+    "visitedLabel": "landen bezocht",
+    "hint": "Sleep om te draaien · Scroll om te zoomen · Klik op een land om erop in te zoomen",
+    "loading": "Wereldbol laden…",
+    "visitedBadge": "Bezocht",
+    "notVisited": "Nog niet bezocht!",
+    "resetView": "Weergave herstellen",
+    "placesTitle": "Plaatsen die ik heb bezocht",
+    "prevCountry": "Vorig land",
+    "nextCountry": "Volgend land"
   },
   "hero": {
     "greeting": "Hoi, ik ben",
