@@ -12,6 +12,8 @@ export interface VisitedPlace {
   name: string
   lat: number
   lng: number
+  /** Free text shown in the country card when this place is selected. */
+  description?: string
 }
 
 export interface VisitedCountry {
@@ -27,6 +29,7 @@ export const visitedCountries: VisitedCountry[] = [
     code: 'NLD',
     note: 'Home',
     description: 'Where I was born and raised. Edit this text in src/data/visitedCountries.ts.',
+    places: [{ name: 'Kerkrade', lat: 50.8658, lng: 6.0625 }],
   },
   {
     code: 'BRA',

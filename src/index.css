@@ -710,6 +710,15 @@
   cursor: pointer;
 }
 
+/* Screen-space fan-out wrapper for flags too close to separate by zooming */
+.place-flag-spread {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+}
+
 .place-flag-inner {
   position: absolute;
   bottom: 0;
@@ -776,6 +785,113 @@
   background: rgba(255, 255, 255, 0.75);
 }
 
+/* Home flag (Kerkrade): golden pole and banner with a pulsing warm glow */
+.place-flag--home .place-flag-pole {
+  background: linear-gradient(to bottom, #ffe9a8, #b8860b);
+}
+
+.place-flag-home-icon {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 4px;
+  vertical-align: -1.5px;
+}
+
+.place-flag--home .place-flag-banner {
+  color: #3a2a05;
+  background: linear-gradient(135deg, #ffe27a 0%, #fbbf24 45%, #d97706 100%);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 0 6px rgba(251, 191, 36, 0.55));
+}
+
+.place-flag--home .place-flag-ground {
+  background: rgba(251, 191, 36, 0.65);
+  animation: home-glow 2.4s ease-in-out infinite;
+}
+
+.place-flag--home.place-flag--active .place-flag-banner {
+  color: #92400e;
+  background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%);
+}
+
+.place-flag--home.place-flag--active .place-flag-ground {
+  background: rgba(255, 236, 179, 0.85);
+}
+
+@keyframes home-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 6px 2px rgba(251, 191, 36, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 12px 5px rgba(251, 191, 36, 0.65);
+  }
+}
+
+/* Moon in the space backdrop: shaded disc, soft halo, faint craters */
+.space-moon {
+  position: absolute;
+  top: 34%;
+  right: 9%;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 30%, #f0ede5 0%, #d6d3ca 45%, #b9b5aa 75%, #9c988d 100%);
+  box-shadow:
+    0 0 34px 10px rgba(214, 222, 235, 0.14),
+    inset -14px -10px 28px rgba(35, 40, 55, 0.4);
+}
+
+.space-moon-crater {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(120, 116, 108, 0.55), rgba(120, 116, 108, 0) 70%);
+}
+
+/* Shooting star: a bright-headed streak flying along its rotated axis */
+.meteor-streak {
+  width: 140px;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.55) 60%,
+    #ffffff 100%
+  );
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+  animation: meteor-fly 1.5s ease-out forwards;
+}
+
+@keyframes meteor-fly {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(46vw);
+    opacity: 0;
+  }
+}
+
+/* Space backdrop: stars breathe between a dim base and their peak opacity */
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: calc(var(--star-max, 1) * 0.3);
+  }
+  50% {
+    opacity: var(--star-max, 1);
+  }
+}
+
 @keyframes flag-plant {
   0% {
     transform: translateY(-30px);
@@ -790,6 +906,58 @@
   }
   100% {
     transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Cluster badge: several places grouped at this zoom level */
+.place-cluster {
+  position: relative;
+  width: 0;
+  height: 0;
+  cursor: pointer;
+}
+
+.place-cluster-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #00c2cb 0%, #00858c 100%);
+  border: 2px solid #fff;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  animation: cluster-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.place-cluster-badge::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 173, 181, 0.5);
+}
+
+.place-cluster:hover .place-cluster-badge {
+  filter: brightness(1.2);
+}
+
+@keyframes cluster-pop {
+  from {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
 }

@@ -11,13 +11,13 @@
       "title": "My Trips",
       "subtitle": "An interactive globe of the world — the highlighted countries are the ones I've visited."
     },
-    "visitedLabel": "countries visited",
-    "hint": "Drag to rotate · Scroll to zoom · Click a country to focus it",
     "loading": "Loading globe…",
     "visitedBadge": "Visited",
     "notVisited": "Not visited (yet!)",
     "resetView": "Reset view",
     "placesTitle": "Places I visited",
+    "clusterHint": "Several places here — click to zoom in",
+    "homeHint": "Home sweet home — this is where I live",
     "prevCountry": "Previous country",
     "nextCountry": "Next country"
   },

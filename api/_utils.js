@@ -46,78 +46,43 @@ export const hasValidSession = (req) => {
   return safeEqual(sig, sign(String(expires)))
 }
 
-// --- Storage: Supabase (preferred) or Upstash Redis, via REST, no npm deps ---
+// --- Storage: Upstash Redis (Vercel KV) via REST, no npm deps ---
 
 const NOT_CONFIGURED =
-  'Storage is not configured — set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (Supabase) ' +
-  'or add the Upstash for Redis integration (Vercel → project → Storage)'
-
-const supabaseEnv = () => {
-  const url = process.env.SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  return url && key ? { url, key } : null
-}
+  'Storage is not configured — add the Upstash for Redis integration (Vercel → project → Storage tab)'
 
 const redisEnv = () => {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+  const url =
+    process.env.TRIPS_KV_REST_API_URL ||
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL
+  const token =
+    process.env.TRIPS_KV_REST_API_TOKEN ||
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN
   return url && token ? { url, token } : null
 }
 
-/** Returns the notes map { [iso3 code]: description }. */
-export const loadNotes = async () => {
-  const sb = supabaseEnv()
-  if (sb) {
-    const res = await fetch(`${sb.url}/rest/v1/country_notes?select=code,description`, {
-      headers: { apikey: sb.key, Authorization: `Bearer ${sb.key}` },
-    })
-    if (!res.ok) throw new Error(`Supabase read failed (${res.status}) — does the country_notes table exist?`)
-    const rows = await res.json()
-    return Object.fromEntries(rows.map((row) => [row.code, row.description]))
-  }
-
+/** Reads a JSON value by key; null when the key doesn't exist. */
+export const kvGet = async (key) => {
   const redis = redisEnv()
-  if (redis) {
-    const res = await fetch(`${redis.url}/get/country-notes`, {
-      headers: { Authorization: `Bearer ${redis.token}` },
-    })
-    if (!res.ok) throw new Error(`Storage read failed (${res.status})`)
-    const data = await res.json()
-    return data.result ? JSON.parse(data.result) : {}
-  }
-
-  throw new Error(NOT_CONFIGURED)
+  if (!redis) throw new Error(NOT_CONFIGURED)
+  const res = await fetch(`${redis.url}/get/${key}`, {
+    headers: { Authorization: `Bearer ${redis.token}` },
+  })
+  if (!res.ok) throw new Error(`Storage read failed (${res.status})`)
+  const data = await res.json()
+  return data.result ? JSON.parse(data.result) : null
 }
 
-/** Persists the notes map { [iso3 code]: description }. */
-export const saveNotes = async (notes) => {
-  const sb = supabaseEnv()
-  if (sb) {
-    const rows = Object.entries(notes).map(([code, description]) => ({ code, description }))
-    const res = await fetch(`${sb.url}/rest/v1/country_notes`, {
-      method: 'POST',
-      headers: {
-        apikey: sb.key,
-        Authorization: `Bearer ${sb.key}`,
-        'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates',
-      },
-      body: JSON.stringify(rows),
-    })
-    if (!res.ok) throw new Error(`Supabase write failed (${res.status}) — does the country_notes table exist?`)
-    return
-  }
-
+/** Writes a JSON value under a key. */
+export const kvSet = async (key, value) => {
   const redis = redisEnv()
-  if (redis) {
-    const res = await fetch(`${redis.url}/set/country-notes`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${redis.token}` },
-      body: JSON.stringify(notes),
-    })
-    if (!res.ok) throw new Error(`Storage write failed (${res.status})`)
-    return
-  }
-
-  throw new Error(NOT_CONFIGURED)
+  if (!redis) throw new Error(NOT_CONFIGURED)
+  const res = await fetch(`${redis.url}/set/${key}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${redis.token}` },
+    body: JSON.stringify(value),
+  })
+  if (!res.ok) throw new Error(`Storage write failed (${res.status})`)
 }

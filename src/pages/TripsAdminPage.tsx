@@ -1,13 +1,27 @@
-import { useEffect, useState } from 'react'
-import { LogOut, Save, Trash2, Upload } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ChevronDown, ChevronRight, LogOut, MapPin, Plus, Save, Trash2, Upload } from 'lucide-react'
 import { upload } from '@vercel/blob/client'
 import NavBar from '../components/NavBar'
-import { visitedCountries } from '../data/visitedCountries'
-import type { VisitedPlace } from '../data/visitedCountries'
+import { visitedCountries as bundledCountries } from '../data/visitedCountries'
+import type { VisitedCountry, VisitedPlace } from '../data/visitedCountries'
 import { mediaPrefix, isVideo } from '../utils/placeMedia'
 import type { MediaItem } from '../utils/placeMedia'
 
 type AuthState = 'checking' | 'loggedOut' | 'loggedIn'
+
+interface GeoCountry {
+  name: string
+  iso3: string
+  iso2: string
+}
+
+const flagEmoji = (iso2: string) =>
+  /^[A-Z]{2}$/.test(iso2)
+    ? String.fromCodePoint(...[...iso2].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
+    : ''
+
+const inputCls =
+  'rounded-lg bg-gray-800 border border-gray-600 text-on-dark px-3 py-2 text-sm focus:outline-none focus:border-accent'
 
 export default function TripsAdminPage() {
   const [auth, setAuth] = useState<AuthState>('checking')
@@ -15,10 +29,16 @@ export default function TripsAdminPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState<string | null>(null)
-  const [notes, setNotes] = useState<Record<string, string>>({})
+
+  const [data, setData] = useState<VisitedCountry[]>([])
+  const [dirty, setDirty] = useState(false)
+  const [openCode, setOpenCode] = useState<string | null>(null)
+  const [geo, setGeo] = useState<GeoCountry[]>([])
+  const [newCountry, setNewCountry] = useState('')
+  const [newPlace, setNewPlace] = useState({ name: '', lat: '', lng: '' })
   const [saving, setSaving] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
-  // Media per place, keyed by the blob folder prefix
+
   const [media, setMedia] = useState<Record<string, MediaItem[]>>({})
   const [uploadBusy, setUploadBusy] = useState<Record<string, boolean>>({})
 
@@ -26,8 +46,21 @@ export default function TripsAdminPage() {
     window.scrollTo(0, 0)
   }, [])
 
-  // Check for an existing session. A non-JSON response means the request was
-  // answered by the SPA fallback (no serverless runtime) — API unavailable.
+  // Country names/codes for the add-country picker and display
+  useEffect(() => {
+    fetch('/data/countries.geojson')
+      .then((res) => res.json())
+      .then((geojson) =>
+        setGeo(
+          (geojson.features as { properties: GeoCountry }[])
+            .map((f) => ({ name: f.properties.name, iso3: f.properties.iso3, iso2: f.properties.iso2 }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+        )
+      )
+      .catch(() => {})
+  }, [])
+
+  // Check for an existing session (non-JSON response = SPA fallback = no API)
   useEffect(() => {
     fetch('/api/admin-login')
       .then((res) => {
@@ -48,44 +81,138 @@ export default function TripsAdminPage() {
       })
   }, [])
 
-  // Once logged in, load the stored notes and merge with the bundled defaults
+  // Load the dataset once logged in; seed from the bundled file if empty
   useEffect(() => {
     if (auth !== 'loggedIn') return
-    fetch('/api/country-notes')
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('load failed'))))
-      .then((data) => {
-        const merged: Record<string, string> = {}
-        for (const country of visitedCountries) {
-          merged[country.code] = data.notes?.[country.code] ?? country.description ?? ''
+    fetch('/api/trips-data')
+      .then((res) =>
+        res.ok && res.headers.get('content-type')?.includes('application/json')
+          ? res.json()
+          : Promise.reject(new Error('load failed'))
+      )
+      .then((payload) => {
+        if (Array.isArray(payload?.data) && payload.data.length > 0) {
+          setData(payload.data)
+        } else {
+          setData(bundledCountries)
+          setStatus('No stored data yet — starting from the defaults in the code. Press Save to persist them.')
         }
-        setNotes(merged)
       })
-      .catch(() => setStatus('Could not load stored texts — showing the defaults from the code.'))
+      .catch(() => {
+        setData(bundledCountries)
+        setStatus('Could not load stored data — showing the defaults from the code.')
+      })
   }, [auth])
+
+  // Warn about unsaved changes when leaving
+  useEffect(() => {
+    if (!dirty) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [dirty])
+
+  const geoByIso3 = useMemo(() => new Map(geo.map((g) => [g.iso3, g])), [geo])
+
+  const mutate = (updater: (draft: VisitedCountry[]) => VisitedCountry[]) => {
+    setData(updater)
+    setDirty(true)
+  }
+
+  // ---------- countries ----------
+
+  const addCountry = () => {
+    const query = newCountry.trim()
+    if (!query) return
+    const match =
+      geo.find((g) => g.iso3 === query.toUpperCase()) ??
+      geo.find((g) => g.name.toLowerCase() === query.toLowerCase())
+    if (!match) {
+      setStatus(`Unknown country "${query}" — pick one from the list or use its 3-letter code.`)
+      return
+    }
+    if (data.some((c) => c.code === match.iso3)) {
+      setStatus(`${match.name} is already in the list.`)
+      setOpenCode(match.iso3)
+      return
+    }
+    mutate((draft) => [...draft, { code: match.iso3 }])
+    setOpenCode(match.iso3)
+    setNewCountry('')
+    setStatus(null)
+  }
+
+  const deleteCountry = (code: string) => {
+    const name = geoByIso3.get(code)?.name ?? code
+    if (!window.confirm(`Delete ${name} and all its places from the list?`)) return
+    mutate((draft) => draft.filter((c) => c.code !== code))
+    if (openCode === code) setOpenCode(null)
+  }
+
+  const updateCountry = (code: string, patch: Partial<VisitedCountry>) => {
+    mutate((draft) => draft.map((c) => (c.code === code ? { ...c, ...patch } : c)))
+  }
+
+  // ---------- places ----------
+
+  const addPlace = (code: string) => {
+    const name = newPlace.name.trim()
+    const lat = Number(newPlace.lat)
+    const lng = Number(newPlace.lng)
+    if (!name) return setStatus('Place needs a name.')
+    if (!Number.isFinite(lat) || lat < -90 || lat > 90) return setStatus('Latitude must be between -90 and 90.')
+    if (!Number.isFinite(lng) || lng < -180 || lng > 180) return setStatus('Longitude must be between -180 and 180.')
+    const country = data.find((c) => c.code === code)
+    if (country?.places?.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+      return setStatus(`"${name}" already exists in this country.`)
+    }
+    mutate((draft) =>
+      draft.map((c) => (c.code === code ? { ...c, places: [...(c.places ?? []), { name, lat, lng }] } : c))
+    )
+    setNewPlace({ name: '', lat: '', lng: '' })
+    setStatus(null)
+  }
+
+  const updatePlace = (code: string, index: number, patch: Partial<VisitedPlace>) => {
+    mutate((draft) =>
+      draft.map((c) =>
+        c.code === code
+          ? { ...c, places: (c.places ?? []).map((p, i) => (i === index ? { ...p, ...patch } : p)) }
+          : c
+      )
+    )
+  }
+
+  const deletePlace = (code: string, index: number) => {
+    mutate((draft) =>
+      draft.map((c) => (c.code === code ? { ...c, places: (c.places ?? []).filter((_, i) => i !== index) } : c))
+    )
+  }
+
+  // ---------- media ----------
 
   const refreshMedia = async (countryCode: string, placeName: string) => {
     const prefix = mediaPrefix(countryCode, placeName)
     try {
       const res = await fetch(`/api/place-media?prefix=${encodeURIComponent(prefix)}`)
       if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
-        const data = await res.json()
-        setMedia((prev) => ({ ...prev, [prefix]: data.media ?? [] }))
+        const payload = await res.json()
+        setMedia((prev) => ({ ...prev, [prefix]: payload.media ?? [] }))
       }
     } catch {
       /* media listing is best-effort */
     }
   }
 
-  // Load existing media for every place once logged in
+  // Load media for the places of the opened country
   useEffect(() => {
-    if (auth !== 'loggedIn') return
-    for (const country of visitedCountries) {
-      for (const place of country.places ?? []) {
-        refreshMedia(country.code, place.name)
-      }
+    if (!openCode) return
+    const country = data.find((c) => c.code === openCode)
+    for (const place of country?.places ?? []) {
+      refreshMedia(openCode, place.name)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth])
+  }, [openCode])
 
   const handleMediaUpload = async (countryCode: string, place: VisitedPlace, files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -116,8 +243,8 @@ export default function TripsAdminPage() {
         body: JSON.stringify({ url }),
       })
       if (!res.ok) {
-        const data = await res.json().catch(() => null)
-        setStatus(`Delete failed: ${data?.error ?? res.status}`)
+        const payload = await res.json().catch(() => null)
+        setStatus(`Delete failed: ${payload?.error ?? res.status}`)
         return
       }
       await refreshMedia(countryCode, placeName)
@@ -125,6 +252,8 @@ export default function TripsAdminPage() {
       setStatus('Delete failed: could not reach the API.')
     }
   }
+
+  // ---------- auth & save ----------
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,22 +265,23 @@ export default function TripsAdminPage() {
         body: JSON.stringify({ username, password }),
       })
       if (!res.headers.get('content-type')?.includes('application/json')) {
-        setLoginError('The admin API is not running here. Deploy to Vercel or use `npx vercel dev` locally.')
+        setLoginError('The admin API is not running here. Use `make dev` (or deploy).')
         return
       }
       if (res.ok) {
         setPassword('')
         setAuth('loggedIn')
       } else {
-        const data = await res.json().catch(() => null)
-        setLoginError(data?.error ?? `Login failed (${res.status})`)
+        const payload = await res.json().catch(() => null)
+        setLoginError(payload?.error ?? `Login failed (${res.status})`)
       }
     } catch {
-      setLoginError('Could not reach the login API. Run via `npx vercel dev` locally, or deploy to Vercel.')
+      setLoginError('Could not reach the login API. Use `make dev` (or deploy).')
     }
   }
 
   const handleLogout = async () => {
+    if (dirty && !window.confirm('You have unsaved changes. Log out anyway?')) return
     await fetch('/api/admin-login', { method: 'DELETE' }).catch(() => {})
     setAuth('loggedOut')
   }
@@ -160,16 +290,17 @@ export default function TripsAdminPage() {
     setSaving(true)
     setStatus(null)
     try {
-      const res = await fetch('/api/country-notes', {
+      const res = await fetch('/api/trips-data', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes }),
+        body: JSON.stringify({ data }),
       })
       if (res.ok) {
-        setStatus('Saved — the texts are live.')
+        setDirty(false)
+        setStatus('Saved — the changes are live.')
       } else {
-        const data = await res.json().catch(() => null)
-        setStatus(`Save failed: ${data?.error ?? res.status}`)
+        const payload = await res.json().catch(() => null)
+        setStatus(`Save failed: ${payload?.error ?? res.status}`)
       }
     } catch {
       setStatus('Save failed: could not reach the API.')
@@ -178,20 +309,22 @@ export default function TripsAdminPage() {
     }
   }
 
+  // ---------- render ----------
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950">
       <NavBar />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-        <h1 className="text-3xl font-bold text-on-dark mb-2">Trips admin</h1>
-        <p className="text-muted-on-dark text-sm mb-8">
-          Edit the country texts shown on the Trips globe. Changes go live for all visitors as soon as you save.
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <h1 className="text-3xl font-bold text-on-dark mb-2">Trips dashboard</h1>
+        <p className="text-muted-on-dark text-sm mb-6">
+          Manage the countries and places shown on the Trips globe. Don't forget to press Save.
         </p>
 
         {apiUnavailable && (
           <div className="mb-6 rounded-lg border border-yellow-600 bg-yellow-900/30 text-yellow-200 text-sm px-4 py-3">
-            The admin API is not reachable. It only runs on Vercel (or locally via <code>npx vercel dev</code>),
-            and needs <code>ADMIN_PASSWORD</code> plus a storage integration (Upstash for Redis or Supabase,
-            via the project&apos;s Storage tab) configured in the Vercel dashboard.
+            The admin API is not reachable. Run the site with <code>make dev</code> (not{' '}
+            <code>make frontend</code>), or deploy to Vercel with <code>ADMIN_PASSWORD</code> and the Upstash
+            integration configured.
           </div>
         )}
 
@@ -206,7 +339,7 @@ export default function TripsAdminPage() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full mb-4 rounded-lg bg-gray-800 border border-gray-600 text-on-dark px-3 py-2 focus:outline-none focus:border-accent"
+              className={`w-full mb-4 ${inputCls}`}
             />
             <label className="block text-sm text-muted-on-dark mb-1" htmlFor="admin-pass">Password</label>
             <input
@@ -215,7 +348,7 @@ export default function TripsAdminPage() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full mb-4 rounded-lg bg-gray-800 border border-gray-600 text-on-dark px-3 py-2 focus:outline-none focus:border-accent"
+              className={`w-full mb-4 ${inputCls}`}
             />
             {loginError && <p className="text-red-400 text-sm mb-4">{loginError}</p>}
             <button
@@ -229,96 +362,263 @@ export default function TripsAdminPage() {
 
         {auth === 'loggedIn' && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-on-dark text-sm">Logged in.</p>
+            {/* Toolbar */}
+            <div className="sticky top-16 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-gray-900/95 backdrop-blur border-b border-gray-800 flex items-center gap-4 mb-6">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || !dirty}
+                className="inline-flex items-center gap-2 border border-accent text-accent hover:bg-chip rounded-lg px-5 py-2 font-medium transition-colors disabled:opacity-40"
+              >
+                <Save className="h-4 w-4" /> {saving ? 'Saving…' : 'Save'}
+              </button>
+              {dirty && <span className="text-yellow-300 text-sm">● unsaved changes</span>}
+              {status && <span className="text-sm text-muted-on-dark flex-1 min-w-0 truncate">{status}</span>}
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 text-sm text-muted-on-dark hover:text-accent transition-colors"
+                className="ml-auto inline-flex items-center gap-1.5 text-sm text-muted-on-dark hover:text-accent transition-colors shrink-0"
               >
                 <LogOut className="h-4 w-4" /> Log out
               </button>
             </div>
 
-            <div className="space-y-6">
-              {visitedCountries.map((country) => (
-                <div key={country.code} className="bg-card-dark border border-gray-700 rounded-2xl p-5">
-                  <h2 className="text-on-dark font-semibold mb-1">
-                    {country.code}
-                    {country.note ? <span className="text-muted-on-dark font-normal"> — {country.note}</span> : null}
-                  </h2>
-                  <textarea
-                    value={notes[country.code] ?? ''}
-                    onChange={(e) => setNotes((prev) => ({ ...prev, [country.code]: e.target.value }))}
-                    rows={4}
-                    className="w-full rounded-lg bg-gray-800 border border-gray-600 text-on-dark px-3 py-2 text-sm leading-relaxed focus:outline-none focus:border-accent"
-                    placeholder="Text shown on this country's card (empty = no text)"
-                  />
+            {/* Add country */}
+            <div className="flex gap-2 mb-6">
+              <input
+                list="country-options"
+                value={newCountry}
+                onChange={(e) => setNewCountry(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addCountry()}
+                placeholder="Add a country — type its name or 3-letter code"
+                className={`flex-1 ${inputCls}`}
+              />
+              <datalist id="country-options">
+                {geo.map((g) => (
+                  <option key={g.iso3} value={g.name}>{g.iso3}</option>
+                ))}
+              </datalist>
+              <button
+                type="button"
+                onClick={addCountry}
+                className="inline-flex items-center gap-1.5 border border-accent text-accent hover:bg-chip rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Add
+              </button>
+            </div>
 
-                  {(country.places ?? []).map((place) => {
-                    const prefix = mediaPrefix(country.code, place.name)
-                    const items = media[prefix] ?? []
-                    const busy = uploadBusy[prefix] ?? false
-                    return (
-                      <div key={place.name} className="mt-4 border-t border-gray-700 pt-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-sm font-medium text-on-dark">
-                            {place.name}
-                            <span className="text-muted-on-dark font-normal"> — {items.length} file(s)</span>
-                          </h3>
-                          <label className={`inline-flex items-center gap-1.5 text-sm border border-accent text-accent hover:bg-chip rounded-lg px-3 py-1 cursor-pointer transition-colors ${busy ? 'opacity-50 pointer-events-none' : ''}`}>
-                            <Upload className="h-3.5 w-3.5" />
-                            {busy ? 'Uploading…' : 'Add photos/videos'}
+            {/* Countries */}
+            <div className="space-y-3">
+              {data.map((country) => {
+                const geoInfo = geoByIso3.get(country.code)
+                const isOpen = openCode === country.code
+                return (
+                  <div key={country.code} className="bg-card-dark border border-gray-700 rounded-2xl overflow-hidden">
+                    {/* Row header */}
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOpenCode(isOpen ? null : country.code)
+                          setNewPlace({ name: '', lat: '', lng: '' })
+                        }}
+                        className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                      >
+                        {isOpen ? (
+                          <ChevronDown className="h-4 w-4 text-muted-on-dark shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-on-dark shrink-0" />
+                        )}
+                        <span className="text-xl leading-none">{flagEmoji(geoInfo?.iso2 ?? '')}</span>
+                        <span className="text-on-dark font-semibold truncate">
+                          {geoInfo?.name ?? country.code}
+                        </span>
+                        <span className="text-xs text-muted-on-dark bg-gray-800 rounded px-1.5 py-0.5">{country.code}</span>
+                        <span className="text-sm text-muted-on-dark truncate hidden sm:inline">{country.note}</span>
+                        <span className="ml-auto text-xs text-muted-on-dark shrink-0">
+                          {(country.places ?? []).length} place(s)
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${geoInfo?.name ?? country.code}`}
+                        onClick={() => deleteCountry(country.code)}
+                        className="text-muted-on-dark hover:text-red-400 transition-colors shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Editor */}
+                    {isOpen && (
+                      <div className="border-t border-gray-700 px-4 py-4 space-y-4">
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          <label className="block">
+                            <span className="text-xs text-muted-on-dark">Badge note (e.g. “Home”, “Exchange 2024”)</span>
                             <input
-                              type="file"
-                              accept="image/*,video/*"
-                              multiple
-                              className="hidden"
-                              onChange={(e) => {
-                                handleMediaUpload(country.code, place, e.target.files)
-                                e.target.value = ''
-                              }}
+                              type="text"
+                              value={country.note ?? ''}
+                              onChange={(e) => updateCountry(country.code, { note: e.target.value })}
+                              className={`w-full mt-1 ${inputCls}`}
                             />
                           </label>
                         </div>
-                        {items.length > 0 && (
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                            {items.map((item) => (
-                              <div key={item.url} className="relative group rounded-lg overflow-hidden bg-gray-800">
-                                {isVideo(item.pathname) ? (
-                                  <video src={item.url} className="w-full h-24 object-cover" preload="metadata" muted />
-                                ) : (
-                                  <img src={item.url} alt="" loading="lazy" className="w-full h-24 object-cover" />
-                                )}
-                                <button
-                                  type="button"
-                                  aria-label="Delete file"
-                                  onClick={() => handleMediaDelete(country.code, place.name, item.url)}
-                                  className="absolute top-1 right-1 rounded-md bg-black/60 text-white p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
+                        <label className="block">
+                          <span className="text-xs text-muted-on-dark">Card text</span>
+                          <textarea
+                            value={country.description ?? ''}
+                            onChange={(e) => updateCountry(country.code, { description: e.target.value })}
+                            rows={3}
+                            className={`w-full mt-1 ${inputCls} leading-relaxed`}
+                            placeholder="Free text shown on this country's card"
+                          />
+                        </label>
 
-            <div className="mt-6 flex items-center gap-4">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="inline-flex items-center gap-2 border border-accent text-accent hover:bg-chip rounded-lg px-5 py-2 font-medium transition-colors disabled:opacity-50"
-              >
-                <Save className="h-4 w-4" /> {saving ? 'Saving…' : 'Save all'}
-              </button>
-              {status && <p className="text-sm text-muted-on-dark">{status}</p>}
+                        {/* Places */}
+                        <div>
+                          <h3 className="text-sm font-semibold text-on-dark mb-2 inline-flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 text-accent" /> Places
+                          </h3>
+                          <p className="text-xs text-muted-on-dark mb-3">
+                            Tip: photos/videos are stored under the place's name — rename places before uploading media.
+                          </p>
+                          <div className="space-y-4">
+                            {(country.places ?? []).map((place, index) => {
+                              const prefix = mediaPrefix(country.code, place.name)
+                              const items = media[prefix] ?? []
+                              const busy = uploadBusy[prefix] ?? false
+                              return (
+                                <div key={index} className="rounded-xl border border-gray-700 p-3">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <input
+                                      type="text"
+                                      value={place.name}
+                                      onChange={(e) => updatePlace(country.code, index, { name: e.target.value })}
+                                      className={`flex-1 min-w-32 ${inputCls}`}
+                                      placeholder="Place name"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={place.lat}
+                                      step="any"
+                                      onChange={(e) =>
+                                        updatePlace(country.code, index, {
+                                          lat: Number.isFinite(e.target.valueAsNumber) ? e.target.valueAsNumber : 0,
+                                        })
+                                      }
+                                      className={`w-28 ${inputCls}`}
+                                      placeholder="Latitude"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={place.lng}
+                                      step="any"
+                                      onChange={(e) =>
+                                        updatePlace(country.code, index, {
+                                          lng: Number.isFinite(e.target.valueAsNumber) ? e.target.valueAsNumber : 0,
+                                        })
+                                      }
+                                      className={`w-28 ${inputCls}`}
+                                      placeholder="Longitude"
+                                    />
+                                    <label className={`inline-flex items-center gap-1.5 text-sm border border-accent text-accent hover:bg-chip rounded-lg px-3 py-1.5 cursor-pointer transition-colors ${busy ? 'opacity-50 pointer-events-none' : ''}`}>
+                                      <Upload className="h-3.5 w-3.5" />
+                                      {busy ? 'Uploading…' : 'Media'}
+                                      <input
+                                        type="file"
+                                        accept="image/*,video/*"
+                                        multiple
+                                        className="hidden"
+                                        onChange={(e) => {
+                                          handleMediaUpload(country.code, place, e.target.files)
+                                          e.target.value = ''
+                                        }}
+                                      />
+                                    </label>
+                                    <button
+                                      type="button"
+                                      aria-label={`Delete ${place.name}`}
+                                      onClick={() => deletePlace(country.code, index)}
+                                      className="text-muted-on-dark hover:text-red-400 transition-colors"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                  <textarea
+                                    value={place.description ?? ''}
+                                    onChange={(e) => updatePlace(country.code, index, { description: e.target.value })}
+                                    rows={2}
+                                    className={`w-full mt-2 ${inputCls} leading-relaxed`}
+                                    placeholder="Text shown when this place is selected (optional)"
+                                  />
+                                  {items.length > 0 && (
+                                    <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                      {items.map((item) => (
+                                        <div key={item.url} className="relative group rounded-lg overflow-hidden bg-gray-800">
+                                          {isVideo(item.pathname) ? (
+                                            <video src={item.url} className="w-full h-20 object-cover" preload="metadata" muted />
+                                          ) : (
+                                            <img src={item.url} alt="" loading="lazy" className="w-full h-20 object-cover" />
+                                          )}
+                                          <button
+                                            type="button"
+                                            aria-label="Delete file"
+                                            onClick={() => handleMediaDelete(country.code, place.name, item.url)}
+                                            className="absolute top-1 right-1 rounded-md bg-black/60 text-white p-1 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity"
+                                          >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            })}
+
+                            {/* Add place */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <input
+                                type="text"
+                                value={newPlace.name}
+                                onChange={(e) => setNewPlace((p) => ({ ...p, name: e.target.value }))}
+                                className={`flex-1 min-w-32 ${inputCls}`}
+                                placeholder="New place name"
+                              />
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                value={newPlace.lat}
+                                onChange={(e) => setNewPlace((p) => ({ ...p, lat: e.target.value }))}
+                                className={`w-28 ${inputCls}`}
+                                placeholder="Latitude"
+                              />
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                value={newPlace.lng}
+                                onChange={(e) => setNewPlace((p) => ({ ...p, lng: e.target.value }))}
+                                className={`w-28 ${inputCls}`}
+                                placeholder="Longitude"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => addPlace(country.code)}
+                                className="inline-flex items-center gap-1.5 border border-accent text-accent hover:bg-chip rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                              >
+                                <Plus className="h-4 w-4" /> Add place
+                              </button>
+                            </div>
+                            <p className="text-xs text-muted-on-dark">
+                              Find coordinates: right-click a spot on Google Maps and the lat/lng is the first menu entry.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

@@ -11,13 +11,13 @@
       "title": "Mijn reizen",
       "subtitle": "Een interactieve wereldbol — de gemarkeerde landen heb ik bezocht."
     },
-    "visitedLabel": "landen bezocht",
-    "hint": "Sleep om te draaien · Scroll om te zoomen · Klik op een land om erop in te zoomen",
     "loading": "Wereldbol laden…",
     "visitedBadge": "Bezocht",
     "notVisited": "Nog niet bezocht!",
     "resetView": "Weergave herstellen",
     "placesTitle": "Plaatsen die ik heb bezocht",
+    "clusterHint": "Meerdere plaatsen — klik om in te zoomen",
+    "homeHint": "Thuis — hier woon ik",
     "prevCountry": "Vorig land",
     "nextCountry": "Volgend land"
   },
