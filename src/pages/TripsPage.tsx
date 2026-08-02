@@ -3,13 +3,14 @@ import Globe from 'react-globe.gl'
 import type { GlobeMethods } from 'react-globe.gl'
 import * as THREE from 'three'
 import { geoArea, geoBounds, geoCentroid } from 'd3-geo'
-import { ChevronLeft, ChevronRight, Flag, House, X } from 'lucide-react'
+import { BadgeCheck, BarChart3, ChevronLeft, ChevronRight, Flag, House, Image as ImageIcon, Maximize2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import NavBar from '../components/NavBar'
 import SpaceBackground from '../components/SpaceBackground'
 import { visitedCountries } from '../data/visitedCountries'
 import type { VisitedCountry, VisitedPlace } from '../data/visitedCountries'
-import { mediaPrefix, isVideo } from '../utils/placeMedia'
+import { mediaPrefix, isVideo, placeSlug } from '../utils/placeMedia'
+import 'flag-icons/css/flag-icons.min.css'
 import type { MediaItem } from '../utils/placeMedia'
 
 // Natural Earth river centerlines, compacted by scripts (name + [lat,lng] points)
@@ -86,11 +87,7 @@ type MarkerDatum =
 // Flags fanned apart at the zoom floor aim for this separation
 const SPREAD_TARGET_PX = 80
 
-// 'NL' -> 🇳🇱 (regional indicator symbols)
-const flagEmoji = (iso2: string) =>
-  /^[A-Z]{2}$/.test(iso2)
-    ? String.fromCodePoint(...[...iso2].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
-    : ''
+// SVG flag (flag-icons css classes); sized via font-size like text
 
 // Kerkrade is home — its flag gets a special golden treatment
 const isHomePlace = (name: string) => name.trim().toLowerCase() === 'kerkrade'
@@ -147,11 +144,10 @@ const vecToLatLng = (v: THREE.Vector3): [number, number] => {
   return [lat, lng]
 }
 
-// Rasterize the country polygons into a small equirectangular mask, padded a
-// little at the coasts, for cheap "is there land here?" lookups.
-const buildLandMask = (features: CountryFeature[]): LandTest => {
-  const W = 1024
-  const H = 512
+// Rasterize the country polygons into a small equirectangular mask for cheap
+// "is there land here?" lookups. `padPx` > 0 grows the coastlines outward
+// (boats keep their distance); 0 gives the exact land shape (buildings).
+const buildLandMask = (features: CountryFeature[], padPx = 10, W = 1024, H = 512): LandTest => {
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
@@ -159,7 +155,7 @@ const buildLandMask = (features: CountryFeature[]): LandTest => {
   if (!ctx) return () => false
   ctx.fillStyle = '#fff'
   ctx.strokeStyle = '#fff'
-  ctx.lineWidth = 10 // pads coastlines ~1.7° so boats keep their distance
+  ctx.lineWidth = padPx
   for (const feature of features) {
     const geom = feature.geometry
     const polys = (
@@ -194,7 +190,7 @@ const buildLandMask = (features: CountryFeature[]): LandTest => {
         }
       }
       ctx.fill('evenodd')
-      ctx.stroke()
+      if (padPx > 0) ctx.stroke()
     }
   }
   const mask = ctx.getImageData(0, 0, W, H).data
@@ -204,6 +200,448 @@ const buildLandMask = (features: CountryFeature[]): LandTest => {
     return mask[(y * W + x) * 4 + 3] > 0
   }
 }
+
+// ---------- world landmarks ----------
+
+// Small primitive helpers for the landmark models (waterline/ground at y = 0)
+const lmCyl = (
+  parent: THREE.Group,
+  rTop: number,
+  rBot: number,
+  h: number,
+  color: string,
+  x: number,
+  y: number,
+  z = 0,
+  seg = 8
+) => {
+  const mesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(rTop, rBot, h, seg),
+    new THREE.MeshLambertMaterial({ color })
+  )
+  mesh.position.set(x, y, z)
+  parent.add(mesh)
+  return mesh
+}
+
+const lmSphere = (parent: THREE.Group, r: number, color: string, x: number, y: number, z = 0) => {
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(r, 12, 8),
+    new THREE.MeshLambertMaterial({ color })
+  )
+  mesh.position.set(x, y, z)
+  parent.add(mesh)
+  return mesh
+}
+
+// Famous landmarks, each hand-built from a few primitives — recognizable
+// silhouettes rather than faithful models.
+const buildEiffel = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0.1, 0.32, 0.55, '#6e553f', 0, 0.27, 0, 4)
+  lmCyl(g, 0.05, 0.1, 0.5, '#6e553f', 0, 0.78, 0, 4)
+  lmCyl(g, 0.015, 0.05, 0.45, '#6e553f', 0, 1.25, 0, 4)
+  lmCyl(g, 0.008, 0.008, 0.22, '#6e553f', 0, 1.58, 0, 4)
+  return g
+}
+
+const buildBigBen = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.22, 1.0, 0.22, '#c9b791', 0, 0.5)
+  shipBox(g, 0.26, 0.16, 0.26, '#e8e2d0', 0, 1.0)
+  lmCyl(g, 0, 0.16, 0.35, '#4a5d54', 0, 1.26, 0, 4)
+  return g
+}
+
+const buildLiberty = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.3, 0.25, 0.3, '#b8a88f', 0, 0.125)
+  lmCyl(g, 0.09, 0.11, 0.45, '#6fae9a', 0, 0.48)
+  lmSphere(g, 0.07, '#6fae9a', 0, 0.76)
+  const arm = shipBox(g, 0.05, 0.38, 0.05, '#6fae9a', 0.11, 0.85)
+  arm.rotation.z = -0.35
+  lmSphere(g, 0.045, '#f2c14e', 0.18, 1.03)
+  return g
+}
+
+const buildPyramids = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0, 0.38, 0.42, '#d4b06a', 0, 0.21, 0, 4)
+  lmCyl(g, 0, 0.26, 0.3, '#c9a55e', 0.5, 0.15, 0.25, 4)
+  lmCyl(g, 0, 0.18, 0.22, '#dcb974', -0.45, 0.11, 0.3, 4)
+  return g
+}
+
+const buildColosseum = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0.36, 0.36, 0.22, '#cbb693', 0, 0.11, 0, 14)
+  lmCyl(g, 0.28, 0.28, 0.3, '#bfa87f', 0, 0.15, 0, 14)
+  lmCyl(g, 0.18, 0.18, 0.06, '#8a7a5c', 0, 0.15, 0, 12)
+  return g
+}
+
+const buildRedeemer = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.14, 0.18, 0.14, '#9aa2ab', 0, 0.09)
+  shipBox(g, 0.1, 0.5, 0.1, '#f0ede5', 0, 0.42)
+  shipBox(g, 0.56, 0.08, 0.08, '#f0ede5', 0, 0.56)
+  lmSphere(g, 0.055, '#f0ede5', 0, 0.72)
+  return g
+}
+
+const buildBurj = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0.16, 0.24, 0.5, '#c8ccd2', 0, 0.25, 0, 6)
+  lmCyl(g, 0.1, 0.16, 0.5, '#d4d8dd', 0, 0.75, 0, 6)
+  lmCyl(g, 0.055, 0.1, 0.5, '#c8ccd2', 0, 1.25, 0, 6)
+  lmCyl(g, 0.02, 0.055, 0.4, '#d4d8dd', 0, 1.7, 0, 6)
+  lmCyl(g, 0.006, 0.006, 0.35, '#b8bcc2', 0, 2.05, 0, 6)
+  return g
+}
+
+const buildOperaHouse = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.75, 0.08, 0.45, '#d9cfc0', 0, 0.04)
+  const sail = (w: number, h: number, x: number, tilt: number) => {
+    const geom = new THREE.BufferGeometry()
+    geom.setAttribute(
+      'position',
+      new THREE.Float32BufferAttribute([0, 0, 0, w, 0, 0, w * 0.35, h, 0], 3)
+    )
+    geom.computeVertexNormals()
+    const mesh = new THREE.Mesh(
+      geom,
+      new THREE.MeshLambertMaterial({ color: '#f4f1e8', side: THREE.DoubleSide })
+    )
+    mesh.position.set(x, 0.08, 0)
+    mesh.rotation.x = tilt
+    g.add(mesh)
+  }
+  sail(0.34, 0.42, -0.32, 0.15)
+  sail(0.3, 0.34, -0.02, -0.12)
+  sail(0.26, 0.27, 0.24, 0.18)
+  return g
+}
+
+const buildTajMahal = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.52, 0.1, 0.52, '#e8e2d8', 0, 0.05)
+  shipBox(g, 0.3, 0.26, 0.3, '#f4efe6', 0, 0.26)
+  lmSphere(g, 0.16, '#f4efe6', 0, 0.5)
+  for (const dx of [-0.23, 0.23]) {
+    for (const dz of [-0.23, 0.23]) {
+      lmCyl(g, 0.02, 0.02, 0.38, '#efe9dd', dx, 0.29, dz, 6)
+    }
+  }
+  return g
+}
+
+const buildGoldenGate = () => {
+  const g = new THREE.Group()
+  shipBox(g, 1.05, 0.03, 0.1, '#c0442e', 0, 0.2)
+  shipBox(g, 0.06, 0.6, 0.06, '#c0442e', -0.3, 0.3)
+  shipBox(g, 0.06, 0.6, 0.06, '#c0442e', 0.3, 0.3)
+  return g
+}
+
+const buildTorii = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0.035, 0.04, 0.5, '#c73e2e', -0.18, 0.25, 0, 8)
+  lmCyl(g, 0.035, 0.04, 0.5, '#c73e2e', 0.18, 0.25, 0, 8)
+  shipBox(g, 0.62, 0.06, 0.09, '#c73e2e', 0, 0.55)
+  shipBox(g, 0.46, 0.05, 0.07, '#c73e2e', 0, 0.42)
+  return g
+}
+
+const buildStBasils = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.36, 0.2, 0.36, '#b0402f', 0, 0.1)
+  lmCyl(g, 0.1, 0.1, 0.32, '#e8e2d0', 0, 0.36, 0, 10)
+  const onion = lmSphere(g, 0.14, '#d98032', 0, 0.62)
+  onion.scale.y = 1.25
+  lmCyl(g, 0, 0.05, 0.16, '#e6c14f', 0, 0.85, 0, 6)
+  lmCyl(g, 0.05, 0.05, 0.22, '#f0ede5', 0.2, 0.31, 0.2, 8)
+  lmSphere(g, 0.07, '#3f8fbf', 0.2, 0.48, 0.2)
+  lmCyl(g, 0.05, 0.05, 0.22, '#f0ede5', -0.2, 0.31, -0.2, 8)
+  lmSphere(g, 0.07, '#5ba05b', -0.2, 0.48, -0.2)
+  return g
+}
+
+const buildWindmill = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0.1, 0.15, 0.42, '#7a5a3a', 0, 0.21, 0, 8)
+  lmCyl(g, 0, 0.13, 0.14, '#4a3826', 0, 0.49, 0, 8)
+  const blades = new THREE.Group()
+  const b1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 0.6, 0.07),
+    new THREE.MeshLambertMaterial({ color: '#e8e2d0' })
+  )
+  const b2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 0.07, 0.6),
+    new THREE.MeshLambertMaterial({ color: '#e8e2d0' })
+  )
+  blades.add(b1, b2)
+  blades.position.set(0.14, 0.45, 0)
+  blades.rotation.x = Math.PI / 4
+  g.add(blades)
+  return g
+}
+
+const buildPisa = () => {
+  const g = new THREE.Group()
+  const tower = lmCyl(g, 0.09, 0.1, 0.5, '#f0ead8', 0, 0.26, 0, 10)
+  tower.rotation.z = 0.15
+  const top = lmCyl(g, 0.065, 0.07, 0.1, '#e6dfc9', -0.076, 0.55, 0, 10)
+  top.rotation.z = 0.15
+  return g
+}
+
+const buildPetronas = () => {
+  const g = new THREE.Group()
+  for (const dz of [-0.15, 0.15]) {
+    lmCyl(g, 0.07, 0.1, 0.65, '#c8ccd2', 0, 0.33, dz, 8)
+    lmCyl(g, 0.01, 0.05, 0.2, '#d4d8dd', 0, 0.75, dz, 8)
+    lmCyl(g, 0.005, 0.005, 0.18, '#b8bcc2', 0, 0.92, dz, 6)
+  }
+  shipBox(g, 0.05, 0.03, 0.3, '#9aa2ab', 0, 0.38)
+  return g
+}
+
+const buildMoai = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.32, 0.07, 0.18, '#6e747c', 0, 0.035)
+  shipBox(g, 0.14, 0.28, 0.12, '#8d939b', 0, 0.21)
+  shipBox(g, 0.12, 0.2, 0.11, '#979da6', 0, 0.44)
+  shipBox(g, 0.03, 0.08, 0.03, '#8d939b', 0.06, 0.42)
+  return g
+}
+
+const buildMachuPicchu = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.5, 0.08, 0.4, '#7c8f6a', 0, 0.04)
+  shipBox(g, 0.4, 0.08, 0.32, '#8fa07a', 0, 0.12)
+  shipBox(g, 0.3, 0.08, 0.24, '#7c8f6a', 0, 0.2)
+  shipBox(g, 0.08, 0.06, 0.06, '#9aa2ab', -0.05, 0.27)
+  shipBox(g, 0.06, 0.05, 0.06, '#9aa2ab', 0.07, 0.27)
+  lmCyl(g, 0, 0.14, 0.5, '#66785c', -0.28, 0.4, -0.12, 5) // Huayna Picchu
+  return g
+}
+
+const buildStonehenge = () => {
+  const g = new THREE.Group()
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2
+    shipBox(g, 0.05, 0.18, 0.05, '#9aa2ab', Math.cos(a) * 0.2, 0.09, Math.sin(a) * 0.2)
+  }
+  shipBox(g, 0.2, 0.045, 0.07, '#8d939b', 0.1, 0.2, -0.17)
+  shipBox(g, 0.2, 0.045, 0.07, '#8d939b', -0.14, 0.2, 0.12)
+  return g
+}
+
+const buildGreatWall = () => {
+  const g = new THREE.Group()
+  const seg1 = shipBox(g, 0.45, 0.12, 0.09, '#a89a7c', -0.28, 0.06)
+  seg1.rotation.y = 0.5
+  const seg2 = shipBox(g, 0.45, 0.12, 0.09, '#a89a7c', 0.28, 0.06)
+  seg2.rotation.y = -0.5
+  shipBox(g, 0.14, 0.24, 0.14, '#8a7a5c', 0, 0.12) // watchtower
+  return g
+}
+
+const buildNeuschwanstein = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.32, 0.22, 0.2, '#f0ede5', 0, 0.11)
+  lmCyl(g, 0.05, 0.05, 0.42, '#f0ede5', -0.12, 0.21, 0, 8)
+  lmCyl(g, 0, 0.07, 0.16, '#5b7fa6', -0.12, 0.5, 0, 8)
+  lmCyl(g, 0.035, 0.035, 0.3, '#f0ede5', 0.14, 0.15, 0.06, 8)
+  lmCyl(g, 0, 0.055, 0.13, '#5b7fa6', 0.14, 0.37, 0.06, 8)
+  shipBox(g, 0.12, 0.1, 0.12, '#e8e2d0', 0.02, 0.27)
+  lmCyl(g, 0, 0.09, 0.12, '#5b7fa6', 0.02, 0.38, 0, 4)
+  return g
+}
+
+const buildSagrada = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.4, 0.12, 0.25, '#c9a86f', 0, 0.06)
+  lmCyl(g, 0.01, 0.06, 0.55, '#b8975e', -0.13, 0.38, 0, 6)
+  lmCyl(g, 0.01, 0.07, 0.7, '#c9a86f', 0, 0.45, 0, 6)
+  lmCyl(g, 0.01, 0.06, 0.55, '#b8975e', 0.13, 0.38, 0, 6)
+  lmCyl(g, 0.01, 0.05, 0.42, '#c9a86f', 0, 0.3, 0.14, 6)
+  return g
+}
+
+const buildParthenon = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.5, 0.06, 0.3, '#d9cfb8', 0, 0.03)
+  for (const x of [-0.2, -0.1, 0, 0.1, 0.2]) {
+    lmCyl(g, 0.022, 0.022, 0.2, '#e6dcc4', x, 0.16, 0.11, 6)
+    lmCyl(g, 0.022, 0.022, 0.2, '#e6dcc4', x, 0.16, -0.11, 6)
+  }
+  shipBox(g, 0.52, 0.05, 0.32, '#d9cfb8', 0, 0.28)
+  shipBox(g, 0.4, 0.04, 0.24, '#cfc4aa', 0, 0.32)
+  return g
+}
+
+const buildHagiaSophia = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.4, 0.16, 0.4, '#c9b08a', 0, 0.08)
+  lmSphere(g, 0.18, '#8a7a5c', 0, 0.24)
+  for (const dx of [-0.26, 0.26]) {
+    for (const dz of [-0.26, 0.26]) {
+      lmCyl(g, 0.016, 0.016, 0.45, '#e8e2d0', dx, 0.22, dz, 6)
+    }
+  }
+  return g
+}
+
+const buildAngkorWat = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.55, 0.08, 0.4, '#8a795f', 0, 0.04)
+  lmCyl(g, 0, 0.09, 0.45, '#786a52', 0, 0.3, 0, 6)
+  for (const [dx, dz] of [
+    [-0.18, -0.12],
+    [0.18, -0.12],
+    [-0.18, 0.12],
+    [0.18, 0.12],
+  ]) {
+    lmCyl(g, 0, 0.07, 0.32, '#8a795f', dx, 0.24, dz, 6)
+  }
+  return g
+}
+
+const buildChichenItza = () => {
+  const g = new THREE.Group()
+  shipBox(g, 0.45, 0.07, 0.45, '#c2ab84', 0, 0.035)
+  shipBox(g, 0.35, 0.07, 0.35, '#b8a078', 0, 0.105)
+  shipBox(g, 0.26, 0.07, 0.26, '#c2ab84', 0, 0.175)
+  shipBox(g, 0.17, 0.07, 0.17, '#b8a078', 0, 0.245)
+  shipBox(g, 0.11, 0.1, 0.11, '#a89066', 0, 0.33)
+  return g
+}
+
+const buildCNTower = () => {
+  const g = new THREE.Group()
+  lmCyl(g, 0.03, 0.06, 0.7, '#c8ccd2', 0, 0.35, 0, 8)
+  lmCyl(g, 0.09, 0.09, 0.07, '#9aa2ab', 0, 0.68, 0, 10)
+  lmCyl(g, 0.008, 0.008, 0.32, '#b8bcc2', 0, 0.88, 0, 6)
+  return g
+}
+
+const buildGatewayArch = () => {
+  const g = new THREE.Group()
+  const arch = new THREE.Mesh(
+    new THREE.TorusGeometry(0.38, 0.022, 8, 24, Math.PI),
+    new THREE.MeshLambertMaterial({ color: '#c8ccd2' })
+  )
+  arch.position.y = 0.01
+  g.add(arch)
+  return g
+}
+
+const buildMarinaBay = () => {
+  const g = new THREE.Group()
+  for (const x of [-0.18, 0, 0.18]) {
+    const tower = shipBox(g, 0.09, 0.45, 0.13, '#d4d8dd', x, 0.225)
+    tower.rotation.z = x === 0 ? 0 : x < 0 ? 0.08 : -0.08
+  }
+  shipBox(g, 0.62, 0.045, 0.16, '#e8e2d0', 0, 0.5) // skypark deck
+  return g
+}
+
+const buildBrandenburg = () => {
+  const g = new THREE.Group()
+  for (const x of [-0.2, -0.1, 0, 0.1, 0.2]) {
+    shipBox(g, 0.045, 0.24, 0.07, '#d9cfb8', x, 0.12)
+  }
+  shipBox(g, 0.52, 0.09, 0.12, '#d9cfb8', 0, 0.29)
+  shipBox(g, 0.09, 0.06, 0.06, '#6fae9a', 0, 0.37) // quadriga
+  return g
+}
+
+const buildAtomium = () => {
+  const g = new THREE.Group()
+  const center = new THREE.Vector3(0, 0.32, 0)
+  const corners: THREE.Vector3[] = []
+  for (const dx of [-0.18, 0.18]) {
+    for (const dy of [0.14, 0.5]) {
+      for (const dz of [-0.18, 0.18]) corners.push(new THREE.Vector3(dx, dy, dz))
+    }
+  }
+  // connecting tube between two sphere centers
+  const strut = (a: THREE.Vector3, b: THREE.Vector3) => {
+    const dir = new THREE.Vector3().subVectors(b, a)
+    const mesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, dir.length(), 6),
+      new THREE.MeshLambertMaterial({ color: '#b0b6bd' })
+    )
+    mesh.position.copy(a).add(b).multiplyScalar(0.5)
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize())
+    g.add(mesh)
+  }
+  for (const c of corners) strut(center, c) // 8 diagonals into the middle
+  for (let i = 0; i < corners.length; i++) {
+    for (let j = i + 1; j < corners.length; j++) {
+      const a = corners[i]
+      const b = corners[j]
+      const axesDiffering =
+        (a.x !== b.x ? 1 : 0) + (a.y !== b.y ? 1 : 0) + (a.z !== b.z ? 1 : 0)
+      if (axesDiffering === 1) strut(a, b) // 12 cube edges
+    }
+  }
+  lmCyl(g, 0.018, 0.018, 0.14, '#9aa2ab', 0, 0.07, 0, 6)
+  lmSphere(g, 0.07, '#c8ccd2', center.x, center.y, center.z)
+  for (const c of corners) lmSphere(g, 0.055, '#c8ccd2', c.x, c.y, c.z)
+  return g
+}
+
+const buildUluru = () => {
+  const g = new THREE.Group()
+  const rock = lmSphere(g, 0.3, '#b3502e', 0, 0.03)
+  rock.scale.set(1.4, 0.35, 0.75)
+  return g
+}
+
+interface Landmark {
+  name: string
+  city: string
+  lat: number
+  lng: number
+  build: () => THREE.Group
+}
+
+const LANDMARKS: Landmark[] = [
+  { name: 'Eiffel Tower', city: 'Paris', lat: 48.858, lng: 2.294, build: buildEiffel },
+  { name: 'Big Ben', city: 'London', lat: 51.501, lng: -0.125, build: buildBigBen },
+  { name: 'Statue of Liberty', city: 'New York', lat: 40.689, lng: -74.045, build: buildLiberty },
+  { name: 'Pyramids of Giza', city: 'Cairo', lat: 29.979, lng: 31.134, build: buildPyramids },
+  { name: 'Colosseum', city: 'Rome', lat: 41.89, lng: 12.492, build: buildColosseum },
+  { name: 'Christ the Redeemer', city: 'Rio de Janeiro', lat: -22.952, lng: -43.21, build: buildRedeemer },
+  { name: 'Burj Khalifa', city: 'Dubai', lat: 25.197, lng: 55.274, build: buildBurj },
+  { name: 'Sydney Opera House', city: 'Sydney', lat: -33.857, lng: 151.215, build: buildOperaHouse },
+  { name: 'Taj Mahal', city: 'Agra', lat: 27.175, lng: 78.042, build: buildTajMahal },
+  { name: 'Golden Gate Bridge', city: 'San Francisco', lat: 37.82, lng: -122.478, build: buildGoldenGate },
+  { name: 'Itsukushima Torii', city: 'Hiroshima', lat: 34.296, lng: 132.32, build: buildTorii },
+  { name: "Saint Basil's Cathedral", city: 'Moscow', lat: 55.752, lng: 37.623, build: buildStBasils },
+  { name: 'Kinderdijk Windmills', city: 'Rotterdam', lat: 51.883, lng: 4.63, build: buildWindmill },
+  { name: 'Leaning Tower of Pisa', city: 'Pisa', lat: 43.723, lng: 10.396, build: buildPisa },
+  { name: 'Petronas Towers', city: 'Kuala Lumpur', lat: 3.158, lng: 101.712, build: buildPetronas },
+  { name: 'Moai', city: 'Easter Island', lat: -27.126, lng: -109.277, build: buildMoai },
+  { name: 'Machu Picchu', city: 'Cusco', lat: -13.163, lng: -72.545, build: buildMachuPicchu },
+  { name: 'Stonehenge', city: 'Wiltshire', lat: 51.179, lng: -1.826, build: buildStonehenge },
+  { name: 'Great Wall', city: 'Beijing', lat: 40.36, lng: 116.02, build: buildGreatWall },
+  { name: 'Neuschwanstein Castle', city: 'Bavaria', lat: 47.558, lng: 10.75, build: buildNeuschwanstein },
+  { name: 'Sagrada Família', city: 'Barcelona', lat: 41.404, lng: 2.174, build: buildSagrada },
+  { name: 'Parthenon', city: 'Athens', lat: 37.972, lng: 23.726, build: buildParthenon },
+  { name: 'Hagia Sophia', city: 'Istanbul', lat: 41.009, lng: 28.98, build: buildHagiaSophia },
+  { name: 'Angkor Wat', city: 'Siem Reap', lat: 13.412, lng: 103.867, build: buildAngkorWat },
+  { name: 'Chichén Itzá', city: 'Yucatán', lat: 20.683, lng: -88.569, build: buildChichenItza },
+  { name: 'CN Tower', city: 'Toronto', lat: 43.643, lng: -79.387, build: buildCNTower },
+  { name: 'Gateway Arch', city: 'St. Louis', lat: 38.625, lng: -90.185, build: buildGatewayArch },
+  { name: 'Marina Bay Sands', city: 'Singapore', lat: 1.284, lng: 103.861, build: buildMarinaBay },
+  { name: 'Brandenburg Gate', city: 'Berlin', lat: 52.516, lng: 13.378, build: buildBrandenburg },
+  { name: 'Atomium', city: 'Brussels', lat: 50.895, lng: 4.341, build: buildAtomium },
+  { name: 'Uluru', city: 'Northern Territory', lat: -25.345, lng: 131.036, build: buildUluru },
+]
 
 // Random open-water spawn point with a random heading
 const spawnBoat = (isLand: LandTest) => {
@@ -498,10 +936,85 @@ const sailBoats = (boats: Boat[], isLand: LandTest, radius: number, t: number, d
   }
 }
 
+// ---------- per-country card themes ----------
+
+// Some countries get a personalized card: a tinted wash, a flag-colored top
+// strip, a big faint watermark and matching accent colors. Add an entry per
+// country you want to feel special.
+interface CountryTheme {
+  border: string // card border color
+  tint: string // background wash over the card
+  strip: string // decorative strip along the top edge
+  watermark?: string // large faint glyph in the corner
+  badge: string // verified-badge color
+  chipActive: string // selected place chip
+  chipIdle: string // idle place chip
+  flagClass?: string // modifier class for the planted place flags (see CSS)
+  frame?: string // decorative frame class around the photo slideshow
+  watermarkClass?: string // extra classes for the watermark glyph
+  extras?: string // key for bespoke decorations rendered in the card
+  nativeLabels?: Record<string, string> // local-script names for country/places
+  nativeClass?: string // styling for the native-name labels
+}
+
+const COUNTRY_THEMES: Record<string, CountryTheme> = {
+  CHN: {
+    border: 'border-red-700/80',
+    tint: 'bg-gradient-to-b from-red-900/45 via-transparent to-red-950/40',
+    strip: 'h-2.5 cn-meander-strip',
+    watermark: '龍',
+    watermarkClass: 'cn-calligraphy text-red-200',
+    badge: 'text-amber-400',
+    chipActive: 'bg-red-500/15 border-amber-400 text-amber-300',
+    chipIdle: 'border-red-800/70 text-on-dark hover:border-amber-300 hover:text-amber-200',
+    flagClass: 'place-flag--cn',
+    frame: 'media-frame--cn',
+    extras: 'cn',
+    nativeLabels: {
+      China: '中国',
+      Shenzhen: '深圳',
+      'Hong Kong': '香港',
+      Macau: '澳門',
+    },
+    nativeClass: 'cn-calligraphy',
+  },
+  NLD: {
+    border: 'border-orange-500/70',
+    tint: 'bg-gradient-to-b from-orange-900/30 via-transparent to-blue-950/30',
+    strip: 'h-1 bg-gradient-to-r from-red-500 via-white to-blue-600',
+    watermark: '🌷',
+    badge: 'text-orange-400',
+    chipActive: 'bg-orange-500/15 border-orange-400 text-orange-300',
+    chipIdle: 'border-gray-600 text-on-dark hover:border-orange-300 hover:text-orange-200',
+    flagClass: 'place-flag--nl',
+  },
+  BRA: {
+    border: 'border-emerald-500/70',
+    tint: 'bg-gradient-to-b from-emerald-900/35 via-transparent to-yellow-900/25',
+    strip: 'h-1.5 bg-gradient-to-r from-green-600 via-yellow-400 to-blue-600',
+    badge: 'text-emerald-400',
+    chipActive: 'bg-emerald-500/15 border-yellow-300 text-yellow-200',
+    chipIdle: 'border-gray-600 text-on-dark hover:border-yellow-300 hover:text-yellow-200',
+    flagClass: 'place-flag--br',
+    frame: 'media-frame--br',
+    extras: 'br',
+    nativeLabels: { Brazil: 'Brasil' },
+    nativeClass: 'italic',
+  },
+}
+
 export default function TripsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // Pick the Dutch text when the site runs in Dutch, falling back to English
+  const localText = (item?: { description?: string; descriptionNl?: string }) =>
+    i18n.language?.startsWith('nl') ? item?.descriptionNl || item?.description : item?.description
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const pageRef = useRef<HTMLDivElement | null>(null)
+  // The DOM moon fades out while the globe's disc covers its screen spot
+  const [moonCovered, setMoonCovered] = useState(false)
+  // Tooltip shown while hovering a city's buildings (updated imperatively)
+  const cityTipRef = useRef<HTMLDivElement | null>(null)
   // Our own directional light (installed in onGlobeReady, replacing the
   // stock lights) — repositioned every frame to follow the camera
   const dirLightsRef = useRef<THREE.DirectionalLight[]>([])
@@ -509,6 +1022,12 @@ export default function TripsPage() {
   const boatsRef = useRef<Boat[]>([])
   // Land lookup for boat steering, rasterized from the country polygons
   const landMaskRef = useRef<LandTest>(() => false)
+  // Projection view-offset (fractions of width/height): shifts the whole
+  // scene while the panel is open — left on desktop (panel on the right),
+  // up on mobile (panel on the bottom half) — without moving or clipping
+  // the canvas. Eased toward its target every frame by the animation loop.
+  const viewOffsetRef = useRef({ x: 0, y: 0 })
+  const viewOffsetTargetRef = useRef({ x: 0, y: 0 })
   // Sky objects (built in onGlobeReady), animated by the loop
   const cloudsRef = useRef<THREE.Mesh | null>(null)
   const satRef = useRef<THREE.Group | null>(null)
@@ -520,6 +1039,13 @@ export default function TripsPage() {
   const [countriesData, setCountriesData] = useState<VisitedCountry[] | null>(null)
   // Photos/videos of the selected place, uploaded via /trips/admin
   const [placeMedia, setPlaceMedia] = useState<MediaItem[] | null>(null)
+  // Slideshow position within the selected place's media + lightbox state
+  const [mediaIndex, setMediaIndex] = useState(0)
+  const [mediaFullscreen, setMediaFullscreen] = useState(false)
+  // swipe-to-close tracking for the mobile lightbox
+  const lightboxTouchY = useRef<number | null>(null)
+  // Which media URLs have finished downloading (skeleton pulse until then)
+  const [mediaLoaded, setMediaLoaded] = useState<Record<string, boolean>>({})
   const [hovered, setHovered] = useState<CountryFeature | null>(null)
   const [selected, setSelected] = useState<CountryFeature | null>(null)
   // Keeps the last selection so the panel stays filled while fading out
@@ -549,6 +1075,22 @@ export default function TripsPage() {
       .catch(() => {})
   }, [])
 
+  const [globeReady, setGlobeReady] = useState(false)
+  // The scene fades in as one once all layers have had time to build
+  const [sceneVisible, setSceneVisible] = useState(false)
+  // Travel stats live behind a toggle to keep the hero compact
+  const [statsOpen, setStatsOpen] = useState(false)
+  // Mobile bottom sheet: collapsed shows the photos; dragging the handle
+  // follows the finger 1:1, then settles to the nearest state on release
+  // (expanded reveals the texts). Tapping the handle toggles.
+  const [sheetExpanded, setSheetExpanded] = useState(false)
+  const sheetRef = useRef<HTMLDivElement | null>(null)
+  const sheetDragRef = useRef<{ startY: number; startH: number; parentH: number; moved: boolean } | null>(null)
+  const sheetMovedRef = useRef(false)
+  useEffect(() => {
+    setSheetExpanded(false)
+  }, [selected])
+
   // Load the admin-managed dataset; falls back to the bundled data file
   useEffect(() => {
     fetch('/api/trips-data')
@@ -561,16 +1103,41 @@ export default function TripsPage() {
       .catch(() => {})
   }, [])
 
+  // Is the globe's projected disc covering the moon's screen position?
+  // (moon geometry must match the CSS: top 34%, right 9%, 92px wide)
+  const updateMoonCovered = useCallback(() => {
+    const globe = globeRef.current
+    const container = containerRef.current
+    const page = pageRef.current
+    if (!globe || !container || !page) return
+    const cam = globe.camera() as THREE.PerspectiveCamera
+    const R = globe.getGlobeRadius()
+    const d = cam.position.length()
+    const crect = container.getBoundingClientRect()
+    if (crect.height === 0 || d <= R) return
+    // pixel radius of the globe: focal length in px × tan(angular radius)
+    const focal = crect.height / 2 / Math.tan((cam.fov * Math.PI) / 360)
+    const globePx = (focal * R) / Math.sqrt(d * d - R * R)
+    const prect = page.getBoundingClientRect()
+    const moonX = prect.left + prect.width * 0.91 - 46
+    const moonY = prect.top + prect.height * 0.34 + 46
+    // the projection view-offset slides the globe's disc away from center
+    const cx = crect.left + crect.width / 2 - viewOffsetRef.current.x * crect.width
+    const cy = crect.top + crect.height / 2 - viewOffsetRef.current.y * crect.height
+    setMoonCovered(Math.hypot(moonX - cx, moonY - cy) < globePx + 40)
+  }, [])
+
   // Keep the globe canvas sized to its container
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
     const observer = new ResizeObserver(() => {
       setSize({ width: el.clientWidth, height: el.clientHeight })
+      updateMoonCovered()
     })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [updateMoonCovered])
 
   const activeCountries = countriesData ?? visitedCountries
 
@@ -579,22 +1146,84 @@ export default function TripsPage() {
     [activeCountries]
   )
 
-  // Lazily load detailed shapes and swap them in for visited countries only —
-  // a handful of detailed polygons doesn't cause the lag the full set did,
-  // and the countries you actually zoom into get the nice outlines.
+  // Lazily load the detailed shapes; polygonsData below swaps them in for
+  // visited countries and the current selection (the full set at once would
+  // lag, so the rest of the world stays blocky).
   useEffect(() => {
     fetch('/data/countries-detailed.geojson')
       .then((res) => res.json())
       .then((geojson) => {
         const byCode = new Map<string, CountryFeature>(
-          (geojson.features as CountryFeature[])
-            .filter((f) => visitedByCode.has(f.properties.iso3))
-            .map((f) => [f.properties.iso3, f])
+          (geojson.features as CountryFeature[]).map((f) => [f.properties.iso3, f])
         )
         setDetailedByCode(byCode)
       })
       .catch(() => {}) // fall back to blocky shapes silently
-  }, [visitedByCode])
+  }, [])
+
+  // Landmark hover tooltip: convert the cursor to lat/lng on the globe and
+  // find the nearest landmark — the area around it is the hover target, and
+  // it grows a little when zoomed out so landmarks stay easy to hit.
+  useEffect(() => {
+    if (!globeReady) return
+    const container = containerRef.current
+    const globe = globeRef.current
+    const tip = cityTipRef.current
+    if (!container || !globe || !tip) return
+    let lastRun = 0
+    const onMove = (e: PointerEvent) => {
+      const now = performance.now()
+      if (now - lastRun < 40) return
+      lastRun = now
+      const rect = container.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      const coords = globe.toGlobeCoords(x, y)
+      if (!coords) {
+        tip.classList.add('hidden')
+        container.classList.remove('city-hovered')
+        return
+      }
+      const cosLat = Math.max(0.2, Math.cos((coords.lat * Math.PI) / 180))
+      const radius = 0.8 * Math.max(1, altitudeRef.current * 1.5)
+      let best: Landmark | null = null
+      let bestScore = 1 // scores below 1 are inside the hover area
+      for (const lm of LANDMARKS) {
+        const dLat = lm.lat - coords.lat
+        if (dLat > 5 || dLat < -5) continue
+        let dLng = Math.abs(lm.lng - coords.lng)
+        if (dLng > 180) dLng = 360 - dLng
+        dLng *= cosLat
+        const score = (dLat * dLat + dLng * dLng) / (radius * radius)
+        if (score < bestScore) {
+          bestScore = score
+          best = lm
+        }
+      }
+      if (best) {
+        tip.textContent = `${best.name} — ${best.city}`
+        tip.style.left = `${x + 14}px`
+        tip.style.top = `${y + 10}px`
+        tip.classList.remove('hidden')
+        container.classList.add('city-hovered') // suppresses the country tooltip
+      } else {
+        tip.classList.add('hidden')
+        container.classList.remove('city-hovered')
+      }
+    }
+    const onLeave = () => {
+      tip.classList.add('hidden')
+      container.classList.remove('city-hovered')
+    }
+    container.addEventListener('pointermove', onMove)
+    container.addEventListener('pointerleave', onLeave)
+    return () => {
+      container.removeEventListener('pointermove', onMove)
+      container.removeEventListener('pointerleave', onLeave)
+      container.classList.remove('city-hovered')
+    }
+  }, [globeReady])
+
 
   // Ocean: deep blue with a soft specular sheen — no surface texture; the
   // sense of moving water comes from the boats and their wakes.
@@ -607,6 +1236,16 @@ export default function TripsPage() {
       }),
     []
   )
+
+  // While a country is selected the scene slides aside for the panel:
+  // left on desktop, up into the top half on mobile
+  useEffect(() => {
+    viewOffsetTargetRef.current = !selected
+      ? { x: 0, y: 0 }
+      : window.innerWidth >= 768
+        ? { x: 0.225, y: 0 }
+        : { x: 0, y: 0.333 } // selection centers in the top third
+  }, [selected])
 
   // Per-frame animation: keep the directional light just above the camera
   // ("headlight", so the ocean glint follows the view) and sail the boats.
@@ -626,6 +1265,37 @@ export default function TripsPage() {
           light.position.copy(cam.position)
           // small upward nudge → glint sits slightly above view center
           light.position.y += cam.position.length() * 0.25
+        }
+        // ease the projection offset toward its target (scene slides aside
+        // when the panel opens, back to center when it closes)
+        const offsetTarget = viewOffsetTargetRef.current
+        const offset = viewOffsetRef.current
+        if (
+          Math.abs(offset.x - offsetTarget.x) > 0.0005 ||
+          Math.abs(offset.y - offsetTarget.y) > 0.0005
+        ) {
+          offset.x += (offsetTarget.x - offset.x) * Math.min(1, dt * 5)
+          offset.y += (offsetTarget.y - offset.y) * Math.min(1, dt * 5)
+          const el = containerRef.current
+          const persp = cam as THREE.PerspectiveCamera
+          if (el && persp.isPerspectiveCamera) {
+            const nearZero = Math.abs(offset.x) < 0.0005 && Math.abs(offset.y) < 0.0005
+            if (nearZero && offsetTarget.x === 0 && offsetTarget.y === 0) {
+              offset.x = 0
+              offset.y = 0
+              persp.clearViewOffset()
+            } else {
+              persp.setViewOffset(
+                el.clientWidth,
+                el.clientHeight,
+                offset.x * el.clientWidth,
+                offset.y * el.clientHeight,
+                el.clientWidth,
+                el.clientHeight
+              )
+            }
+          }
+          updateMoonCovered()
         }
         const radius = globe.getGlobeRadius()
         sailBoats(boatsRef.current, landMaskRef.current, radius, t, dt)
@@ -659,9 +1329,19 @@ export default function TripsPage() {
 
 
   // Blocky base shapes, with detailed geometry swapped in for visited countries
+  // Detailed geometry for visited countries (and whichever country is
+  // selected, visited or not); blocky base shapes for the rest. Feature
+  // identities stay stable across selections, so three-globe only
+  // re-tessellates polygons that actually change.
   const polygonsData = useMemo(
-    () => countries.map((c) => detailedByCode?.get(c.properties.iso3) ?? c),
-    [countries, detailedByCode]
+    () =>
+      countries.map((c) =>
+        visitedByCode.has(c.properties.iso3) ||
+        (selected && c.properties.iso3 === selected.properties.iso3)
+          ? detailedByCode?.get(c.properties.iso3) ?? c
+          : c
+      ),
+    [countries, detailedByCode, visitedByCode, selected]
   )
 
   const isVisited = (d: object | null) =>
@@ -677,18 +1357,47 @@ export default function TripsPage() {
     [visitedByCode]
   )
 
-  // Angular size of a country's mainland in degrees (handles the antimeridian)
-  const countrySizeDeg = (feature: CountryFeature) => {
-    const [[minLng, minLat], [maxLng, maxLat]] = geoBounds(mainPolygon(feature) as never)
+  // Fly the camera to a country, zoomed so its bounding box fits the screen
+  // area the info panel leaves free: on desktop the panel takes the right
+  // side, so the country is framed into roughly the left half. The bounds
+  // include islands near the mainland (Sicily, Sardinia…) but not far-flung
+  // territories (Caribbean, Guiana…) that would wreck the framing.
+  const focusCountry = (feature: CountryFeature) => {
+    const geom = feature.geometry
+    const allPolys = (
+      geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates
+    ) as number[][][][]
+    const [mainLng, mainLat] = geoCentroid(mainPolygon(feature) as never)
+    const nearby = allPolys.filter((coords) => {
+      const [cLng, cLat] = geoCentroid({ type: 'Polygon', coordinates: coords } as never)
+      let dLng = Math.abs(cLng - mainLng)
+      if (dLng > 180) dLng = 360 - dLng
+      return Math.hypot(cLat - mainLat, dLng) <= 15
+    })
+    const region = { type: 'MultiPolygon', coordinates: nearby } as never
+    const [[minLng, minLat], [maxLng, maxLat]] = geoBounds(region)
     let lngSpan = maxLng - minLng
     if (lngSpan < 0) lngSpan += 360
-    return Math.max(maxLat - minLat, lngSpan)
-  }
-
-  // Fly the camera to a country's mainland, zoomed to fit its size
-  const focusCountry = (feature: CountryFeature) => {
-    const [lng, lat] = geoCentroid(mainPolygon(feature) as never)
-    const altitude = Math.min(2, Math.max(0.25, countrySizeDeg(feature) / 35))
+    // aim at the bbox center — the area centroid leans toward landmass bulk
+    const lat = (minLat + maxLat) / 2
+    let lng = minLng + lngSpan / 2
+    if (lng > 180) lng -= 360
+    const toRad = Math.PI / 180
+    // angular sizes of the bbox at the surface, in radians
+    const sizeV = (maxLat - minLat) * toRad
+    const sizeH = lngSpan * toRad * Math.max(0.2, Math.cos(lat * toRad))
+    // projected fraction of the viewport ≈ size·R / (2·tan(fov/2)·(d−R)),
+    // solved for altitude; fov is 50°, so 2·tan(25°) ≈ 0.933
+    const aspect = size.height > 0 ? size.width / size.height : 1.7
+    const desktop = window.innerWidth >= 768
+    // desktop: fit into the left half beside the panel; mobile: fit into
+    // the top third above the bottom-sheet card
+    const targetV = desktop ? 0.82 : 0.27 // fraction of viewport height to fill
+    const targetH = desktop ? 0.53 : 0.85 // fraction of viewport width
+    const altitude = Math.min(
+      2,
+      Math.max(0.08, Math.max(sizeV / (0.933 * targetV), sizeH / (0.933 * aspect * targetH)))
+    )
     globeRef.current?.pointOfView({ lat, lng, altitude }, 1000)
   }
 
@@ -710,7 +1419,9 @@ export default function TripsPage() {
   const handleCountryClick = (d: object | null) => {
     if (!d) return
     const feature = d as CountryFeature
-    if (feature === selected) {
+    // Compare by code — the selected country's polygon object is swapped
+    // for its detailed twin, so identity comparison would miss
+    if (selected && feature.properties.iso3 === selected.properties.iso3) {
       // Misclicks next to a flag must not deselect the country (that's what
       // the card's reset button is for). If zoomed in on a place, clicking
       // the country zooms back out to the country view.
@@ -721,6 +1432,8 @@ export default function TripsPage() {
       }
       return
     }
+    // Only visited countries open — the others have nothing to show
+    if (!visitedByCode.has(feature.properties.iso3)) return
     selectCountry(feature)
   }
 
@@ -734,10 +1447,11 @@ export default function TripsPage() {
     if (feature) selectCountry(feature)
   }
 
-  // Keyboard: Escape closes the country, arrow keys step through visited ones
+  // Keyboard: Escape closes the country, arrow keys step through visited
+  // ones — unless the media lightbox is open, which owns the keys then
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!selected) return
+      if (!selected || mediaFullscreen) return
       if (e.key === 'Escape') {
         resetView()
       } else if (e.key === 'ArrowLeft') {
@@ -751,7 +1465,7 @@ export default function TripsPage() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected])
+  }, [selected, mediaFullscreen])
 
   // Zoom in on a visited place. When a neighbour is too close to distinguish
   // (e.g. Hong Kong/Macau), zoom past 0.3 until the flags separate on screen.
@@ -784,6 +1498,74 @@ export default function TripsPage() {
   // cluster composition changes (tracked via a signature), so flags are not
   // needlessly recreated (which would replay the plant animation) on every
   // render or small zoom step.
+  // Deep links: /trips?country=CHN&place=shenzhen opens that view directly.
+  // The country applies as soon as the globe is ready; the place waits in
+  // pendingPlaceRef until the (possibly admin-managed) dataset contains it —
+  // on load the bundled fallback may not know the place yet.
+  const urlAppliedRef = useRef(false)
+  const pendingPlaceRef = useRef<{ code: string; slug: string } | null>(null)
+  useEffect(() => {
+    if (urlAppliedRef.current || !globeReady || countries.length === 0) return
+    urlAppliedRef.current = true
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('country')?.toUpperCase()
+    if (!code) return
+    const feature = polygonsData.find((f) => f.properties.iso3 === code)
+    if (!feature) return
+    selectCountry(feature)
+    const placeParam = params.get('place')?.toLowerCase()
+    if (placeParam) pendingPlaceRef.current = { code, slug: placeParam }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [globeReady, countries])
+
+  // Fly to the pending deep-linked place once the data knows it. Give up if
+  // the live dataset arrived without a match, or if the user moved on.
+  useEffect(() => {
+    const pending = pendingPlaceRef.current
+    if (!pending) return
+    if (!selected || selected.properties.iso3 !== pending.code) {
+      pendingPlaceRef.current = null
+      return
+    }
+    const place = visitedByCode
+      .get(pending.code)
+      ?.places?.find((p) => placeSlug(p.name) === pending.slug)
+    if (place) {
+      pendingPlaceRef.current = null
+      focusPlace(place)
+    } else if (countriesData !== null) {
+      pendingPlaceRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visitedByCode, selected, countriesData])
+
+  // ...and the URL follows the selection, so any view can be shared
+  // (replaceState — selections shouldn't pile up in the history). Paused
+  // while a deep-linked place is still waiting for its data, so the pasted
+  // URL isn't rewritten without the place in the meantime.
+  useEffect(() => {
+    if (!urlAppliedRef.current || pendingPlaceRef.current) return
+    const params = new URLSearchParams(window.location.search)
+    if (selected) params.set('country', selected.properties.iso3)
+    else params.delete('country')
+    if (selected && selectedPlace) params.set('place', placeSlug(selectedPlace.name))
+    else params.delete('place')
+    const qs = params.toString()
+    window.history.replaceState(
+      null,
+      '',
+      qs ? `${window.location.pathname}?${qs}` : window.location.pathname
+    )
+  }, [selected, selectedPlace])
+
+  // Theme modifier class for the selected country's place flags
+  const themeFlagRef = useRef('')
+  useEffect(() => {
+    themeFlagRef.current = selected
+      ? COUNTRY_THEMES[selected.properties.iso3]?.flagClass ?? ''
+      : ''
+  }, [selected])
+
   const markerEls = useRef(new Map<string, HTMLDivElement>())
   const placesRef = useRef<VisitedPlace[]>([])
   const selectedPlaceRef = useRef<VisitedPlace | null>(null)
@@ -936,7 +1718,7 @@ export default function TripsPage() {
       }
 
       const home = isHomePlace(d.name)
-      el.className = `place-flag${home ? ' place-flag--home' : ''}${selectedPlaceRef.current?.name === d.name ? ' place-flag--active' : ''}`
+      el.className = `place-flag${themeFlagRef.current ? ` ${themeFlagRef.current}` : ''}${home ? ' place-flag--home' : ''}${selectedPlaceRef.current?.name === d.name ? ' place-flag--active' : ''}`
       if (home) el.title = t('trips.homeHint')
       el.innerHTML = `
         <div class="place-flag-spread" style="transform: translate(${d.spreadX ?? 0}px, ${d.spreadY ?? 0}px)">
@@ -964,61 +1746,186 @@ export default function TripsPage() {
     }
   }, [selectedPlace, placeMarkers])
 
-  // Load the selected place's photos/videos
+  // Fullscreen lightbox: Escape closes, arrow keys navigate
+  useEffect(() => {
+    if (!mediaFullscreen) return
+    const onKey = (e: KeyboardEvent) => {
+      const count = placeMedia?.length ?? 0
+      if (e.key === 'Escape') setMediaFullscreen(false)
+      else if (e.key === 'ArrowRight' && count > 1) setMediaIndex((i) => (i + 1) % count)
+      else if (e.key === 'ArrowLeft' && count > 1) setMediaIndex((i) => (i - 1 + count) % count)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mediaFullscreen, placeMedia])
+
+  // Media lists fetched this session, keyed by storage prefix — revisiting
+  // a place or country costs no request (and no Blob operation) at all
+  const mediaCacheRef = useRef(new Map<string, MediaItem[]>())
+
+  // Load photos/videos: the selected place's own media, or — when no place
+  // is selected — everything from all of the country's places combined
   useEffect(() => {
     setPlaceMedia(null)
-    if (!selectedPlace || !selected) return
-    const prefix = mediaPrefix(selected.properties.iso3, selectedPlace.name)
+    setMediaIndex(0)
+    setMediaFullscreen(false)
+    if (!selected) return
+    const places = visitedByCode.get(selected.properties.iso3)?.places ?? []
+    const targets = selectedPlace ? [selectedPlace] : places
+    if (targets.length === 0) return
     let cancelled = false
-    fetch(`/api/place-media?prefix=${encodeURIComponent(prefix)}`)
-      .then((res) =>
-        res.ok && res.headers.get('content-type')?.includes('application/json') ? res.json() : null
-      )
-      .then((data) => {
-        if (!cancelled && data?.media) setPlaceMedia(data.media)
-      })
-      .catch(() => {})
+    const loadPrefix = (prefix: string): Promise<MediaItem[]> => {
+      const cached = mediaCacheRef.current.get(prefix)
+      if (cached) return Promise.resolve(cached)
+      return fetch(`/api/place-media?prefix=${encodeURIComponent(prefix)}`)
+        .then((res) =>
+          res.ok && res.headers.get('content-type')?.includes('application/json')
+            ? res.json()
+            : null
+        )
+        .then((data) => {
+          const items = (data?.media ?? []) as MediaItem[]
+          if (data) mediaCacheRef.current.set(prefix, items)
+          return items
+        })
+        .catch(() => [] as MediaItem[])
+    }
+    Promise.all(
+      targets.map((p) => loadPrefix(mediaPrefix(selected.properties.iso3, p.name)))
+    ).then((lists) => {
+      if (!cancelled) setPlaceMedia(lists.flat())
+    })
     return () => {
       cancelled = true
     }
-  }, [selectedPlace, selected])
+  }, [selectedPlace, selected, visitedByCode])
+
+  // Background preloading: as soon as the media list is in, fetch the
+  // gallery's images one by one (sequentially, so the visible first photo
+  // keeps bandwidth priority). Preloaded URLs are marked loaded so stepping
+  // through the slideshow is instant, without skeleton flashes.
+  useEffect(() => {
+    if (!placeMedia || placeMedia.length === 0) return
+    let cancelled = false
+    const queue = placeMedia.filter((m) => !isVideo(m.pathname)).map((m) => m.url)
+    const preload = (i: number) => {
+      if (cancelled || i >= queue.length) return
+      const url = queue[i]
+      const img = new Image()
+      img.onload = () => {
+        if (cancelled) return
+        setMediaLoaded((loaded) => (loaded[url] ? loaded : { ...loaded, [url]: true }))
+        preload(i + 1)
+      }
+      img.onerror = () => preload(i + 1)
+      img.src = url
+    }
+    preload(0)
+    return () => {
+      cancelled = true
+    }
+  }, [placeMedia])
 
   const panelPlaces = panelCountry
     ? visitedByCode.get(panelCountry.properties.iso3)?.places ?? []
     : []
+  const cardTheme = panelCountry ? COUNTRY_THEMES[panelCountry.properties.iso3] : undefined
+  const placeText = selectedPlace ? localText(selectedPlace) : undefined
+  const countryText = panelCountry
+    ? localText(visitedByCode.get(panelCountry.properties.iso3))
+    : undefined
+  // shown fading out under the photo in the collapsed mobile sheet,
+  // hinting that swiping up reveals the rest
+  const teaserText = placeText ?? (selectedPlace ? undefined : countryText)
+
+  // Hero stats: countries visited, continents, share of the world
+  const stats = useMemo(() => {
+    if (countries.length === 0) return null
+    const visited = countries.filter((c) => visitedByCode.has(c.properties.iso3))
+    if (visited.length === 0) return null
+    return {
+      countries: visited.length,
+      continents: new Set(visited.map((c) => c.properties.continent)).size,
+      worldPct: Math.round((visited.length / countries.length) * 100),
+    }
+  }, [countries, visitedByCode])
 
   return (
-    <div className="h-dvh flex flex-col overflow-hidden relative z-10 bg-gradient-to-b from-purple-900 via-blue-900 to-black">
+    <div ref={pageRef} className="h-dvh flex flex-col overflow-hidden relative z-10 bg-gradient-to-b from-purple-900 via-blue-900 to-black">
       {/* Same space backdrop as the home page's About section */}
-      <SpaceBackground />
+      <SpaceBackground
+        moonCard={{ title: t('trips.moonTitle'), text: t('trips.moonText') }}
+        moonHidden={moonCovered}
+      />
       <NavBar />
 
-      {/* Hero Section */}
-      <div className="w-full pt-20 pb-4 header-gradient-trips relative overflow-hidden">
+      {/* Hero Section — compact; hidden on mobile where every pixel counts;
+          the stats hide behind the chart button */}
+      <div className="hidden md:block w-full pt-16 pb-1.5 header-gradient-trips relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
-            {t('trips.hero.title')}
-          </h1>
-          <p className="text-sm md:text-base text-gray-200 max-w-3xl mx-auto">
+          <h1 className="text-lg md:text-xl font-bold text-white">{t('trips.hero.title')}</h1>
+          <p className="text-xs md:text-sm text-gray-200 max-w-3xl mx-auto">
             {t('trips.hero.subtitle')}
           </p>
+          {stats && (
+            <>
+              <button
+                type="button"
+                aria-label={t('trips.statsToggle')}
+                title={t('trips.statsToggle')}
+                onClick={() => setStatsOpen((open) => !open)}
+                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
+                  statsOpen ? 'text-white' : 'text-gray-200 hover:text-white'
+                }`}
+              >
+                <BarChart3 className="h-5 w-5" />
+              </button>
+              {statsOpen && (
+                <div className="absolute right-4 top-full mt-2 z-30 inline-flex items-center gap-2 md:gap-3 rounded-full border border-white/20 bg-gray-900/90 px-4 md:px-5 py-1.5 text-sm text-gray-200 backdrop-blur-sm whitespace-nowrap">
+                  <span>
+                    <span className="font-bold text-white">{stats.countries}</span> {t('trips.stats.countries')}
+                  </span>
+                  <span className="opacity-50">·</span>
+                  <span>
+                    <span className="font-bold text-white">{stats.continents}</span> {t('trips.stats.continents')}
+                  </span>
+                  <span className="opacity-50">·</span>
+                  <span>
+                    <span className="font-bold text-white">{stats.worldPct}%</span> {t('trips.stats.world')}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
       {/* Globe Section — fills the remaining viewport height */}
-      <section className="flex-1 min-h-0 flex flex-col py-4">
+      <section className="flex-1 min-h-0 flex flex-col py-1.5">
         <div className="relative overflow-hidden flex-1 min-h-0">
+          {/* Loading veil — the scene stays hidden underneath until every
+              layer (countries, relief, clouds) has had time to build, then
+              the whole world fades in at once */}
+          {!sceneVisible && (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-on-dark pointer-events-none">
+              {t('trips.loading')}
+            </div>
+          )}
           <div
             ref={containerRef}
-            className={`relative w-full h-full cursor-grab active:cursor-grabbing transition-transform duration-700 ease-in-out ${
-              selected ? 'md:-translate-x-[20%]' : ''
+            className={`relative w-full h-full cursor-grab active:cursor-grabbing transition-opacity duration-700 ease-in-out ${
+              sceneVisible ? 'opacity-100' : 'opacity-0'
+            } ${
+              // on mobile the open card owns the screen — the globe can't be
+              // dragged/zoomed until it's closed (place flags stay tappable)
+              selected ? 'pointer-events-none md:pointer-events-auto' : ''
             }`}
           >
-            {countries.length === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center text-muted-on-dark">
-                {t('trips.loading')}
-              </div>
-            )}
+            {/* City hover tooltip, positioned imperatively next to the cursor */}
+            <div
+              ref={cityTipRef}
+              className="hidden absolute z-20 pointer-events-none whitespace-nowrap rounded-lg border border-gray-600 bg-gray-900/95 px-2.5 py-1.5 text-xs md:text-sm text-on-dark"
+            ></div>
             {countries.length > 0 && size.width > 0 && (
               <Globe
                 ref={globeRef}
@@ -1031,12 +1938,25 @@ export default function TripsPage() {
                 atmosphereAltitude={0.18}
                 polygonsData={polygonsData}
                 polygonCapColor={(d: object) => {
-                  const active = d === hovered || d === selected
-                  // Land must be opaque — translucent fills let the animated
-                  // water shimmer through the countries.
+                  // By code, not identity — the selected polygon object is
+                  // swapped for its detailed twin
+                  const isSel =
+                    selected?.properties.iso3 === (d as CountryFeature).properties.iso3
+                  const active = d === hovered || isSel
+                  // While a country is selected, every other country dims so
+                  // the selection carries the focus (hover still lifts them
+                  // slightly so they read as clickable). Land must stay
+                  // opaque — translucent fills let the water shimmer through.
+                  const dimmed = selected && !isSel
+                  // Unvisited countries don't react to hover — they can't be
+                  // opened, so they shouldn't look clickable
                   return isVisited(d)
-                    ? active ? '#bef264' : '#a3e635'
-                    : active ? '#1f7a3f' : '#14532d'
+                    ? dimmed
+                      ? active ? '#7d9a28' : '#5f7a1e'
+                      : active ? '#bef264' : '#a3e635'
+                    : dimmed
+                      ? '#0c3018'
+                      : '#14532d'
                 }}
                 polygonSideColor={() => 'rgba(0,0,0,0.25)'}
                 polygonStrokeColor={() => '#161b22'}
@@ -1049,6 +1969,10 @@ export default function TripsPage() {
                 pathPointAlt={RIVER_ALTITUDE}
                 pathColor={() => '#4596cf'}
                 pathTransitionDuration={0}
+                // Unvisited countries can't be opened — no pointer cursor
+                showPointerCursor={(objType: string, objData: object) =>
+                  objType !== 'polygon' || isVisited(objData)
+                }
                 // Rivers are decoration — never let them swallow country
                 // hover/clicks (line raycast hits have a generous threshold)
                 pointerEventsFilter={(obj: THREE.Object3D) => {
@@ -1072,6 +1996,7 @@ export default function TripsPage() {
                 onZoom={(pov: { altitude: number }) => {
                   altitudeRef.current = pov.altitude
                   setAltBucket(Math.round(Math.log2(Math.max(pov.altitude, 0.01)) * 4))
+                  updateMoonCovered()
                 }}
                 onPolygonHover={(d: object | null) => setHovered(d as CountryFeature | null)}
                 onPolygonClick={handleCountryClick}
@@ -1199,25 +2124,150 @@ export default function TripsPage() {
                   satBeaconRef.current = beacon
                   sky.add(sat)
                   scene.add(sky)
+                  // World landmarks, planted upright at their real spots
+                  const lmPrev = scene.getObjectByName('landmarks')
+                  if (lmPrev) scene.remove(lmPrev)
+                  const landmarks = new THREE.Group()
+                  landmarks.name = 'landmarks'
+                  for (const lm of LANDMARKS) {
+                    const obj = lm.build()
+                    obj.traverse((o) => {
+                      o.raycast = () => {} // hover uses area math, not raycasts
+                    })
+                    const up = latLngToVec3(lm.lat, lm.lng)
+                    const east = new THREE.Vector3()
+                      .crossVectors(new THREE.Vector3(0, 1, 0), up)
+                      .normalize()
+                    const north = new THREE.Vector3().crossVectors(up, east)
+                    obj.quaternion.setFromRotationMatrix(
+                      new THREE.Matrix4().makeBasis(east, up, north.clone().negate())
+                    )
+                    obj.position.copy(up).multiplyScalar(globeR * (1 + BASE_POLY_ALTITUDE))
+                    landmarks.add(obj)
+                  }
+                  scene.add(landmarks)
+                  setGlobeReady(true)
                   globe.pointOfView(DEFAULT_POV, 0)
+                  updateMoonCovered()
+                  // reveal once the polygons have tessellated and the relief
+                  // and cloud textures have most likely arrived
+                  window.setTimeout(() => setSceneVisible(true), 600)
                 }}
               />
             )}
 
           </div>
 
-          {/* Country info panel — slides in from the right when a country is selected */}
-          <div className="absolute inset-x-4 bottom-4 md:inset-x-auto md:bottom-auto md:right-6 lg:right-10 md:top-1/2 md:-translate-y-1/2 md:w-[45%] md:h-[85%] pointer-events-none">
+          {/* Country info panel — on mobile it fills the bottom half (the
+              globe shifts the selection into the top half); on desktop it
+              fills the full right side, edge to edge */}
+          <div
+            ref={sheetRef}
+            className={`absolute inset-x-0 bottom-0 ${
+              sheetExpanded ? 'h-[88%]' : 'h-2/3'
+            } transition-[height] duration-500 ease-in-out md:transition-none md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30`}
+          >
             <div
               data-testid="country-card"
-              className={`md:h-full flex flex-col bg-navbar border border-accent rounded-2xl p-6 md:p-8 lg:p-10 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
+              className={`relative h-full flex flex-col bg-navbar border-0 border-t md:border-t-0 md:border-l ${
+                cardTheme?.border ?? 'border-accent'
+              } rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
                 selected
                   ? 'opacity-100 translate-y-0 md:translate-x-0 pointer-events-auto'
-                  : 'opacity-0 translate-y-6 md:translate-y-0 md:translate-x-[120%]'
+                  : 'opacity-0 translate-y-full md:translate-y-0 md:translate-x-[120%]'
               }`}
             >
               {panelCountry && (
                 <>
+                  {/* Mobile sheet handle: swipe up/down or tap to toggle the
+                      expanded state that reveals the texts */}
+                  <div
+                    className="md:hidden -mt-2 mb-1 flex justify-center py-2 touch-none"
+                    onTouchStart={(e) => {
+                      const sheet = sheetRef.current
+                      if (!sheet || window.innerWidth >= 768) return
+                      sheetDragRef.current = {
+                        startY: e.touches[0].clientY,
+                        startH: sheet.offsetHeight,
+                        parentH: sheet.parentElement?.clientHeight ?? 0,
+                        moved: false,
+                      }
+                      sheet.style.transition = 'none' // follow the finger 1:1
+                    }}
+                    onTouchMove={(e) => {
+                      const drag = sheetDragRef.current
+                      const sheet = sheetRef.current
+                      if (!drag || !sheet || drag.parentH === 0) return
+                      const dy = e.touches[0].clientY - drag.startY
+                      if (Math.abs(dy) > 8) drag.moved = true
+                      const height = Math.min(
+                        drag.parentH * 0.92,
+                        Math.max(drag.parentH * 0.3, drag.startH - dy)
+                      )
+                      sheet.style.height = `${height}px`
+                    }}
+                    onTouchEnd={() => {
+                      const drag = sheetDragRef.current
+                      const sheet = sheetRef.current
+                      sheetDragRef.current = null
+                      if (!drag || !sheet) return
+                      sheetMovedRef.current = drag.moved
+                      sheet.style.transition = '' // settle animated
+                      if (drag.moved) {
+                        setSheetExpanded(sheet.offsetHeight / Math.max(1, drag.parentH) > 0.77)
+                      }
+                      // release the inline height after the class target has
+                      // updated, so the settle animates from where the finger
+                      // let go instead of jumping
+                      requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                          if (sheetRef.current) sheetRef.current.style.height = ''
+                        })
+                      })
+                    }}
+                    onClick={() => {
+                      if (sheetMovedRef.current) {
+                        sheetMovedRef.current = false
+                        return
+                      }
+                      setSheetExpanded((open) => !open)
+                    }}
+                  >
+                    <div className="h-1.5 w-12 rounded-full bg-gray-500/70" />
+                  </div>
+                  {/* Country theme decoration: wash, top strip, watermark —
+                      behind the content (the card's backdrop-blur creates the
+                      stacking context that makes -z-10 sit above its bg) */}
+                  {cardTheme && (
+                    <div className="absolute inset-0 -z-10 overflow-hidden rounded-t-2xl md:rounded-none pointer-events-none">
+                      <div className={`absolute inset-0 ${cardTheme.tint}`} />
+                      <div className={`absolute top-0 inset-x-0 ${cardTheme.strip}`} />
+                      {cardTheme.watermark && (
+                        <span
+                          className={`absolute -right-4 -top-2 text-[9rem] leading-none opacity-[0.08] select-none ${
+                            cardTheme.watermarkClass ?? ''
+                          }`}
+                        >
+                          {cardTheme.watermark}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {cardTheme?.extras === 'cn' && (
+                    <>
+                      <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern w-8" style={{ top: '0.6rem', left: '9%' }} />
+                      <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern w-6" style={{ top: '0.6rem', left: '17%', animationDelay: '-2.2s' }} />
+                      <img src="/frames/cn-knot.svg" alt="" className="cn-knot w-5" style={{ top: '0.6rem', right: '22%', animationDelay: '-1.1s' }} />
+                      <span className="cn-seal cn-calligraphy hidden md:block">米兰</span>
+                    </>
+                  )}
+                  {cardTheme?.extras === 'br' && (
+                    <>
+                      <img src="/frames/br-garland.svg" alt="" className="br-garland" style={{ top: '0.5rem', left: '2%', width: '23%' }} />
+                      <img src="/frames/br-garland.svg" alt="" className="br-garland" style={{ top: '0.5rem', right: '11%', width: '18%' }} />
+                      <img src="/frames/br-stamp.svg" alt="" className="br-stamp hidden md:block" />
+                    </>
+                  )}
                   <div className="flex items-center gap-2 md:gap-3">
                     {activeCountries.length > 1 && (
                       <button
@@ -1231,8 +2281,30 @@ export default function TripsPage() {
                       </button>
                     )}
                     <div className="flex items-center justify-center gap-3 md:gap-4 flex-1 min-w-0">
-                      <span className="text-4xl md:text-5xl leading-none">{flagEmoji(panelCountry.properties.iso2)}</span>
+                      {/^[A-Za-z]{2}$/.test(panelCountry.properties.iso2) && (
+                        <span
+                          className={`fi fi-${panelCountry.properties.iso2.toLowerCase()} text-3xl md:text-4xl rounded shadow-md shrink-0`}
+                        />
+                      )}
                       <h3 className="text-2xl md:text-4xl font-bold text-on-dark truncate">{panelCountry.properties.name}</h3>
+                      {cardTheme?.nativeLabels?.[panelCountry.properties.name] && (
+                        <span
+                          className={`text-2xl md:text-4xl leading-none shrink-0 opacity-90 ${cardTheme.badge} ${cardTheme.nativeClass ?? ''}`}
+                        >
+                          {cardTheme.nativeLabels[panelCountry.properties.name]}
+                        </span>
+                      )}
+                      {visitedByCode.has(panelCountry.properties.iso3) && (
+                        <span className="relative group shrink-0">
+                          <BadgeCheck
+                            className={`h-6 w-6 md:h-8 md:w-8 ${cardTheme?.badge ?? 'text-accent'}`}
+                            aria-label={t('trips.visitedBadge')}
+                          />
+                          <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 px-2.5 py-1 rounded-md bg-gray-900/95 border border-gray-600 text-xs md:text-sm font-medium text-on-dark whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            {t('trips.visitedBadge')}!
+                          </span>
+                        </span>
+                      )}
                     </div>
                     {activeCountries.length > 1 && (
                       <button
@@ -1255,40 +2327,43 @@ export default function TripsPage() {
                     </button>
                   </div>
 
-                  {visitedByCode.has(panelCountry.properties.iso3) ? (
-                    <div className="mt-3 md:mt-5 self-start inline-flex items-center gap-2 bg-chip border border-accent rounded-full px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base text-accent">
-                      ✓ {visitedByCode.get(panelCountry.properties.iso3)?.note ?? t('trips.visitedBadge')}
-                    </div>
-                  ) : (
-                    <div className="mt-3 md:mt-5 text-sm md:text-base text-muted-on-dark">{t('trips.notVisited')}</div>
+                  {!visitedByCode.has(panelCountry.properties.iso3) && (
+                    <div className="mt-2 text-sm md:text-base text-muted-on-dark">{t('trips.notVisited')}</div>
                   )}
 
-                  {visitedByCode.get(panelCountry.properties.iso3)?.description && (
-                    <p className="mt-5 md:mt-8 text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line border-t border-gray-700 pt-4 md:pt-6">
-                      {visitedByCode.get(panelCountry.properties.iso3)?.description}
+                  {/* country text: not shown while a city is selected, and on
+                      mobile only in the expanded sheet */}
+                  {!selectedPlace && localText(visitedByCode.get(panelCountry.properties.iso3)) && (
+                    <p
+                      className={`${
+                        sheetExpanded ? 'block' : 'hidden md:block'
+                      } mt-3 md:mt-4 max-h-[30%] md:max-h-none overflow-y-auto text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line border-t border-gray-700 pt-3 md:pt-4`}
+                    >
+                      {localText(visitedByCode.get(panelCountry.properties.iso3))}
                     </p>
                   )}
 
                   {panelPlaces.length > 0 && (
-                    <div className="mt-5 md:mt-8">
+                    <div className="mt-3 md:mt-4">
                       <h4 className="text-sm md:text-base font-semibold text-on-dark mb-2 md:mb-3">
                         {t('trips.placesTitle')}
                       </h4>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-nowrap overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0 gap-2">
                         {panelPlaces.map((place) => (
                           <button
                             key={place.name}
                             type="button"
                             onClick={() => focusPlace(place)}
                             title={isHomePlace(place.name) ? t('trips.homeHint') : undefined}
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base border transition-colors ${
+                            className={`inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-full px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base border transition-colors ${
                               isHomePlace(place.name)
                                 ? selectedPlace === place
                                   ? 'bg-amber-400/15 border-amber-400 text-amber-300'
                                   : 'border-amber-500/60 text-amber-300 hover:border-amber-300 hover:text-amber-200'
                                 : selectedPlace === place
-                                  ? 'bg-chip border-accent text-accent'
-                                  : 'border-gray-600 text-on-dark hover:border-accent hover:text-accent'
+                                  ? cardTheme?.chipActive ?? 'bg-chip border-accent text-accent'
+                                  : cardTheme?.chipIdle ??
+                                    'border-gray-600 text-on-dark hover:border-accent hover:text-accent'
                             }`}
                           >
                             {isHomePlace(place.name) ? (
@@ -1297,55 +2372,175 @@ export default function TripsPage() {
                               <Flag className="h-3.5 w-3.5 md:h-4 md:w-4" />
                             )}
                             {place.name}
+                            {cardTheme?.nativeLabels?.[place.name] && (
+                              <span className={`opacity-90 ${cardTheme.nativeClass ?? ''}`}>
+                                {cardTheme.nativeLabels[place.name]}
+                              </span>
+                            )}
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {selectedPlace?.description && (
-                    <p className="mt-4 md:mt-6 text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line">
-                      {selectedPlace.description}
-                    </p>
-                  )}
-
-                  {/* Photos/videos of the selected place */}
-                  {selectedPlace && placeMedia && placeMedia.length > 0 ? (
-                    <div className="mt-4 md:mt-6 md:flex-1 md:min-h-0 overflow-y-auto max-h-52 md:max-h-none">
-                      <div className="grid grid-cols-2 gap-2 content-start">
-                        {placeMedia.map((item) =>
-                          isVideo(item.pathname) ? (
+                  {/* Photo slideshow (portrait 3:4, one at a time,
+                      letterboxed) with the place's story next to it. With no
+                      place selected it shows every photo from the country's
+                      places combined. While the media list or the current
+                      image is still loading, its shape pulses as a skeleton. */}
+                  {(selectedPlace || panelPlaces.length > 0) &&
+                  (placeMedia === null || placeMedia.length > 0 || placeText) ? (
+                    <div className="mt-3 md:mt-4 flex-1 min-h-0 flex flex-col md:flex-row items-center md:items-stretch gap-2 md:gap-4">
+                      {placeMedia === null ? (
+                        <div
+                          className={`${
+                            sheetExpanded
+                              ? placeText
+                                ? 'h-[58%]'
+                                : 'h-full'
+                              : teaserText
+                                ? 'h-[72%]'
+                                : 'h-full'
+                          } md:h-full aspect-[3/4] max-w-full shrink-0 rounded-lg media-skeleton flex items-center justify-center`}
+                        >
+                          <ImageIcon className="h-9 w-9 text-white/20" />
+                        </div>
+                      ) : placeMedia.length > 0 ? (
+                      <div
+                        className={`${
+                          sheetExpanded
+                            ? placeText
+                              ? 'h-[58%]'
+                              : 'h-full'
+                            : teaserText
+                              ? 'h-[72%]'
+                              : 'h-full'
+                        } md:h-full aspect-[3/4] max-w-full shrink-0 ${cardTheme?.frame ?? ''}`}
+                      >
+                      <div className="relative w-full h-full rounded-lg overflow-hidden bg-black/50">
+                        {(() => {
+                          const item = placeMedia[Math.min(mediaIndex, placeMedia.length - 1)]
+                          return isVideo(item.pathname) ? (
                             <video
                               key={item.url}
                               src={item.url}
                               controls
                               preload="metadata"
-                              className="w-full rounded-lg bg-black/40"
+                              className="absolute inset-0 w-full h-full object-contain"
                             />
                           ) : (
-                            <img
-                              key={item.url}
-                              src={item.url}
-                              alt={selectedPlace.name}
-                              loading="lazy"
-                              className="w-full rounded-lg object-cover aspect-video"
-                            />
+                            <>
+                              <img
+                                key={item.url}
+                                src={item.url}
+                                alt={selectedPlace?.name ?? panelCountry.properties.name}
+                                onClick={() => setMediaFullscreen(true)}
+                                onLoad={() =>
+                                  setMediaLoaded((loaded) => ({ ...loaded, [item.url]: true }))
+                                }
+                                className={`absolute inset-0 w-full h-full object-contain cursor-zoom-in transition-opacity duration-300 ${
+                                  mediaLoaded[item.url] ? 'opacity-100' : 'opacity-0'
+                                }`}
+                              />
+                              {!mediaLoaded[item.url] && (
+                                <div className="absolute inset-0 media-skeleton flex items-center justify-center pointer-events-none">
+                                  <ImageIcon className="h-9 w-9 text-white/20" />
+                                </div>
+                              )}
+                            </>
                           )
+                        })()}
+                        {/* desktop only — on mobile, tapping the photo's
+                            center opens fullscreen */}
+                        <button
+                          type="button"
+                          aria-label={t('trips.mediaFullscreen')}
+                          title={t('trips.mediaFullscreen')}
+                          onClick={() => setMediaFullscreen(true)}
+                          className="hidden md:block absolute right-1.5 top-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white p-1.5 transition-colors"
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </button>
+                        {placeMedia.length > 1 && (
+                          <>
+                            {/* Instagram-style progress bars (full width on
+                                mobile — no fullscreen button there) */}
+                            <div className="absolute top-2 left-2 right-2 md:right-10 flex gap-1 pointer-events-none">
+                              {placeMedia.map((m, i) => (
+                                <div
+                                  key={m.url}
+                                  className={`h-1 flex-1 rounded-full transition-colors ${
+                                    i === Math.min(mediaIndex, placeMedia.length - 1)
+                                      ? 'bg-white/90'
+                                      : 'bg-white/30'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            {/* mobile: tap the photo's left/right side to flip */}
+                            <button
+                              type="button"
+                              aria-label={t('trips.mediaPrev')}
+                              onClick={() =>
+                                setMediaIndex((i) => (i - 1 + placeMedia.length) % placeMedia.length)
+                              }
+                              className="md:hidden absolute inset-y-0 left-0 w-2/5"
+                            />
+                            <button
+                              type="button"
+                              aria-label={t('trips.mediaNext')}
+                              onClick={() => setMediaIndex((i) => (i + 1) % placeMedia.length)}
+                              className="md:hidden absolute inset-y-0 right-0 w-2/5"
+                            />
+                            {/* desktop: arrows */}
+                            <button
+                              type="button"
+                              aria-label={t('trips.mediaPrev')}
+                              onClick={() =>
+                                setMediaIndex((i) => (i - 1 + placeMedia.length) % placeMedia.length)
+                              }
+                              className="hidden md:block absolute left-1.5 top-1/2 -translate-y-1/2 rounded-full bg-black/50 hover:bg-black/75 text-white p-1.5 transition-colors"
+                            >
+                              <ChevronLeft className="h-5 w-5" />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={t('trips.mediaNext')}
+                              onClick={() => setMediaIndex((i) => (i + 1) % placeMedia.length)}
+                              className="hidden md:block absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-black/50 hover:bg-black/75 text-white p-1.5 transition-colors"
+                            >
+                              <ChevronRight className="h-5 w-5" />
+                            </button>
+                          </>
                         )}
                       </div>
+                      </div>
+                      ) : null}
+                      {/* collapsed mobile sheet: the first lines fade out
+                          under the photo — an invitation to swipe up */}
+                      {!sheetExpanded && teaserText && (
+                        <div
+                          onClick={() => setSheetExpanded(true)}
+                          className="md:hidden w-full flex-1 min-h-0 overflow-hidden sheet-teaser text-sm text-on-dark leading-relaxed whitespace-pre-line"
+                        >
+                          {teaserText}
+                        </div>
+                      )}
+                      {placeText && (
+                        <div
+                          className={`${
+                            sheetExpanded ? 'block' : 'hidden'
+                          } md:block w-full md:w-auto flex-1 min-w-0 min-h-0 max-h-full overflow-y-auto text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line`}
+                        >
+                          {placeText}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     /* Flexible space for future content */
                     <div className="hidden md:block flex-1" />
                   )}
 
-                  <button
-                    type="button"
-                    onClick={resetView}
-                    className="mt-5 md:mt-0 w-full border border-accent text-accent hover:bg-chip rounded-lg py-2 md:py-3 text-sm md:text-base font-medium transition-colors"
-                  >
-                    {t('trips.resetView')}
-                  </button>
                 </>
               )}
             </div>
@@ -1353,6 +2548,119 @@ export default function TripsPage() {
         </div>
 
       </section>
+
+      {/* Fullscreen media lightbox */}
+      {mediaFullscreen &&
+        placeMedia &&
+        placeMedia.length > 0 &&
+        (() => {
+          const item = placeMedia[Math.min(mediaIndex, placeMedia.length - 1)]
+          return (
+            <div
+              className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+              onClick={() => setMediaFullscreen(false)}
+              onTouchStart={(e) => {
+                lightboxTouchY.current = e.touches[0].clientY
+              }}
+              onTouchEnd={(e) => {
+                // swipe up or down closes the lightbox (mobile)
+                const start = lightboxTouchY.current
+                lightboxTouchY.current = null
+                if (start != null && Math.abs(e.changedTouches[0].clientY - start) > 70) {
+                  setMediaFullscreen(false)
+                }
+              }}
+            >
+              {isVideo(item.pathname) ? (
+                <video
+                  key={item.url}
+                  src={item.url}
+                  controls
+                  autoPlay
+                  onClick={(e) => e.stopPropagation()}
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <img
+                  key={item.url}
+                  src={item.url}
+                  alt={selectedPlace?.name ?? panelCountry?.properties.name ?? ''}
+                  onClick={(e) => e.stopPropagation()}
+                  className="max-w-full max-h-full object-contain"
+                />
+              )}
+              {/* desktop only — on mobile a swipe closes the lightbox */}
+              <button
+                type="button"
+                aria-label={t('trips.mediaClose')}
+                onClick={() => setMediaFullscreen(false)}
+                className="hidden md:block absolute right-4 top-4 rounded-full bg-black/60 hover:bg-black/80 text-white p-2 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              {placeMedia.length > 1 && (
+                <>
+                  {/* Instagram-style progress bars (full width on mobile —
+                      no close button there) */}
+                  <div className="absolute top-4 left-4 right-4 md:right-16 flex gap-1 pointer-events-none">
+                    {placeMedia.map((m, i) => (
+                      <div
+                        key={m.url}
+                        className={`h-1 flex-1 rounded-full transition-colors ${
+                          i === Math.min(mediaIndex, placeMedia.length - 1)
+                            ? 'bg-white/90'
+                            : 'bg-white/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {/* mobile: tap left/right side to flip */}
+                  <button
+                    type="button"
+                    aria-label={t('trips.mediaPrev')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMediaIndex((i) => (i - 1 + placeMedia.length) % placeMedia.length)
+                    }}
+                    className="md:hidden absolute inset-y-0 left-0 w-2/5"
+                  />
+                  <button
+                    type="button"
+                    aria-label={t('trips.mediaNext')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMediaIndex((i) => (i + 1) % placeMedia.length)
+                    }}
+                    className="md:hidden absolute inset-y-0 right-0 w-2/5"
+                  />
+                  {/* desktop: arrows */}
+                  <button
+                    type="button"
+                    aria-label={t('trips.mediaPrev')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMediaIndex((i) => (i - 1 + placeMedia.length) % placeMedia.length)
+                    }}
+                    className="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/60 hover:bg-black/80 text-white p-2 transition-colors"
+                  >
+                    <ChevronLeft className="h-7 w-7" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t('trips.mediaNext')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMediaIndex((i) => (i + 1) % placeMedia.length)
+                    }}
+                    className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/60 hover:bg-black/80 text-white p-2 transition-colors"
+                  >
+                    <ChevronRight className="h-7 w-7" />
+                  </button>
+                </>
+              )}
+            </div>
+          )
+        })()}
     </div>
   )
 }

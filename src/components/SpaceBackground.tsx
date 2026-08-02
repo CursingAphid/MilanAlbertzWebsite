@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Star {
   id: number
@@ -12,11 +12,21 @@ interface Star {
   glow: boolean
 }
 
+interface SpaceBackgroundProps {
+  /** When set, the moon is clickable and toggles a small card with this text. */
+  moonCard?: { title: string; text: string }
+  /** Fades the moon out (e.g. while the globe covers its screen position). */
+  moonHidden?: boolean
+}
+
 // Space backdrop based on the home page's About section, but denser and
 // brighter: 450 twinkling stars, a few of them larger, glowing or subtly
-// tinted. Position inside a `relative` container, before the content.
-export default function SpaceBackground() {
+// tinted, plus a moon and the occasional shooting star. Position inside a
+// `relative` container, before the content.
+export default function SpaceBackground({ moonCard, moonHidden }: SpaceBackgroundProps) {
   const [stars, setStars] = useState<Star[]>([])
+  const [moonOpen, setMoonOpen] = useState(false)
+  const moonRef = useRef<HTMLDivElement | null>(null)
   const [meteor, setMeteor] = useState<{
     id: number
     top: number
@@ -71,15 +81,47 @@ export default function SpaceBackground() {
     }
   }, [])
 
+  // The moon card closes when clicking anywhere else
+  useEffect(() => {
+    if (!moonOpen) return
+    const close = (e: PointerEvent) => {
+      if (moonRef.current && !moonRef.current.contains(e.target as Node)) setMoonOpen(false)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [moonOpen])
+
+  // ...and when the moon slips behind the globe
+  useEffect(() => {
+    if (moonHidden) setMoonOpen(false)
+  }, [moonHidden])
+
   return (
     <div className="absolute inset-0 bg-black">
       {/* Moon: CSS-shaded disc with craters and a soft halo */}
-      <div className="space-moon" aria-hidden="true">
-        <div className="space-moon-crater" style={{ top: '22%', left: '28%', width: '18%', height: '18%' }}></div>
-        <div className="space-moon-crater" style={{ top: '55%', left: '18%', width: '12%', height: '12%' }}></div>
-        <div className="space-moon-crater" style={{ top: '40%', left: '58%', width: '22%', height: '22%' }}></div>
-        <div className="space-moon-crater" style={{ top: '68%', left: '52%', width: '10%', height: '10%' }}></div>
-        <div className="space-moon-crater" style={{ top: '15%', left: '62%', width: '9%', height: '9%' }}></div>
+      <div
+        ref={moonRef}
+        className={`space-moon-anchor ${moonHidden ? 'space-moon-anchor--hidden' : ''}`}
+      >
+        <button
+          type="button"
+          className={`space-moon ${moonCard ? 'space-moon--clickable' : ''}`}
+          aria-label={moonCard?.title}
+          disabled={!moonCard}
+          onClick={() => moonCard && setMoonOpen((open) => !open)}
+        >
+          <div className="space-moon-crater" style={{ top: '22%', left: '28%', width: '18%', height: '18%' }}></div>
+          <div className="space-moon-crater" style={{ top: '55%', left: '18%', width: '12%', height: '12%' }}></div>
+          <div className="space-moon-crater" style={{ top: '40%', left: '58%', width: '22%', height: '22%' }}></div>
+          <div className="space-moon-crater" style={{ top: '68%', left: '52%', width: '10%', height: '10%' }}></div>
+          <div className="space-moon-crater" style={{ top: '15%', left: '62%', width: '9%', height: '9%' }}></div>
+        </button>
+        {moonCard && moonOpen && (
+          <div className="space-moon-card bg-navbar border border-accent rounded-xl shadow-2xl p-4 text-left">
+            <div className="text-on-dark font-semibold text-sm mb-1">🌕 {moonCard.title}</div>
+            <div className="text-muted-on-dark text-sm">{moonCard.text}</div>
+          </div>
+        )}
       </div>
       {meteor && (
         <div

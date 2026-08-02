@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144">
+  <!-- Chinese lattice frame for border-image (slice 48): double gold lines
+       with interlocking square knots and 45° chamfers at the corners -->
+  <g fill="none" stroke="#e6bf5f" stroke-width="3">
+    <!-- outer line -->
+    <rect x="10" y="10" width="124" height="124"/>
+    <!-- inner line, edge segments (uniform within the stretched slices) -->
+    <path d="M48 26h48M26 48v48M118 48v48M48 118h48"/>
+    <!-- corner chamfers connecting the inner lines -->
+    <path d="M26 48L48 26M96 26L118 48M118 96L96 118M48 118L26 96"/>
+    <!-- interlocking corner knots -->
+    <rect x="4" y="4" width="24" height="24"/>
+    <rect x="16" y="16" width="24" height="24"/>
+    <rect x="116" y="4" width="24" height="24"/>
+    <rect x="104" y="16" width="24" height="24"/>
+    <rect x="4" y="116" width="24" height="24"/>
+    <rect x="16" y="104" width="24" height="24"/>
+    <rect x="116" y="116" width="24" height="24"/>
+    <rect x="104" y="104" width="24" height="24"/>
+  </g>
+</svg>

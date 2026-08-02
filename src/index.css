@@ -829,18 +829,102 @@
   }
 }
 
-/* Moon in the space backdrop: shaded disc, soft halo, faint craters */
-.space-moon {
+/* Collapsed-sheet text teaser: the first lines dissolve toward the bottom,
+   signalling there is more to read when swiping up */
+.sheet-teaser {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 25%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 25%, transparent 92%);
+}
+
+/* Skeleton for media that is still loading: dim base with a light band
+   sweeping across, so it clearly reads as "loading" rather than empty */
+.media-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.media-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  animation: media-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes media-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* While a city tooltip is showing, hide the globe's own country tooltip —
+   the two would overlap right next to the cursor */
+.city-hovered .float-tooltip-kap {
+  visibility: hidden;
+}
+
+/* Moon in the space backdrop: shaded disc, soft halo, faint craters.
+   The anchor floats above the globe canvas so the moon can be clicked;
+   the country panel sits above it in turn (z-30). */
+.space-moon-anchor {
   position: absolute;
   top: 34%;
   right: 9%;
+  z-index: 20;
+  transition: opacity 0.4s ease;
+}
+
+/* The globe's disc is covering the moon — it "slips behind" the planet */
+.space-moon-anchor--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.space-moon {
+  position: relative;
+  display: block;
   width: 92px;
   height: 92px;
+  padding: 0;
+  border: none;
   border-radius: 50%;
   background: radial-gradient(circle at 32% 30%, #f0ede5 0%, #d6d3ca 45%, #b9b5aa 75%, #9c988d 100%);
   box-shadow:
     0 0 34px 10px rgba(214, 222, 235, 0.14),
     inset -14px -10px 28px rgba(35, 40, 55, 0.4);
+}
+
+.space-moon--clickable {
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.space-moon--clickable:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 44px 14px rgba(214, 222, 235, 0.24),
+    inset -14px -10px 28px rgba(35, 40, 55, 0.4);
+}
+
+.space-moon-card {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 13rem;
+  animation: moon-card-pop 0.2s ease-out both;
+}
+
+@keyframes moon-card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .space-moon-crater {
@@ -890,6 +974,162 @@
   50% {
     opacity: var(--star-max, 1);
   }
+}
+
+/* Chinese picture frame around the card slideshow (not the fullscreen
+   lightbox): gold lattice with interlocking corner knots on red lacquer.
+   The lattice is an SVG applied as a 9-slice border-image, so the corner
+   knots stay intact while the lines stretch with the frame. */
+.media-frame--cn {
+  padding: 3px;
+  border: 15px solid transparent;
+  border-image: url('/frames/cn-frame.svg') 48 / 15px stretch;
+  background: linear-gradient(135deg, #a01a0f 0%, #c8281a 45%, #7d1108 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* square media corners suit the lattice better than the default rounding */
+.media-frame--cn > div {
+  border-radius: 2px;
+}
+
+/* --- Chinese card extras --- */
+
+/* calligraphic system fonts — no webfont download needed */
+.cn-calligraphy {
+  font-family: 'Kaiti SC', 'STKaiti', 'KaiTi', 'BiauKai', 'Noto Serif SC', serif;
+}
+
+/* meander (回纹) strip along the card's top edge */
+.cn-meander-strip {
+  background: url('/frames/cn-meander.svg') repeat-x left top / auto 100%;
+}
+
+/* lantern and knot hang from the strip and sway gently */
+.cn-lantern,
+.cn-knot {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: 50% 0;
+  animation: cn-sway 4.5s ease-in-out infinite;
+}
+
+@keyframes cn-sway {
+  0%,
+  100% {
+    transform: rotate(3.5deg);
+  }
+  50% {
+    transform: rotate(-3.5deg);
+  }
+}
+
+/* red artist's seal (印章), stamped in the card's corner */
+.cn-seal {
+  position: absolute;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  pointer-events: none;
+  padding: 8px 5px;
+  background: #c02419;
+  color: #ffe9d9;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 1.3rem;
+  line-height: 1;
+  letter-spacing: 0.25em;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 233, 217, 0.85),
+    0 2px 8px rgba(0, 0, 0, 0.45);
+  transform: rotate(-6deg);
+  opacity: 0.95;
+}
+
+/* --- Brazilian card extras --- */
+
+/* festa junina pennant garlands hanging from the strip */
+.br-garland {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style entry stamp */
+.br-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+
+/* flag-colored photo frame: yellow outer, blue inner, losango corners */
+.media-frame--br {
+  padding: 3px;
+  border: 15px solid transparent;
+  border-image: url('/frames/br-frame.svg') 48 / 15px stretch;
+  background: linear-gradient(135deg, #0e4d26 0%, #1b7a3f 45%, #0a3a1c 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.media-frame--br > div {
+  border-radius: 2px;
+}
+
+/* Country-themed place flags (the home flag keeps its golden look).
+   China: red banner, gold pole and lettering */
+.place-flag--cn:not(.place-flag--home) .place-flag-pole {
+  background: linear-gradient(to bottom, #ffe9a8, #caa64a);
+}
+
+.place-flag--cn:not(.place-flag--home) .place-flag-banner {
+  color: #ffd75e;
+  background: linear-gradient(135deg, #e03b2f 0%, #c02419 45%, #8f150c 100%);
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 6px rgba(224, 59, 47, 0.4));
+}
+
+.place-flag--cn:not(.place-flag--home) .place-flag-ground {
+  background: rgba(224, 59, 47, 0.55);
+}
+
+.place-flag--cn:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #b01f13;
+  background: linear-gradient(135deg, #ffe9a8 0%, #ffd75e 100%);
+}
+
+.place-flag--cn:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 215, 94, 0.75);
+}
+
+/* Netherlands: orange banner */
+.place-flag--nl:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #ff8a3d 0%, #f26a1b 45%, #c94e0a 100%);
+}
+
+.place-flag--nl:not(.place-flag--home) .place-flag-ground {
+  background: rgba(242, 106, 27, 0.55);
+}
+
+.place-flag--nl:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #c2570f;
+  background: linear-gradient(135deg, #ffffff 0%, #ffe9d6 100%);
+}
+
+/* Brazil: green banner, yellow lettering */
+.place-flag--br:not(.place-flag--home) .place-flag-banner {
+  color: #fde047;
+  background: linear-gradient(135deg, #22b357 0%, #16a34a 45%, #0f7a37 100%);
+}
+
+.place-flag--br:not(.place-flag--home) .place-flag-ground {
+  background: rgba(34, 179, 87, 0.55);
+}
+
+.place-flag--br:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #15803d;
+  background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%);
 }
 
 @keyframes flag-plant {

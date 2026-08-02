@@ -18,6 +18,18 @@
     "placesTitle": "Places I visited",
     "clusterHint": "Several places here — click to zoom in",
     "homeHint": "Home sweet home — this is where I live",
+    "moonTitle": "The Moon",
+    "moonText": "I have not been here (yet!)",
+    "stats": {
+      "countries": "countries",
+      "continents": "continents",
+      "world": "of the world"
+    },
+    "statsToggle": "Travel stats",
+    "mediaPrev": "Previous photo",
+    "mediaNext": "Next photo",
+    "mediaFullscreen": "View full screen",
+    "mediaClose": "Close",
     "prevCountry": "Previous country",
     "nextCountry": "Next country"
   },

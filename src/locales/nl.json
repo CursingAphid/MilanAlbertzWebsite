@@ -18,6 +18,18 @@
     "placesTitle": "Plaatsen die ik heb bezocht",
     "clusterHint": "Meerdere plaatsen — klik om in te zoomen",
     "homeHint": "Thuis — hier woon ik",
+    "moonTitle": "De maan",
+    "moonText": "Hier ben ik (nog) niet geweest!",
+    "stats": {
+      "countries": "landen",
+      "continents": "continenten",
+      "world": "van de wereld"
+    },
+    "statsToggle": "Reisstatistieken",
+    "mediaPrev": "Vorige foto",
+    "mediaNext": "Volgende foto",
+    "mediaFullscreen": "Volledig scherm",
+    "mediaClose": "Sluiten",
     "prevCountry": "Vorig land",
     "nextCountry": "Volgend land"
   },

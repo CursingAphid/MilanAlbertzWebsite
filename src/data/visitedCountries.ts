@@ -14,6 +14,8 @@ export interface VisitedPlace {
   lng: number
   /** Free text shown in the country card when this place is selected. */
   description?: string
+  /** Dutch version of the text — shown when the site language is Dutch. */
+  descriptionNl?: string
 }
 
 export interface VisitedCountry {
@@ -21,6 +23,8 @@ export interface VisitedCountry {
   note?: string
   /** Free text shown in the country card — write whatever you like. */
   description?: string
+  /** Dutch version of the text — shown when the site language is Dutch. */
+  descriptionNl?: string
   places?: VisitedPlace[]
 }
 

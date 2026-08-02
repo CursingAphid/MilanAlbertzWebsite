@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 12">
+  <!-- repeating meander (回纹) tile for the card's top strip -->
+  <rect width="24" height="12" fill="#8f150c"/>
+  <path d="M4 10V2h16v8h-8V6h4" fill="none" stroke="#e6bf5f" stroke-width="1.7"/>
+</svg>

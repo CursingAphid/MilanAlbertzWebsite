@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48">
+  <!-- festa junina bandeirinhas: pennant garland on a drooping string -->
+  <path d="M0 6Q110 30 220 6" fill="none" stroke="#8a6a45" stroke-width="2"/>
+  <path d="M15 10.3h14l-7 16z" fill="#f5c518"/>
+  <path d="M48 15h14l-7 16z" fill="#2e9e4f"/>
+  <path d="M81 17.6h14l-7 16z" fill="#2b6cb0"/>
+  <path d="M103 18h14l-7 16z" fill="#d94a3d"/>
+  <path d="M125 17.6h14l-7 16z" fill="#2e9e4f"/>
+  <path d="M158 15h14l-7 16z" fill="#f5c518"/>
+  <path d="M191 10.3h14l-7 16z" fill="#2b6cb0"/>
+</svg>

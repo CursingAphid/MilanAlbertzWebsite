@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- round passport-style entry stamp -->
+  <defs>
+    <path id="topArc" d="M50 50m-25 0a25 25 0 1 1 50 0"/>
+    <path id="bottomArc" d="M50 50m-26 0a26 26 0 1 0 52 0"/>
+  </defs>
+  <g fill="none" stroke="#2e8b57">
+    <circle cx="50" cy="50" r="46" stroke-width="2.6"/>
+    <circle cx="50" cy="50" r="41.5" stroke-width="1.2"/>
+  </g>
+  <g fill="#2e8b57" font-family="Helvetica, Arial, sans-serif">
+    <text font-size="11.5" font-weight="bold" letter-spacing="2.5">
+      <textPath href="#topArc" startOffset="50%" text-anchor="middle">BRASIL</textPath>
+    </text>
+    <text font-size="8" letter-spacing="5">
+      <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">★ ★ ★</textPath>
+    </text>
+    <text x="50" y="53" font-size="9" font-weight="bold" letter-spacing="2.5" text-anchor="middle">ENTRADA</text>
+  </g>
+  <g stroke="#2e8b57" stroke-width="1.1">
+    <line x1="35" y1="42" x2="65" y2="42"/>
+    <line x1="35" y1="58" x2="65" y2="58"/>
+  </g>
+</svg>

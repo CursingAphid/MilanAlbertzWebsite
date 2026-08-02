@@ -6,6 +6,7 @@ import { visitedCountries as bundledCountries } from '../data/visitedCountries'
 import type { VisitedCountry, VisitedPlace } from '../data/visitedCountries'
 import { mediaPrefix, isVideo } from '../utils/placeMedia'
 import type { MediaItem } from '../utils/placeMedia'
+import 'flag-icons/css/flag-icons.min.css'
 
 type AuthState = 'checking' | 'loggedOut' | 'loggedIn'
 
@@ -14,11 +15,6 @@ interface GeoCountry {
   iso3: string
   iso2: string
 }
-
-const flagEmoji = (iso2: string) =>
-  /^[A-Z]{2}$/.test(iso2)
-    ? String.fromCodePoint(...[...iso2].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
-    : ''
 
 const inputCls =
   'rounded-lg bg-gray-800 border border-gray-600 text-on-dark px-3 py-2 text-sm focus:outline-none focus:border-accent'
@@ -194,7 +190,11 @@ export default function TripsAdminPage() {
   const refreshMedia = async (countryCode: string, placeName: string) => {
     const prefix = mediaPrefix(countryCode, placeName)
     try {
-      const res = await fetch(`/api/place-media?prefix=${encodeURIComponent(prefix)}`)
+      // cache-buster: the public API response is CDN-cached, but the admin
+      // must always see the store's current contents (e.g. after uploads)
+      const res = await fetch(
+        `/api/place-media?prefix=${encodeURIComponent(prefix)}&fresh=${Date.now()}`
+      )
       if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
         const payload = await res.json()
         setMedia((prev) => ({ ...prev, [prefix]: payload.media ?? [] }))
@@ -429,7 +429,9 @@ export default function TripsAdminPage() {
                         ) : (
                           <ChevronRight className="h-4 w-4 text-muted-on-dark shrink-0" />
                         )}
-                        <span className="text-xl leading-none">{flagEmoji(geoInfo?.iso2 ?? '')}</span>
+                        {/^[A-Za-z]{2}$/.test(geoInfo?.iso2 ?? '') && (
+                          <span className={`fi fi-${geoInfo!.iso2.toLowerCase()} text-lg rounded-sm shrink-0`} />
+                        )}
                         <span className="text-on-dark font-semibold truncate">
                           {geoInfo?.name ?? country.code}
                         </span>
@@ -464,13 +466,23 @@ export default function TripsAdminPage() {
                           </label>
                         </div>
                         <label className="block">
-                          <span className="text-xs text-muted-on-dark">Card text</span>
+                          <span className="text-xs text-muted-on-dark">Card text (English)</span>
                           <textarea
                             value={country.description ?? ''}
                             onChange={(e) => updateCountry(country.code, { description: e.target.value })}
                             rows={3}
                             className={`w-full mt-1 ${inputCls} leading-relaxed`}
                             placeholder="Free text shown on this country's card"
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="text-xs text-muted-on-dark">Card text (Dutch)</span>
+                          <textarea
+                            value={country.descriptionNl ?? ''}
+                            onChange={(e) => updateCountry(country.code, { descriptionNl: e.target.value })}
+                            rows={3}
+                            className={`w-full mt-1 ${inputCls} leading-relaxed`}
+                            placeholder="Dutch version — shown when the site is in Dutch (falls back to English)"
                           />
                         </label>
 
@@ -549,7 +561,14 @@ export default function TripsAdminPage() {
                                     onChange={(e) => updatePlace(country.code, index, { description: e.target.value })}
                                     rows={2}
                                     className={`w-full mt-2 ${inputCls} leading-relaxed`}
-                                    placeholder="Text shown when this place is selected (optional)"
+                                    placeholder="Text shown when this place is selected — English (optional)"
+                                  />
+                                  <textarea
+                                    value={place.descriptionNl ?? ''}
+                                    onChange={(e) => updatePlace(country.code, index, { descriptionNl: e.target.value })}
+                                    rows={2}
+                                    className={`w-full mt-2 ${inputCls} leading-relaxed`}
+                                    placeholder="Dutch version (optional — falls back to English)"
                                   />
                                   {items.length > 0 && (
                                     <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">

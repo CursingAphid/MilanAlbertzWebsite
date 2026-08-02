@@ -13,7 +13,11 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid prefix' })
       }
       const { blobs } = await list({ prefix, limit: 100 })
-      res.setHeader('Cache-Control', 'no-store')
+      // Blob list() calls count against the monthly "advanced operations"
+      // quota — let the CDN serve repeat views for 10 minutes (a day when
+      // stale) instead of hitting the store every time. The admin page
+      // busts this with a cache-buster param after uploads.
+      res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=86400')
       return res.status(200).json({
         media: blobs.map((b) => ({
           url: b.url,
