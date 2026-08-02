@@ -962,12 +962,15 @@ interface CountryTheme {
   extras?: string // key for bespoke decorations rendered in the card
   nativeLabels?: Record<string, string> // local-script names for country/places
   nativeClass?: string // styling for the native-name labels
+  bgArt?: string // decorative image rendered in the card's background layer
+  bgArtClass?: string // positioning/opacity class for bgArt
+  titleArt?: string // small emblem shown next to the country title
 }
 
 const COUNTRY_THEMES: Record<string, CountryTheme> = {
   CHN: {
     border: 'border-red-700/80',
-    tint: 'bg-gradient-to-b from-red-900/45 via-transparent to-red-950/40',
+    tint: 'bg-gradient-to-b from-red-800/60 via-red-950/30 to-red-950/55',
     strip: 'h-2.5 cn-meander-strip',
     watermark: '龍',
     watermarkClass: 'cn-calligraphy text-red-200',
@@ -987,17 +990,39 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
   },
   NLD: {
     border: 'border-orange-500/70',
-    tint: 'bg-gradient-to-b from-orange-900/30 via-transparent to-blue-950/30',
-    strip: 'h-1 bg-gradient-to-r from-red-500 via-white to-blue-600',
-    watermark: '🌷',
+    tint: 'bg-gradient-to-b from-orange-700/50 via-orange-900/20 to-blue-950/40',
+    strip: 'h-4 nl-skyline-strip',
     badge: 'text-orange-400',
     chipActive: 'bg-orange-500/15 border-orange-400 text-orange-300',
     chipIdle: 'border-gray-600 text-on-dark hover:border-orange-300 hover:text-orange-200',
     flagClass: 'place-flag--nl',
+    frame: 'media-frame--nl',
+    extras: 'nl',
+    nativeLabels: { Netherlands: 'Nederland' },
+    nativeClass: 'italic',
+    bgArt: '/frames/nl-tulips.svg',
+    bgArtClass: 'nl-tulips',
+    titleArt: '/frames/nl-lion.svg',
+  },
+  ESP: {
+    border: 'border-red-700/80',
+    // the rojigualda: strong red at the edges fading quickly into a wide
+    // golden middle (explicit stops — red is done by 22% from each edge)
+    tint: 'bg-[linear-gradient(to_bottom,rgb(153_27_27/0.65)_0%,rgb(253_209_49/0.72)_30%,rgb(253_209_49/0.72)_70%,rgb(153_27_27/0.65)_100%)]',
+    strip: 'h-2 es-flag-strip',
+    badge: 'text-yellow-400',
+    chipActive: 'bg-red-500/15 border-yellow-400 text-yellow-300',
+    chipIdle: 'border-red-800/70 text-on-dark hover:border-yellow-300 hover:text-yellow-200',
+    flagClass: 'place-flag--es',
+    frame: 'media-frame--es',
+    extras: 'es',
+    nativeLabels: { Spain: 'España' },
+    nativeClass: 'italic',
+    titleArt: '/frames/es-bull.svg',
   },
   BRA: {
     border: 'border-emerald-500/70',
-    tint: 'bg-gradient-to-b from-emerald-900/35 via-transparent to-yellow-900/25',
+    tint: 'bg-gradient-to-b from-emerald-700/50 via-emerald-900/25 to-yellow-900/30',
     strip: 'h-1.5 bg-gradient-to-r from-green-600 via-yellow-400 to-blue-600',
     badge: 'text-emerald-400',
     chipActive: 'bg-emerald-500/15 border-yellow-300 text-yellow-200',
@@ -1447,13 +1472,22 @@ export default function TripsPage() {
   }
 
   // Card arrows: cycle through the visited countries (dashboard order)
+  // Blocks the prev/next arrows (and their keyboard shortcuts) while the
+  // camera is mid-flight, so spamming them can't queue up or interrupt
+  // flights — the next step only fires once the current one has settled
+  // in the center (matches focusCountry's 1000ms fly duration).
+  const [countryStepBusy, setCountryStepBusy] = useState(false)
   const stepCountry = (dir: 1 | -1) => {
+    if (countryStepBusy) return
     const codes = activeCountries.map((v) => v.code)
     const current = panelCountry ?? selected
     const idx = current ? codes.indexOf(current.properties.iso3) : -1
     const nextCode = idx === -1 ? codes[0] : codes[(idx + dir + codes.length) % codes.length]
     const feature = polygonsData.find((f) => f.properties.iso3 === nextCode)
-    if (feature) selectCountry(feature)
+    if (!feature) return
+    selectCountry(feature)
+    setCountryStepBusy(true)
+    window.setTimeout(() => setCountryStepBusy(false), 1000)
   }
 
   // Keyboard: Escape closes the country, arrow keys step through visited
@@ -1837,6 +1871,9 @@ export default function TripsPage() {
   const countryText = panelCountry
     ? localText(visitedByCode.get(panelCountry.properties.iso3))
     : undefined
+  // what the media area's text column shows: the selected place's story,
+  // or the country's own story when no place is selected
+  const panelText = placeText ?? (selectedPlace ? undefined : countryText)
 
   // Hero stats: countries visited, continents, share of the world
   const stats = useMemo(() => {
@@ -2181,6 +2218,9 @@ export default function TripsPage() {
                     <div className="absolute inset-0 -z-10 overflow-hidden rounded-t-2xl md:rounded-none pointer-events-none">
                       <div className={`absolute inset-0 ${cardTheme.tint}`} />
                       <div className={`absolute top-0 inset-x-0 ${cardTheme.strip}`} />
+                      {cardTheme.bgArt && (
+                        <img src={cardTheme.bgArt} alt="" className={cardTheme.bgArtClass ?? ''} />
+                      )}
                       {cardTheme.watermark && (
                         <span
                           className={`absolute -right-4 -top-2 text-[9rem] leading-none opacity-[0.08] select-none ${
@@ -2196,7 +2236,7 @@ export default function TripsPage() {
                     <>
                       <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern hidden md:block w-8" style={{ top: '0.6rem', left: '9%' }} />
                       <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern hidden md:block w-6" style={{ top: '0.6rem', left: '17%', animationDelay: '-2.2s' }} />
-                      <img src="/frames/cn-knot.svg" alt="" className="cn-knot w-5" style={{ top: '0.6rem', right: '22%', animationDelay: '-1.1s' }} />
+                      <img src="/frames/cn-knot.svg" alt="" className="cn-knot hidden md:block w-5" style={{ top: '0.6rem', right: '22%', animationDelay: '-1.1s' }} />
                       <span className="cn-seal cn-calligraphy hidden md:block">米兰</span>
                     </>
                   )}
@@ -2207,18 +2247,27 @@ export default function TripsPage() {
                       <img src="/frames/br-stamp.svg" alt="" className="br-stamp hidden md:block" />
                     </>
                   )}
+                  {cardTheme?.extras === 'es' && (
+                    <>
+                      <img
+                        src="/frames/es-guitar.svg"
+                        alt=""
+                        className="es-guitar hidden md:block w-12"
+                        style={{ top: '1.2rem', left: '2%' }}
+                      />
+                      <img src="/frames/es-stamp.svg" alt="" className="es-stamp hidden md:block" />
+                    </>
+                  )}
+                  {cardTheme?.extras === 'nl' && (
+                    <>
+                      <div className="nl-windmill hidden md:block" style={{ top: '1.3rem', left: '2%' }}>
+                        <img src="/frames/nl-windmill-body.svg" alt="" className="absolute inset-0 w-full h-full" />
+                        <img src="/frames/nl-windmill-blades.svg" alt="" className="nl-windmill-blades" />
+                      </div>
+                      <img src="/frames/nl-stamp.svg" alt="" className="nl-stamp hidden md:block" />
+                    </>
+                  )}
                   <div className="flex items-center gap-2 md:gap-3">
-                    {activeCountries.length > 1 && (
-                      <button
-                        type="button"
-                        data-testid="prev-country"
-                        aria-label={t('trips.prevCountry')}
-                        onClick={() => stepCountry(-1)}
-                        className="hidden md:block shrink-0 text-muted-on-dark hover:text-accent transition-colors"
-                      >
-                        <ChevronLeft className="h-6 w-6 md:h-8 md:w-8" />
-                      </button>
-                    )}
                     <div className="flex items-center justify-center gap-3 md:gap-4 flex-1 min-w-0">
                       {/^[A-Za-z]{2}$/.test(panelCountry.properties.iso2) && (
                         <span
@@ -2244,18 +2293,14 @@ export default function TripsPage() {
                           </span>
                         </span>
                       )}
+                      {cardTheme?.titleArt && (
+                        <img
+                          src={cardTheme.titleArt}
+                          alt=""
+                          className="h-7 md:h-9 w-auto shrink-0"
+                        />
+                      )}
                     </div>
-                    {activeCountries.length > 1 && (
-                      <button
-                        type="button"
-                        data-testid="next-country"
-                        aria-label={t('trips.nextCountry')}
-                        onClick={() => stepCountry(1)}
-                        className="hidden md:block shrink-0 text-muted-on-dark hover:text-accent transition-colors"
-                      >
-                        <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
-                      </button>
-                    )}
                     <button
                       type="button"
                       aria-label={t('trips.resetView')}
@@ -2270,18 +2315,19 @@ export default function TripsPage() {
                     <div className="mt-2 text-sm md:text-base text-muted-on-dark">{t('trips.notVisited')}</div>
                   )}
 
-                  {/* country text (desktop; mobile shows it in the unified
-                      text block below): not shown while a city is selected */}
-                  {!selectedPlace && countryText && (
+                  {/* country text normally lives in the media area's right
+                      column; this fallback is only for countries without any
+                      places (so no media row renders at all) */}
+                  {!selectedPlace && countryText && panelPlaces.length === 0 && (
                     <p
                       className="hidden md:block mt-4 text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line border-t border-gray-700 pt-4"
                     >
-                      {localText(visitedByCode.get(panelCountry.properties.iso3))}
+                      {countryText}
                     </p>
                   )}
 
                   {panelPlaces.length > 0 && (
-                    <div className="mt-3 md:mt-4">
+                    <div className="mt-5 md:mt-7">
                       <h4 className="text-sm md:text-base font-semibold text-on-dark mb-2 md:mb-3">
                         {t('trips.placesTitle')}
                       </h4>
@@ -2290,14 +2336,28 @@ export default function TripsPage() {
                           <button
                             key={place.name}
                             type="button"
-                            onClick={() => focusPlace(place)}
+                            onClick={() => {
+                              // clicking the active chip deselects the place
+                              // and returns to the country view
+                              if (selectedPlace?.name === place.name) {
+                                setSelectedPlace(null)
+                                selectedPlaceRef.current = null
+                                focusCountry(panelCountry)
+                              } else {
+                                focusPlace(place)
+                              }
+                            }}
                             title={isHomePlace(place.name) ? t('trips.homeHint') : undefined}
                             className={`inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-full px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base border transition-colors ${
+                              // compare by name, not reference — a deep-linked
+                              // place is looked up from the dataset separately
+                              // from panelPlaces, so the objects can differ
+                              // even when they describe the same place
                               isHomePlace(place.name)
-                                ? selectedPlace === place
+                                ? selectedPlace?.name === place.name
                                   ? 'bg-amber-400/15 border-amber-400 text-amber-300'
                                   : 'border-amber-500/60 text-amber-300 hover:border-amber-300 hover:text-amber-200'
-                                : selectedPlace === place
+                                : selectedPlace?.name === place.name
                                   ? cardTheme?.chipActive ?? 'bg-chip border-accent text-accent'
                                   : cardTheme?.chipIdle ??
                                     'border-gray-600 text-on-dark hover:border-accent hover:text-accent'
@@ -2326,7 +2386,7 @@ export default function TripsPage() {
                       places combined. While the media list or the current
                       image is still loading, its shape pulses as a skeleton. */}
                   {(selectedPlace || panelPlaces.length > 0) &&
-                  (placeMedia === null || placeMedia.length > 0 || placeText) ? (
+                  (placeMedia === null || placeMedia.length > 0 || panelText) ? (
                     <div className="hidden md:flex mt-4 flex-1 min-h-0 flex-row items-stretch gap-4">
                       {placeMedia === null ? (
                         <div className="h-full aspect-[3/4] max-w-full shrink-0 rounded-lg media-skeleton flex items-center justify-center">
@@ -2433,9 +2493,9 @@ export default function TripsPage() {
                       </div>
                       </div>
                       ) : null}
-                      {placeText && (
+                      {panelText && (
                         <div className="flex-1 min-w-0 min-h-0 max-h-full overflow-y-auto text-base text-on-dark leading-relaxed whitespace-pre-line">
-                          {placeText}
+                          {panelText}
                         </div>
                       )}
                     </div>
@@ -2447,9 +2507,9 @@ export default function TripsPage() {
                   {/* mobile: the card is text-first — the story scrolls, and
                       a photo button opens the gallery straight in fullscreen */}
                   <div className="md:hidden mt-3 flex-1 min-h-0 flex flex-col gap-3">
-                    {(placeText ?? (!selectedPlace ? countryText : undefined)) && (
+                    {panelText && (
                       <div className="flex-1 min-h-0 overflow-y-auto text-sm text-on-dark leading-relaxed whitespace-pre-line">
-                        {placeText ?? countryText}
+                        {panelText}
                       </div>
                     )}
                     {placeMedia === null ? (

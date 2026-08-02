@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144">
+  <!-- Delft tile border for border-image (slice 48): outer line, chamfered
+       inner line, mitre diagonals crossing at the corners, clover ornaments -->
+  <g fill="none" stroke="#5b7fd0">
+    <!-- outer line -->
+    <rect x="8" y="8" width="128" height="128" stroke-width="4"/>
+    <!-- inner line with 45° chamfered corners -->
+    <path d="M40 24 H104 L120 40 V104 L104 120 H40 L24 104 V40 Z" stroke-width="3"/>
+    <!-- mitre diagonals through each corner -->
+    <path d="M12 12 L36 36 M132 12 L108 36 M12 132 L36 108 M132 132 L108 108" stroke-width="2.5"/>
+  </g>
+  <!-- corner clovers (quatrefoils) -->
+  <g fill="#3f5fae">
+    <g>
+      <circle cx="14.5" cy="14.5" r="2.9"/><circle cx="21" cy="14.5" r="2.9"/>
+      <circle cx="14.5" cy="21" r="2.9"/><circle cx="21" cy="21" r="2.9"/>
+    </g>
+    <g>
+      <circle cx="123" cy="14.5" r="2.9"/><circle cx="129.5" cy="14.5" r="2.9"/>
+      <circle cx="123" cy="21" r="2.9"/><circle cx="129.5" cy="21" r="2.9"/>
+    </g>
+    <g>
+      <circle cx="14.5" cy="123" r="2.9"/><circle cx="21" cy="123" r="2.9"/>
+      <circle cx="14.5" cy="129.5" r="2.9"/><circle cx="21" cy="129.5" r="2.9"/>
+    </g>
+    <g>
+      <circle cx="123" cy="123" r="2.9"/><circle cx="129.5" cy="123" r="2.9"/>
+      <circle cx="123" cy="129.5" r="2.9"/><circle cx="129.5" cy="129.5" r="2.9"/>
+    </g>
+  </g>
+</svg>

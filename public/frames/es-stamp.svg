@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- round passport-style stamp, Spanish edition -->
+  <defs>
+    <path id="esTopArc" d="M50 50m-26 0a26 26 0 1 1 52 0"/>
+    <path id="esBottomArc" d="M50 50m-26 0a26 26 0 1 0 52 0"/>
+  </defs>
+  <g fill="none" stroke="#e0b400">
+    <circle cx="50" cy="50" r="46" stroke-width="2.6"/>
+    <circle cx="50" cy="50" r="41.5" stroke-width="1.2"/>
+  </g>
+  <g fill="#e0b400" font-family="Helvetica, Arial, sans-serif">
+    <text font-size="11" font-weight="bold" letter-spacing="2">
+      <textPath href="#esTopArc" startOffset="50%" text-anchor="middle">ESPAÑA</textPath>
+    </text>
+    <text font-size="8" letter-spacing="5">
+      <textPath href="#esBottomArc" startOffset="50%" text-anchor="middle">★ ★ ★</textPath>
+    </text>
+    <text x="50" y="53" font-size="11" font-weight="bold" letter-spacing="3" text-anchor="middle">OLÉ</text>
+  </g>
+  <g stroke="#e0b400" stroke-width="1.1">
+    <line x1="35" y1="42" x2="65" y2="42"/>
+    <line x1="35" y1="58" x2="65" y2="58"/>
+  </g>
+</svg>

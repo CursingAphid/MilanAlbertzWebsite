@@ -1039,6 +1039,107 @@
   opacity: 0.95;
 }
 
+/* --- Spanish card extras --- */
+
+/* the flag's horizontal bands along the card's top edge */
+.es-flag-strip {
+  background: linear-gradient(to bottom, #aa151b 0% 25%, #f1bf00 25% 75%, #aa151b 75% 100%);
+}
+
+/* round passport-style stamp */
+.es-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-11deg);
+  pointer-events: none;
+}
+
+/* Spanish guitar leaning by the title (desktop) */
+.es-guitar {
+  position: absolute;
+  pointer-events: none;
+  transform: rotate(-12deg);
+}
+
+/* trencadís photo frame: Gaudí broken-tile mosaic, grout showing through */
+.media-frame--es {
+  padding: 4px;
+  border: 17px solid transparent;
+  border-image: url('/frames/es-frame.svg') 48 / 17px round;
+  background: #e9e2d4;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.media-frame--es > div {
+  border-radius: 2px;
+}
+
+/* --- Dutch card extras --- */
+
+/* canal-house gable skyline along the card's top edge */
+.nl-skyline-strip {
+  background: url('/frames/nl-skyline.svg') repeat-x left bottom / auto 100%;
+}
+
+/* windmill with slowly turning sails (blades are a separate layer) */
+.nl-windmill {
+  position: absolute;
+  pointer-events: none;
+  width: 44px;
+  height: 60px;
+}
+
+.nl-windmill-blades {
+  position: absolute;
+  left: 0;
+  top: -2px;
+  width: 44px;
+  height: 44px;
+  animation: nl-spin 16s linear infinite;
+}
+
+@keyframes nl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* round passport-style stamp — this one says home */
+.nl-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(9deg);
+  pointer-events: none;
+}
+
+/* faint Delft-blue tulips in the card's background layer */
+.nl-tulips {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  width: 8.5rem;
+  opacity: 0.15;
+}
+
+/* Delft tile photo frame: blue mitred border with corner clovers on white */
+.media-frame--nl {
+  padding: 4px;
+  border: 17px solid transparent;
+  border-image: url('/frames/nl-frame.svg') 48 / 17px stretch;
+  background: #fdfcf8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.media-frame--nl > div {
+  border-radius: 2px;
+}
+
 /* --- Brazilian card extras --- */
 
 /* festa junina pennant garlands hanging from the strip */
@@ -1094,6 +1195,25 @@
 
 .place-flag--cn:not(.place-flag--home).place-flag--active .place-flag-ground {
   background: rgba(255, 215, 94, 0.75);
+}
+
+/* Spain: yellow banner, red lettering */
+.place-flag--es:not(.place-flag--home) .place-flag-banner {
+  color: #aa151b;
+  background: linear-gradient(135deg, #ffd94d 0%, #f1bf00 45%, #cfa400 100%);
+}
+
+.place-flag--es:not(.place-flag--home) .place-flag-ground {
+  background: rgba(241, 191, 0, 0.55);
+}
+
+.place-flag--es:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #f1bf00;
+  background: linear-gradient(135deg, #c42a1e 0%, #aa151b 45%, #8a0f14 100%);
+}
+
+.place-flag--es:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(170, 21, 27, 0.65);
 }
 
 /* Netherlands: orange banner */

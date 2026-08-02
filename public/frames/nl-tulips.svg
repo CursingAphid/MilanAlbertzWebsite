@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140">
+  <!-- Delft-blue tulip cluster, used as a faint background ornament -->
+  <defs>
+    <g id="bloom">
+      <path d="M0 2 C-6 2 -9 -2 -9 -8 L-9 -14 L-4.5 -9 L0 -15 L4.5 -9 L9 -14 L9 -8 C9 -2 6 2 0 2 Z" fill="#7f9fd9"/>
+    </g>
+  </defs>
+  <g stroke="#7f9fd9" stroke-width="3" fill="none">
+    <path d="M30 42 C30 80 28 110 26 140"/>
+    <path d="M65 27 C65 70 66 108 68 140"/>
+    <path d="M95 52 C95 85 97 112 99 140"/>
+    <path d="M28 90 C14 82 8 68 8 56"/>
+    <path d="M67 80 C82 74 88 62 88 50"/>
+    <path d="M97 96 C110 90 114 80 115 70"/>
+  </g>
+  <use href="#bloom" transform="translate(30 40) scale(2)"/>
+  <use href="#bloom" transform="translate(65 25) scale(2.4)"/>
+  <use href="#bloom" transform="translate(95 50) scale(1.8)"/>
+</svg>

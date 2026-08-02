@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44">
+  <!-- four lattice sails around the hub at (22,22) -->
+  <g transform="rotate(45 22 22)">
+    <g fill="#d9cfc0" stroke="#8a6a45" stroke-width="0.8">
+      <rect x="20.2" y="2" width="3.6" height="17" rx="1"/>
+      <rect x="20.2" y="25" width="3.6" height="17" rx="1"/>
+      <rect x="2" y="20.2" width="17" height="3.6" rx="1"/>
+      <rect x="25" y="20.2" width="17" height="3.6" rx="1"/>
+    </g>
+    <path d="M22 4 V19 M22 25 V40 M4 22 H19 M25 22 H40" stroke="#8a6a45" stroke-width="0.7"/>
+  </g>
+  <circle cx="22" cy="22" r="2.4" fill="#4a3826"/>
+</svg>
