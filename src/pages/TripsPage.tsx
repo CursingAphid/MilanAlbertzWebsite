@@ -54,6 +54,13 @@ const mainPolygon = (feature: CountryFeature) => {
 
 const ACCENT = '#00ADB5'
 const DEFAULT_POV = { lat: 30, lng: 5, altitude: 1.8 }
+// NavBar is `fixed` (h-16) and overlays the top of the page rather than
+// pushing content down. On mobile the hero is hidden, so the globe
+// container's own top edge sits at y=0, directly behind the navbar — the
+// framing math below must treat that band as dead space, not usable canvas.
+const MOBILE_NAV_HEIGHT_PX = 64
+// fraction of the container height the bottom sheet occupies on mobile
+const MOBILE_CARD_FRACTION = 0.6
 // Camera altitude limits (relative to globe radius). Distance = radius * (1 + altitude).
 // The floor must stay low enough that tightly packed place clusters
 // (e.g. Hong Kong/Macau/Shenzhen) can still be zoomed apart.
@@ -1227,14 +1234,24 @@ export default function TripsPage() {
     []
   )
 
-  // While a country is selected the scene slides aside for the panel:
-  // left on desktop, up into the top half on mobile
+  // While a country is selected the scene slides aside for the panel: left
+  // on desktop, up into the strip above the mobile card. On mobile that
+  // strip sits between the fixed navbar and the card, not between the
+  // container's true top (which the navbar overlaps) and the card.
   useEffect(() => {
-    viewOffsetTargetRef.current = !selected
-      ? { x: 0, y: 0 }
-      : window.innerWidth >= 768
-        ? { x: 0.225, y: 0 }
-        : { x: 0, y: 0.3 } // selection centers in the top 40% above the card
+    if (!selected) {
+      viewOffsetTargetRef.current = { x: 0, y: 0 }
+      return
+    }
+    if (window.innerWidth >= 768) {
+      viewOffsetTargetRef.current = { x: 0.225, y: 0 }
+      return
+    }
+    const H = containerRef.current?.clientHeight || window.innerHeight
+    const navFrac = MOBILE_NAV_HEIGHT_PX / H
+    const zoneBottomFrac = 1 - MOBILE_CARD_FRACTION
+    // shift the display center up from 0.5 to the midpoint of [navFrac, zoneBottomFrac]
+    viewOffsetTargetRef.current = { x: 0, y: 0.5 - (navFrac + zoneBottomFrac) / 2 }
   }, [selected])
 
   // Per-frame animation: keep the directional light just above the camera
@@ -1380,9 +1397,11 @@ export default function TripsPage() {
     // solved for altitude; fov is 50°, so 2·tan(25°) ≈ 0.933
     const aspect = size.height > 0 ? size.width / size.height : 1.7
     const desktop = window.innerWidth >= 768
-    // desktop: fit into the left half beside the panel; mobile: fit into
-    // the top third above the bottom-sheet card
-    const targetV = desktop ? 0.82 : 0.32 // fraction of viewport height to fill
+    // desktop: fit into the left half beside the panel; mobile: fit into the
+    // strip above the bottom-sheet card, minus the fixed navbar's dead band
+    const H = size.height || (typeof window !== 'undefined' ? window.innerHeight : 800)
+    const mobileZoneFrac = Math.max(0, (1 - MOBILE_CARD_FRACTION) - MOBILE_NAV_HEIGHT_PX / H)
+    const targetV = desktop ? 0.82 : mobileZoneFrac * 0.8 // fraction of viewport height to fill
     const targetH = desktop ? 0.53 : 0.85 // fraction of viewport width
     const altitude = Math.min(
       2,
@@ -2175,8 +2194,8 @@ export default function TripsPage() {
                   )}
                   {cardTheme?.extras === 'cn' && (
                     <>
-                      <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern w-8" style={{ top: '0.6rem', left: '9%' }} />
-                      <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern w-6" style={{ top: '0.6rem', left: '17%', animationDelay: '-2.2s' }} />
+                      <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern hidden md:block w-8" style={{ top: '0.6rem', left: '9%' }} />
+                      <img src="/frames/cn-lantern.svg" alt="" className="cn-lantern hidden md:block w-6" style={{ top: '0.6rem', left: '17%', animationDelay: '-2.2s' }} />
                       <img src="/frames/cn-knot.svg" alt="" className="cn-knot w-5" style={{ top: '0.6rem', right: '22%', animationDelay: '-1.1s' }} />
                       <span className="cn-seal cn-calligraphy hidden md:block">米兰</span>
                     </>
@@ -2195,7 +2214,7 @@ export default function TripsPage() {
                         data-testid="prev-country"
                         aria-label={t('trips.prevCountry')}
                         onClick={() => stepCountry(-1)}
-                        className="shrink-0 text-muted-on-dark hover:text-accent transition-colors"
+                        className="hidden md:block shrink-0 text-muted-on-dark hover:text-accent transition-colors"
                       >
                         <ChevronLeft className="h-6 w-6 md:h-8 md:w-8" />
                       </button>
@@ -2232,7 +2251,7 @@ export default function TripsPage() {
                         data-testid="next-country"
                         aria-label={t('trips.nextCountry')}
                         onClick={() => stepCountry(1)}
-                        className="shrink-0 text-muted-on-dark hover:text-accent transition-colors"
+                        className="hidden md:block shrink-0 text-muted-on-dark hover:text-accent transition-colors"
                       >
                         <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
                       </button>
@@ -2241,9 +2260,9 @@ export default function TripsPage() {
                       type="button"
                       aria-label={t('trips.resetView')}
                       onClick={resetView}
-                      className="shrink-0 text-muted-on-dark hover:text-accent transition-colors"
+                      className="shrink-0 -m-2 p-2 md:m-0 md:p-0 rounded-full text-muted-on-dark hover:text-accent active:bg-white/10 transition-colors"
                     >
-                      <X className="h-5 w-5 md:h-6 md:w-6" />
+                      <X className="h-6 w-6 md:h-6 md:w-6" />
                     </button>
                   </div>
 
