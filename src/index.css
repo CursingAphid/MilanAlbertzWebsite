@@ -829,13 +829,6 @@
   }
 }
 
-/* Collapsed-sheet text teaser: the first lines dissolve toward the bottom,
-   signalling there is more to read when swiping up */
-.sheet-teaser {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 25%, transparent 92%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 25%, transparent 92%);
-}
-
 /* Skeleton for media that is still loading: dim base with a light band
    sweeping across, so it clearly reads as "loading" rather than empty */
 .media-skeleton {

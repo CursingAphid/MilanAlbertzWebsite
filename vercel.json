@@ -1,5 +1,13 @@
 {
   "rewrites": [
     { "source": "/((?!api/|@|.*\\..*).*)", "destination": "/index.html" }
-  ]
+  ],
+  "images": {
+    "remotePatterns": [
+      { "protocol": "https", "hostname": "*.public.blob.vercel-storage.com" }
+    ],
+    "sizes": [640, 2048],
+    "formats": ["image/avif", "image/webp"],
+    "minimumCacheTTL": 2592000
+  }
 }

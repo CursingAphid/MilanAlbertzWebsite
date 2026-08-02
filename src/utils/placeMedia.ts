@@ -21,3 +21,12 @@ export interface MediaItem {
 }
 
 export const isVideo = (pathname: string) => /\.(mp4|mov|m4v|webm)$/i.test(pathname)
+
+/**
+ * Route an image through Vercel's image optimizer: resized, converted to
+ * WebP/AVIF and cached at the edge — far less transfer than the stored
+ * originals, and the blob store is only hit on optimizer cache misses.
+ * In dev the optimizer doesn't run, so the original URL is used.
+ */
+export const optimizedUrl = (url: string, width: 640 | 2048) =>
+  import.meta.env.DEV ? url : `/_vercel/image?url=${encodeURIComponent(url)}&w=${width}&q=75`

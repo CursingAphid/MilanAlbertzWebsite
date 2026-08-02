@@ -9,7 +9,7 @@ import NavBar from '../components/NavBar'
 import SpaceBackground from '../components/SpaceBackground'
 import { visitedCountries } from '../data/visitedCountries'
 import type { VisitedCountry, VisitedPlace } from '../data/visitedCountries'
-import { mediaPrefix, isVideo, placeSlug } from '../utils/placeMedia'
+import { mediaPrefix, isVideo, placeSlug, optimizedUrl } from '../utils/placeMedia'
 import 'flag-icons/css/flag-icons.min.css'
 import type { MediaItem } from '../utils/placeMedia'
 
@@ -1080,16 +1080,6 @@ export default function TripsPage() {
   const [sceneVisible, setSceneVisible] = useState(false)
   // Travel stats live behind a toggle to keep the hero compact
   const [statsOpen, setStatsOpen] = useState(false)
-  // Mobile bottom sheet: collapsed shows the photos; dragging the handle
-  // follows the finger 1:1, then settles to the nearest state on release
-  // (expanded reveals the texts). Tapping the handle toggles.
-  const [sheetExpanded, setSheetExpanded] = useState(false)
-  const sheetRef = useRef<HTMLDivElement | null>(null)
-  const sheetDragRef = useRef<{ startY: number; startH: number; parentH: number; moved: boolean } | null>(null)
-  const sheetMovedRef = useRef(false)
-  useEffect(() => {
-    setSheetExpanded(false)
-  }, [selected])
 
   // Load the admin-managed dataset; falls back to the bundled data file
   useEffect(() => {
@@ -1244,7 +1234,7 @@ export default function TripsPage() {
       ? { x: 0, y: 0 }
       : window.innerWidth >= 768
         ? { x: 0.225, y: 0 }
-        : { x: 0, y: 0.333 } // selection centers in the top third
+        : { x: 0, y: 0.3 } // selection centers in the top 40% above the card
   }, [selected])
 
   // Per-frame animation: keep the directional light just above the camera
@@ -1392,7 +1382,7 @@ export default function TripsPage() {
     const desktop = window.innerWidth >= 768
     // desktop: fit into the left half beside the panel; mobile: fit into
     // the top third above the bottom-sheet card
-    const targetV = desktop ? 0.82 : 0.27 // fraction of viewport height to fill
+    const targetV = desktop ? 0.82 : 0.32 // fraction of viewport height to fill
     const targetH = desktop ? 0.53 : 0.85 // fraction of viewport width
     const altitude = Math.min(
       2,
@@ -1800,31 +1790,25 @@ export default function TripsPage() {
     }
   }, [selectedPlace, selected, visitedByCode])
 
-  // Background preloading: as soon as the media list is in, fetch the
-  // gallery's images one by one (sequentially, so the visible first photo
-  // keeps bandwidth priority). Preloaded URLs are marked loaded so stepping
-  // through the slideshow is instant, without skeleton flashes.
+  // Background preloading, neighbors only: fetch just the photos adjacent
+  // to the current one (at card size), so stepping is instant WITHOUT
+  // downloading whole galleries up front — that burned transfer quota.
   useEffect(() => {
-    if (!placeMedia || placeMedia.length === 0) return
-    let cancelled = false
-    const queue = placeMedia.filter((m) => !isVideo(m.pathname)).map((m) => m.url)
-    const preload = (i: number) => {
-      if (cancelled || i >= queue.length) return
-      const url = queue[i]
+    if (!placeMedia || placeMedia.length < 2) return
+    const current = Math.min(mediaIndex, placeMedia.length - 1)
+    const candidates = [
+      (current + 1) % placeMedia.length,
+      (current - 1 + placeMedia.length) % placeMedia.length,
+    ]
+    for (const i of candidates) {
+      const item = placeMedia[i]
+      if (isVideo(item.pathname) || mediaLoaded[item.url]) continue
       const img = new Image()
-      img.onload = () => {
-        if (cancelled) return
-        setMediaLoaded((loaded) => (loaded[url] ? loaded : { ...loaded, [url]: true }))
-        preload(i + 1)
-      }
-      img.onerror = () => preload(i + 1)
-      img.src = url
+      img.onload = () =>
+        setMediaLoaded((loaded) => (loaded[item.url] ? loaded : { ...loaded, [item.url]: true }))
+      img.src = optimizedUrl(item.url, 640)
     }
-    preload(0)
-    return () => {
-      cancelled = true
-    }
-  }, [placeMedia])
+  }, [placeMedia, mediaIndex, mediaLoaded])
 
   const panelPlaces = panelCountry
     ? visitedByCode.get(panelCountry.properties.iso3)?.places ?? []
@@ -1834,9 +1818,6 @@ export default function TripsPage() {
   const countryText = panelCountry
     ? localText(visitedByCode.get(panelCountry.properties.iso3))
     : undefined
-  // shown fading out under the photo in the collapsed mobile sheet,
-  // hinting that swiping up reveals the rest
-  const teaserText = placeText ?? (selectedPlace ? undefined : countryText)
 
   // Hero stats: countries visited, continents, share of the world
   const stats = useMemo(() => {
@@ -2161,12 +2142,7 @@ export default function TripsPage() {
           {/* Country info panel — on mobile it fills the bottom half (the
               globe shifts the selection into the top half); on desktop it
               fills the full right side, edge to edge */}
-          <div
-            ref={sheetRef}
-            className={`absolute inset-x-0 bottom-0 ${
-              sheetExpanded ? 'h-[88%]' : 'h-2/3'
-            } transition-[height] duration-500 ease-in-out md:transition-none md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30`}
-          >
+          <div className="absolute inset-x-0 bottom-0 h-3/5 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
             <div
               data-testid="country-card"
               className={`relative h-full flex flex-col bg-navbar border-0 border-t md:border-t-0 md:border-l ${
@@ -2179,62 +2155,6 @@ export default function TripsPage() {
             >
               {panelCountry && (
                 <>
-                  {/* Mobile sheet handle: swipe up/down or tap to toggle the
-                      expanded state that reveals the texts */}
-                  <div
-                    className="md:hidden -mt-2 mb-1 flex justify-center py-2 touch-none"
-                    onTouchStart={(e) => {
-                      const sheet = sheetRef.current
-                      if (!sheet || window.innerWidth >= 768) return
-                      sheetDragRef.current = {
-                        startY: e.touches[0].clientY,
-                        startH: sheet.offsetHeight,
-                        parentH: sheet.parentElement?.clientHeight ?? 0,
-                        moved: false,
-                      }
-                      sheet.style.transition = 'none' // follow the finger 1:1
-                    }}
-                    onTouchMove={(e) => {
-                      const drag = sheetDragRef.current
-                      const sheet = sheetRef.current
-                      if (!drag || !sheet || drag.parentH === 0) return
-                      const dy = e.touches[0].clientY - drag.startY
-                      if (Math.abs(dy) > 8) drag.moved = true
-                      const height = Math.min(
-                        drag.parentH * 0.92,
-                        Math.max(drag.parentH * 0.3, drag.startH - dy)
-                      )
-                      sheet.style.height = `${height}px`
-                    }}
-                    onTouchEnd={() => {
-                      const drag = sheetDragRef.current
-                      const sheet = sheetRef.current
-                      sheetDragRef.current = null
-                      if (!drag || !sheet) return
-                      sheetMovedRef.current = drag.moved
-                      sheet.style.transition = '' // settle animated
-                      if (drag.moved) {
-                        setSheetExpanded(sheet.offsetHeight / Math.max(1, drag.parentH) > 0.77)
-                      }
-                      // release the inline height after the class target has
-                      // updated, so the settle animates from where the finger
-                      // let go instead of jumping
-                      requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                          if (sheetRef.current) sheetRef.current.style.height = ''
-                        })
-                      })
-                    }}
-                    onClick={() => {
-                      if (sheetMovedRef.current) {
-                        sheetMovedRef.current = false
-                        return
-                      }
-                      setSheetExpanded((open) => !open)
-                    }}
-                  >
-                    <div className="h-1.5 w-12 rounded-full bg-gray-500/70" />
-                  </div>
                   {/* Country theme decoration: wash, top strip, watermark —
                       behind the content (the card's backdrop-blur creates the
                       stacking context that makes -z-10 sit above its bg) */}
@@ -2331,13 +2251,11 @@ export default function TripsPage() {
                     <div className="mt-2 text-sm md:text-base text-muted-on-dark">{t('trips.notVisited')}</div>
                   )}
 
-                  {/* country text: not shown while a city is selected, and on
-                      mobile only in the expanded sheet */}
-                  {!selectedPlace && localText(visitedByCode.get(panelCountry.properties.iso3)) && (
+                  {/* country text (desktop; mobile shows it in the unified
+                      text block below): not shown while a city is selected */}
+                  {!selectedPlace && countryText && (
                     <p
-                      className={`${
-                        sheetExpanded ? 'block' : 'hidden md:block'
-                      } mt-3 md:mt-4 max-h-[30%] md:max-h-none overflow-y-auto text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line border-t border-gray-700 pt-3 md:pt-4`}
+                      className="hidden md:block mt-4 text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line border-t border-gray-700 pt-4"
                     >
                       {localText(visitedByCode.get(panelCountry.properties.iso3))}
                     </p>
@@ -2390,33 +2308,13 @@ export default function TripsPage() {
                       image is still loading, its shape pulses as a skeleton. */}
                   {(selectedPlace || panelPlaces.length > 0) &&
                   (placeMedia === null || placeMedia.length > 0 || placeText) ? (
-                    <div className="mt-3 md:mt-4 flex-1 min-h-0 flex flex-col md:flex-row items-center md:items-stretch gap-2 md:gap-4">
+                    <div className="hidden md:flex mt-4 flex-1 min-h-0 flex-row items-stretch gap-4">
                       {placeMedia === null ? (
-                        <div
-                          className={`${
-                            sheetExpanded
-                              ? placeText
-                                ? 'h-[58%]'
-                                : 'h-full'
-                              : teaserText
-                                ? 'h-[72%]'
-                                : 'h-full'
-                          } md:h-full aspect-[3/4] max-w-full shrink-0 rounded-lg media-skeleton flex items-center justify-center`}
-                        >
+                        <div className="h-full aspect-[3/4] max-w-full shrink-0 rounded-lg media-skeleton flex items-center justify-center">
                           <ImageIcon className="h-9 w-9 text-white/20" />
                         </div>
                       ) : placeMedia.length > 0 ? (
-                      <div
-                        className={`${
-                          sheetExpanded
-                            ? placeText
-                              ? 'h-[58%]'
-                              : 'h-full'
-                            : teaserText
-                              ? 'h-[72%]'
-                              : 'h-full'
-                        } md:h-full aspect-[3/4] max-w-full shrink-0 ${cardTheme?.frame ?? ''}`}
-                      >
+                      <div className={`h-full aspect-[3/4] max-w-full shrink-0 ${cardTheme?.frame ?? ''}`}>
                       <div className="relative w-full h-full rounded-lg overflow-hidden bg-black/50">
                         {(() => {
                           const item = placeMedia[Math.min(mediaIndex, placeMedia.length - 1)]
@@ -2432,7 +2330,7 @@ export default function TripsPage() {
                             <>
                               <img
                                 key={item.url}
-                                src={item.url}
+                                src={optimizedUrl(item.url, 640)}
                                 alt={selectedPlace?.name ?? panelCountry.properties.name}
                                 onClick={() => setMediaFullscreen(true)}
                                 onLoad={() =>
@@ -2516,22 +2414,8 @@ export default function TripsPage() {
                       </div>
                       </div>
                       ) : null}
-                      {/* collapsed mobile sheet: the first lines fade out
-                          under the photo — an invitation to swipe up */}
-                      {!sheetExpanded && teaserText && (
-                        <div
-                          onClick={() => setSheetExpanded(true)}
-                          className="md:hidden w-full flex-1 min-h-0 overflow-hidden sheet-teaser text-sm text-on-dark leading-relaxed whitespace-pre-line"
-                        >
-                          {teaserText}
-                        </div>
-                      )}
                       {placeText && (
-                        <div
-                          className={`${
-                            sheetExpanded ? 'block' : 'hidden'
-                          } md:block w-full md:w-auto flex-1 min-w-0 min-h-0 max-h-full overflow-y-auto text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line`}
-                        >
+                        <div className="flex-1 min-w-0 min-h-0 max-h-full overflow-y-auto text-base text-on-dark leading-relaxed whitespace-pre-line">
                           {placeText}
                         </div>
                       )}
@@ -2540,6 +2424,30 @@ export default function TripsPage() {
                     /* Flexible space for future content */
                     <div className="hidden md:block flex-1" />
                   )}
+
+                  {/* mobile: the card is text-first — the story scrolls, and
+                      a photo button opens the gallery straight in fullscreen */}
+                  <div className="md:hidden mt-3 flex-1 min-h-0 flex flex-col gap-3">
+                    {(placeText ?? (!selectedPlace ? countryText : undefined)) && (
+                      <div className="flex-1 min-h-0 overflow-y-auto text-sm text-on-dark leading-relaxed whitespace-pre-line">
+                        {placeText ?? countryText}
+                      </div>
+                    )}
+                    {placeMedia === null ? (
+                      <div className="h-11 rounded-lg media-skeleton" />
+                    ) : placeMedia.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setMediaFullscreen(true)}
+                        className={`w-full inline-flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
+                          cardTheme?.chipActive ?? 'bg-chip border-accent text-accent'
+                        }`}
+                      >
+                        <ImageIcon className="h-5 w-5" />
+                        {t('trips.viewPhotos')} ({placeMedia.length})
+                      </button>
+                    ) : null}
+                  </div>
 
                 </>
               )}
@@ -2583,7 +2491,7 @@ export default function TripsPage() {
               ) : (
                 <img
                   key={item.url}
-                  src={item.url}
+                  src={optimizedUrl(item.url, 2048)}
                   alt={selectedPlace?.name ?? panelCountry?.properties.name ?? ''}
                   onClick={(e) => e.stopPropagation()}
                   className="max-w-full max-h-full object-contain"
