@@ -3,7 +3,7 @@ import Globe from 'react-globe.gl'
 import type { GlobeMethods } from 'react-globe.gl'
 import * as THREE from 'three'
 import { geoArea, geoBounds, geoCentroid } from 'd3-geo'
-import { BadgeCheck, BarChart3, ChevronLeft, ChevronRight, Flag, House, Image as ImageIcon, Maximize2, X } from 'lucide-react'
+import { BadgeCheck, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Flag, House, Image as ImageIcon, Maximize2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import NavBar from '../components/NavBar'
 import SpaceBackground from '../components/SpaceBackground'
@@ -956,6 +956,8 @@ interface CountryTheme {
   badge: string // verified-badge color
   chipActive: string // selected place chip
   chipIdle: string // idle place chip
+  chipClass?: string // extra class on place chips only; supplies its own
+  // icon (e.g. the tube roundel), so the default flag icon is skipped
   flagClass?: string // modifier class for the planted place flags (see CSS)
   frame?: string // decorative frame class around the photo slideshow
   watermarkClass?: string // extra classes for the watermark glyph
@@ -966,6 +968,8 @@ interface CountryTheme {
   bgArtClass?: string // positioning/opacity class for bgArt
   titleArt?: string // small emblem shown next to the country title
   cardClass?: string // extra classes on the card root (e.g. text outlining)
+  snow?: boolean // gentle snowfall in the card's background layer
+  rain?: boolean // slanted drizzle in the card's background layer
 }
 
 const COUNTRY_THEMES: Record<string, CountryTheme> = {
@@ -1005,11 +1009,57 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     bgArtClass: 'nl-tulips',
     titleArt: '/frames/nl-lion.svg',
   },
+  AUT: {
+    border: 'border-red-700/80',
+    // not the flag here: a dusk alpine panorama with a hint of alpenglow
+    tint: 'at-alps-bg',
+    strip: 'h-4 at-ridge-strip',
+    badge: 'text-red-300',
+    chipActive: 'bg-red-500/15 border-red-300 text-red-200',
+    chipIdle: 'border-red-400/60 text-on-dark hover:border-red-200 hover:text-red-100',
+    flagClass: 'place-flag--at',
+    frame: 'media-frame--at',
+    extras: 'at',
+    nativeLabels: { Austria: 'Österreich' },
+    nativeClass: 'italic',
+    titleArt: '/frames/at-eagle.svg',
+    snow: true,
+  },
+  GBR: {
+    border: 'border-red-700/80',
+    // not the flag: London at dusk — skyline silhouettes, fog and drizzle
+    tint: 'gb-london-bg',
+    strip: 'h-4 gb-gap-strip',
+    badge: 'text-red-300',
+    chipActive: 'bg-blue-500/15 border-red-400 text-red-100',
+    chipIdle: 'border-blue-500/60 text-on-dark hover:border-red-300 hover:text-red-100',
+    chipClass: 'gb-chip',
+    flagClass: 'place-flag--gb',
+    frame: 'media-frame--gb',
+    extras: 'gb',
+    rain: true,
+    titleArt: '/frames/gb-crown.svg',
+  },
+  ITA: {
+    border: 'border-green-700/80',
+    // not the flag: a Tuscan golden-hour panorama (hills echo the green,
+    // the honey sky echoes the red)
+    tint: 'it-tuscany-bg',
+    strip: 'h-4 it-arches-strip',
+    badge: 'text-amber-300',
+    chipActive: 'bg-green-500/15 border-amber-300 text-amber-200',
+    chipIdle: 'border-green-700/70 text-on-dark hover:border-amber-200 hover:text-amber-100',
+    flagClass: 'place-flag--it',
+    frame: 'media-frame--it',
+    extras: 'it',
+    nativeLabels: { Italy: 'Italia' },
+    nativeClass: 'it-serif italic',
+  },
   FRA: {
     border: 'border-blue-700/70',
     // the tricolore runs vertically, so this card's wash is horizontal:
     // blue on the left, a pale lift in the middle, red on the right
-    tint: 'bg-[linear-gradient(to_right,rgb(0_85_164/0.5)_0%,rgb(0_85_164/0.5)_24%,rgb(246_246_250/0.48)_40%,rgb(246_246_250/0.48)_60%,rgb(225_43_43/0.5)_76%,rgb(225_43_43/0.5)_100%)]',
+    tint: 'bg-[linear-gradient(to_right,rgb(0_85_164/0.55)_0%,rgb(0_85_164/0.55)_30%,rgb(252_252_255/0.72)_37%,rgb(252_252_255/0.72)_63%,rgb(225_43_43/0.55)_70%,rgb(225_43_43/0.55)_100%)]',
     strip: 'h-2 fr-flag-strip',
     badge: 'text-blue-300',
     chipActive: 'bg-blue-500/15 border-blue-300 text-blue-200',
@@ -1018,13 +1068,12 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     frame: 'media-frame--fr',
     extras: 'fr',
     titleArt: '/frames/fr-rooster.svg',
-    cardClass: 'fr-outlined-text',
   },
   ESP: {
     border: 'border-red-700/80',
     // the rojigualda: strong red at the edges fading quickly into a wide
     // golden middle (explicit stops — red is done by 22% from each edge)
-    tint: 'bg-[linear-gradient(to_bottom,rgb(153_27_27/0.65)_0%,rgb(253_209_49/0.72)_30%,rgb(253_209_49/0.72)_70%,rgb(153_27_27/0.65)_100%)]',
+    tint: 'bg-[linear-gradient(to_bottom,rgb(153_27_27/0.65)_0%,rgb(153_27_27/0.65)_8%,rgb(253_209_49/0.72)_30%,rgb(253_209_49/0.72)_70%,rgb(153_27_27/0.65)_92%,rgb(153_27_27/0.65)_100%)]',
     strip: 'h-2 es-flag-strip',
     badge: 'text-yellow-400',
     chipActive: 'bg-red-500/15 border-yellow-400 text-yellow-300',
@@ -1886,6 +1935,31 @@ export default function TripsPage() {
     ? visitedByCode.get(panelCountry.properties.iso3)?.places ?? []
     : []
   const cardTheme = panelCountry ? COUNTRY_THEMES[panelCountry.properties.iso3] : undefined
+  // randomized once per mount; negative delays mean the sky is already
+  // mid-snowfall when the card opens
+  const snowflakes = useMemo(
+    () =>
+      Array.from({ length: 16 }, () => ({
+        left: Math.random() * 100,
+        size: 2 + Math.random() * 2.5,
+        dur: 7 + Math.random() * 8,
+        delay: -Math.random() * 15,
+        opacity: 0.4 + Math.random() * 0.5,
+        sx: (Math.random() - 0.5) * 60,
+      })),
+    []
+  )
+  const raindrops = useMemo(
+    () =>
+      Array.from({ length: 22 }, () => ({
+        left: Math.random() * 100,
+        len: 8 + Math.random() * 9,
+        dur: 2 + Math.random() * 1.6,
+        delay: -Math.random() * 4,
+        opacity: 0.25 + Math.random() * 0.35,
+      })),
+    []
+  )
   const placeText = selectedPlace ? localText(selectedPlace) : undefined
   const countryText = panelCountry
     ? localText(visitedByCode.get(panelCountry.properties.iso3))
@@ -2220,9 +2294,9 @@ export default function TripsPage() {
           <div className="absolute inset-x-0 bottom-0 h-3/5 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
             <div
               data-testid="country-card"
-              className={`relative h-full flex flex-col bg-[rgb(34_40_49/0.96)] border-0 border-t md:border-t-0 md:border-l ${
+              className={`relative h-full flex flex-col bg-[#222831] border-0 border-t md:border-t-0 md:border-l ${
                 cardTheme?.border ?? 'border-accent'
-              } ${cardTheme?.cardClass ?? ''} rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
+              } ${cardTheme?.cardClass ?? ''} card-text-halo rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
                 selected
                   ? 'opacity-100 translate-y-0 md:translate-x-0 pointer-events-auto'
                   : 'opacity-0 translate-y-full md:translate-y-0 md:translate-x-[120%]'
@@ -2236,6 +2310,44 @@ export default function TripsPage() {
                   {cardTheme && (
                     <div className="absolute inset-0 -z-10 overflow-hidden rounded-t-2xl md:rounded-none pointer-events-none">
                       <div className={`absolute inset-0 ${cardTheme.tint}`} />
+                      {cardTheme.rain && (
+                        <div className="gb-rain">
+                          {raindrops.map((drop, i) => (
+                            <span
+                              key={i}
+                              className="gb-raindrop"
+                              style={{
+                                left: `${drop.left}%`,
+                                height: drop.len,
+                                opacity: drop.opacity,
+                                animationDuration: `${drop.dur}s`,
+                                animationDelay: `${drop.delay}s`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {cardTheme.snow && (
+                        <div className="at-snow">
+                          {snowflakes.map((flake, i) => (
+                            <span
+                              key={i}
+                              className="at-snowflake"
+                              style={
+                                {
+                                  left: `${flake.left}%`,
+                                  width: flake.size,
+                                  height: flake.size,
+                                  opacity: flake.opacity,
+                                  animationDuration: `${flake.dur}s`,
+                                  animationDelay: `${flake.delay}s`,
+                                  '--sx': `${flake.sx}px`,
+                                } as React.CSSProperties
+                              }
+                            />
+                          ))}
+                        </div>
+                      )}
                       <div className={`absolute top-0 inset-x-0 ${cardTheme.strip}`} />
                       {cardTheme.bgArt && (
                         <img src={cardTheme.bgArt} alt="" className={cardTheme.bgArtClass ?? ''} />
@@ -2266,16 +2378,43 @@ export default function TripsPage() {
                       <img src="/frames/br-stamp.svg" alt="" className="br-stamp hidden md:block" />
                     </>
                   )}
+                  {cardTheme?.extras === 'at' && (
+                    <>
+                      {/* cableway: the gondola glides along its cable */}
+                      <div
+                        className="at-cableway hidden md:block"
+                        style={{ top: '4.5rem', left: '50%', width: '26%', transform: 'translateX(-50%)' }}
+                      >
+                        <div className="at-cable" />
+                        <img src="/frames/at-gondola.svg" alt="" className="at-gondola w-6" />
+                      </div>
+                      <img src="/frames/at-stamp.svg" alt="" className="at-stamp hidden md:block" />
+                    </>
+                  )}
                   {cardTheme?.extras === 'fr' && (
                     <>
                       <img
                         src="/frames/fr-croissant.svg"
                         alt=""
                         className="fr-croissant hidden md:block w-11"
-                        style={{ top: '1.3rem', left: '2%' }}
+                        style={{ top: '1.3rem', left: '2.6rem' }}
                       />
                       <img src="/frames/fr-stamp.svg" alt="" className="fr-stamp hidden md:block" />
                     </>
+                  )}
+                  {cardTheme?.extras === 'gb' && (
+                    <>
+                      <img
+                        src="/frames/gb-bus.svg"
+                        alt=""
+                        className="gb-bus hidden md:block w-12"
+                        style={{ top: '1.4rem', left: '2.4rem' }}
+                      />
+                      <img src="/frames/gb-stamp.svg" alt="" className="gb-stamp hidden md:block" />
+                    </>
+                  )}
+                  {cardTheme?.extras === 'it' && (
+                    <img src="/frames/it-stamp.svg" alt="" className="it-stamp hidden md:block" />
                   )}
                   {cardTheme?.extras === 'es' && (
                     <>
@@ -2283,14 +2422,14 @@ export default function TripsPage() {
                         src="/frames/es-guitar.svg"
                         alt=""
                         className="es-guitar hidden md:block w-12"
-                        style={{ top: '1.2rem', left: '2%' }}
+                        style={{ top: '1.2rem', left: '2.6rem' }}
                       />
                       <img src="/frames/es-stamp.svg" alt="" className="es-stamp hidden md:block" />
                     </>
                   )}
                   {cardTheme?.extras === 'nl' && (
                     <>
-                      <div className="nl-windmill hidden md:block" style={{ top: '1.3rem', left: '2%' }}>
+                      <div className="nl-windmill hidden md:block" style={{ top: '1.3rem', left: '2.6rem' }}>
                         <img src="/frames/nl-windmill-body.svg" alt="" className="absolute inset-0 w-full h-full" />
                         <img src="/frames/nl-windmill-blades.svg" alt="" className="nl-windmill-blades" />
                       </div>
@@ -2323,23 +2462,37 @@ export default function TripsPage() {
                           </span>
                         </span>
                       )}
-                      {cardTheme?.titleArt && (
-                        <img
-                          src={cardTheme.titleArt}
-                          alt=""
-                          className="h-7 md:h-9 w-auto shrink-0"
-                        />
-                      )}
                     </div>
-                    <button
-                      type="button"
-                      aria-label={t('trips.resetView')}
-                      onClick={resetView}
-                      className="shrink-0 -m-2 p-2 md:m-0 md:p-0 rounded-full text-muted-on-dark hover:text-accent active:bg-white/10 transition-colors"
-                    >
-                      <X className="h-6 w-6 md:h-6 md:w-6" />
-                    </button>
+                    {/* the country emblem sits at the row's far right edge */}
+                    {cardTheme?.titleArt && (
+                      <img src={cardTheme.titleArt} alt="" className="h-7 md:h-9 w-auto shrink-0" />
+                    )}
                   </div>
+                  {/* close handle: a pull tab sticking out of the card like
+                      a sticky note — out the left edge on desktop (the card
+                      slides away right), out the top on mobile (the sheet
+                      slides down). Same background/border so it reads as
+                      part of the card. */}
+                  <button
+                    type="button"
+                    aria-label={t('trips.resetView')}
+                    onClick={resetView}
+                    className={`hidden md:flex absolute -left-8 top-1/2 -translate-y-1/2 w-8 h-16 items-center justify-center rounded-l-xl border border-r-0 ${
+                      cardTheme?.border ?? 'border-accent'
+                    } bg-[#222831] text-muted-on-dark hover:text-on-dark transition-colors`}
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t('trips.resetView')}
+                    onClick={resetView}
+                    className={`md:hidden absolute -top-8 left-1/2 -translate-x-1/2 h-8 w-16 flex items-center justify-center rounded-t-xl border border-b-0 ${
+                      cardTheme?.border ?? 'border-accent'
+                    } bg-[#222831] text-muted-on-dark active:bg-white/10 transition-colors`}
+                  >
+                    <ChevronDown className="h-5 w-5" />
+                  </button>
 
                   {!visitedByCode.has(panelCountry.properties.iso3) && (
                     <div className="mt-2 text-sm md:text-base text-muted-on-dark">{t('trips.notVisited')}</div>
@@ -2378,7 +2531,7 @@ export default function TripsPage() {
                               }
                             }}
                             title={isHomePlace(place.name) ? t('trips.homeHint') : undefined}
-                            className={`inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-full px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base border transition-colors ${
+                            className={`inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap rounded-full px-3 py-1 md:px-4 md:py-1.5 text-sm md:text-base border transition-colors ${cardTheme?.chipClass ?? ''} ${
                               // compare by name, not reference — a deep-linked
                               // place is looked up from the dataset separately
                               // from panelPlaces, so the objects can differ
@@ -2395,7 +2548,7 @@ export default function TripsPage() {
                           >
                             {isHomePlace(place.name) ? (
                               <House className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                            ) : (
+                            ) : cardTheme?.chipClass ? null : (
                               <Flag className="h-3.5 w-3.5 md:h-4 md:w-4" />
                             )}
                             {place.name}

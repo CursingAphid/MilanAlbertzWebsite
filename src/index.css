@@ -1039,15 +1039,259 @@
   opacity: 0.95;
 }
 
-/* --- French card extras --- */
-
-/* thin dark halo around text so it stays readable on the bright white band
-   (text-shadow inherits, so the card root applies it everywhere) */
-.fr-outlined-text {
+/* thin dark halo around all country-card text — keeps it readable on any
+   themed wash (text-shadow inherits, so the card root applies it everywhere) */
+.card-text-halo {
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.6),
     0 0 3px rgba(0, 0, 0, 0.4);
 }
+
+/* --- Austrian card extras --- */
+
+/* alpine ridgeline along the card's top edge */
+.at-ridge-strip {
+  background: url('/frames/at-ridge.svg') repeat-x left bottom / auto 100%;
+}
+
+/* full-card alpine panorama — replaces the flag wash on the Austria card */
+.at-alps-bg {
+  background: url('/frames/at-alps.svg') center bottom / cover no-repeat;
+}
+
+/* gentle snowfall in the card's background layer: individual flakes with
+   randomized size/speed/drift, falling from the top edge */
+.at-snow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.at-snowflake {
+  position: absolute;
+  top: -6px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: at-snow-fall linear infinite;
+}
+
+@keyframes at-snow-fall {
+  to {
+    transform: translate(var(--sx, 0), 95vh);
+  }
+}
+
+/* cableway: a cable line with the gondola gliding back and forth */
+.at-cableway {
+  position: absolute;
+  pointer-events: none;
+  height: 44px;
+}
+
+.at-cable {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(200, 205, 215, 0),
+    rgba(200, 205, 215, 0.8) 10%,
+    rgba(200, 205, 215, 0.8) 90%,
+    rgba(200, 205, 215, 0)
+  );
+}
+
+.at-gondola {
+  position: absolute;
+  top: 4px;
+  animation: at-gondola-ride 18s ease-in-out infinite alternate;
+}
+
+@keyframes at-gondola-ride {
+  0% {
+    left: 4%;
+    transform: rotate(2.5deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+  75% {
+    transform: rotate(-2.5deg);
+  }
+  100% {
+    left: 78%;
+    transform: rotate(2deg);
+  }
+}
+
+/* round passport-style stamp */
+.at-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+/* chalet wood photo frame: carved plank lines, edelweiss corners */
+.media-frame--at {
+  padding: 3px;
+  border: 16px solid transparent;
+  border-image: url('/frames/at-frame.svg') 48 / 16px stretch;
+  background: linear-gradient(135deg, #6e4f30 0%, #8a6a45 45%, #5d3f26 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.media-frame--at > div {
+  border-radius: 2px;
+}
+
+/* --- British card extras --- */
+
+/* full-card London dusk skyline */
+.gb-london-bg {
+  background: url('/frames/gb-london.svg') center bottom / cover no-repeat;
+}
+
+/* tube platform strip: MIND THE GAP */
+.gb-gap-strip {
+  background: url('/frames/gb-gap.svg') repeat-x left bottom / auto 100%;
+}
+
+/* drizzle over the skyline: thin slanted streaks, all falling at the
+   same angle (rain has a wind direction; snow doesn't) */
+.gb-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.gb-raindrop {
+  position: absolute;
+  top: -18px;
+  width: 1.5px;
+  background: linear-gradient(to bottom, rgba(200, 215, 235, 0), rgba(200, 215, 235, 0.65));
+  transform: rotate(4deg);
+  animation: gb-rain-fall linear infinite;
+}
+
+@keyframes gb-rain-fall {
+  to {
+    transform: translate(7vh, 100vh) rotate(4deg);
+  }
+}
+
+/* Underground roundel before each place chip's name */
+.gb-chip {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+}
+
+.gb-chip::before {
+  content: '';
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  margin-right: 0.45em;
+  vertical-align: -0.12em;
+  border-radius: 50%;
+  background:
+    linear-gradient(to bottom, transparent 38%, #0019a8 38%, #0019a8 62%, transparent 62%),
+    radial-gradient(circle, transparent 34%, #dc241f 36%, #dc241f 62%, transparent 64%);
+}
+
+/* pillar-box red lacquer photo frame with cream lining and brass fillets */
+.media-frame--gb {
+  padding: 16px;
+  background: linear-gradient(160deg, #e03a34 0%, #c8102e 40%, #9c0b22 100%);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 2px rgba(255, 236, 200, 0.45),
+    inset 0 2px 6px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.media-frame--gb > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(245, 238, 220, 0.85),
+    0 0 0 4px rgba(160, 120, 40, 0.55),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* round passport-style stamp */
+.gb-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+/* the Routemaster parked in the card's top-left corner */
+.gb-bus {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* --- Italian card extras --- */
+
+/* full-card Tuscan golden hour — replaces the flag wash on the Italy card */
+.it-tuscany-bg {
+  background: url('/frames/it-tuscany.svg') center bottom / cover no-repeat;
+}
+
+/* Roman arcade along the card's top edge */
+.it-arches-strip {
+  background: url('/frames/it-arches.svg') repeat-x left bottom / auto 100%;
+}
+
+/* antique serif for the native names and watermark */
+.it-serif {
+  font-family: Georgia, 'Palatino', 'Times New Roman', serif;
+}
+
+/* Carrara marble photo frame with gold fillets. The texture is a seamless
+   generated tile (scripts-less one-off); bevels are inset shadows so the
+   slab reads as carved rather than flat. */
+.media-frame--it {
+  padding: 17px;
+  background: url('/textures/it-marble.jpg');
+  background-size: 280px 280px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1.5px rgba(122, 92, 20, 0.65),
+    inset 0 2px 5px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.22);
+}
+
+.media-frame--it > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2px rgba(176, 141, 42, 0.75),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* round passport-style stamp */
+.it-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+/* --- French card extras --- */
 
 
 /* the tricolore's vertical bands along the card's top edge */
@@ -1244,6 +1488,24 @@
   background: rgba(255, 215, 94, 0.75);
 }
 
+/* Austria: red banner, white lettering */
+.place-flag--at:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #e04a56 0%, #c8102e 45%, #96001c 100%);
+}
+
+.place-flag--at:not(.place-flag--home) .place-flag-ground {
+  background: rgba(200, 16, 46, 0.55);
+}
+
+.place-flag--at:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #c8102e;
+  background: linear-gradient(135deg, #ffffff 0%, #fbeef0 100%);
+}
+
+.place-flag--at:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
 /* France: blue banner, white lettering */
 .place-flag--fr:not(.place-flag--home) .place-flag-banner {
   background: linear-gradient(135deg, #2f6cc4 0%, #0055a4 45%, #003f7a 100%);
@@ -1259,6 +1521,42 @@
 }
 
 .place-flag--fr:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* Britain: navy banner, white lettering */
+.place-flag--gb:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #2c4bd8 0%, #0019a8 45%, #001478 100%);
+}
+
+.place-flag--gb:not(.place-flag--home) .place-flag-ground {
+  background: rgba(0, 25, 168, 0.55);
+}
+
+.place-flag--gb:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #0019a8;
+  background: linear-gradient(135deg, #ffffff 0%, #e8ecfb 100%);
+}
+
+.place-flag--gb:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* Italy: green banner, white lettering */
+.place-flag--it:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #17a05a 0%, #009246 45%, #006b33 100%);
+}
+
+.place-flag--it:not(.place-flag--home) .place-flag-ground {
+  background: rgba(0, 146, 70, 0.55);
+}
+
+.place-flag--it:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #009246;
+  background: linear-gradient(135deg, #ffffff 0%, #eaf7ef 100%);
+}
+
+.place-flag--it:not(.place-flag--home).place-flag--active .place-flag-ground {
   background: rgba(255, 255, 255, 0.75);
 }
 

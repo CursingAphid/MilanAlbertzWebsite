@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+  <!-- full-card Tuscan golden hour for the Italy card: honey sky, a hazy
+       Duomo silhouette on the horizon, then three tiers of rolling
+       olive-green hills with cypress rows and a small villa. Hills are
+       opaque with stepped tones (Austria lesson: translucent layers read
+       as pattern, not landscape). -->
+  <defs>
+    <linearGradient id="tSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9803f" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#e0a95c" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#f2d49b" stop-opacity="0.95"/>
+    </linearGradient>
+    <radialGradient id="tSun" cx="0.45" cy="0.97" r="0.6">
+      <stop offset="0" stop-color="#fbeec9" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#fbeec9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tFar" x1="0" y1="0.5" x2="0" y2="1">
+      <stop offset="0" stop-color="#b4a271"/>
+      <stop offset="1" stop-color="#99895c"/>
+    </linearGradient>
+    <linearGradient id="tMid" x1="0" y1="0.62" x2="0" y2="1">
+      <stop offset="0" stop-color="#86935a"/>
+      <stop offset="1" stop-color="#69763f"/>
+    </linearGradient>
+    <linearGradient id="tNear" x1="0" y1="0.75" x2="0" y2="1">
+      <stop offset="0" stop-color="#55663c"/>
+      <stop offset="1" stop-color="#3c4a2a"/>
+    </linearGradient>
+    <!-- slender flame-shaped cypress, ~14 units tall at scale 1 -->
+    <g id="cypress">
+      <path d="M0 0 C-2.4 4 -2.4 10 0 14 C2.4 10 2.4 4 0 0 Z"/>
+      <rect x="-0.5" y="14" width="1" height="2.2"/>
+    </g>
+  </defs>
+
+  <rect width="400" height="420" fill="url(#tSky)"/>
+  <rect width="400" height="420" fill="url(#tSun)"/>
+
+  <!-- Florence on the horizon: dome, lantern, campanile — hazy with
+       distance. Bases run to y=345, below the far ridge (~338 here), so
+       the buildings stand ON the hill rather than floating above it. -->
+  <g fill="#9c7258" opacity="0.55">
+    <rect x="272" y="316" width="40" height="29"/>
+    <path d="M269 316 A23 26 0 0 1 315 316 Z"/>
+    <rect x="289.5" y="282" width="5" height="9"/>
+    <rect x="287.5" y="279.5" width="9" height="3"/>
+    <circle cx="292" cy="277.8" r="1.5"/>
+    <rect x="246" y="292" width="13" height="53"/>
+    <path d="M244.5 292 L252.5 283 L260.5 292 Z"/>
+  </g>
+
+  <!-- far hills: sun-washed, bleached olive -->
+  <path fill="url(#tFar)"
+    d="M0 355 C60 335 120 330 180 342 C240 354 300 322 400 345 L400 600 L0 600 Z"/>
+  <g fill="#7d7147" opacity="0.85">
+    <use href="#cypress" transform="translate(150 330) scale(0.75)"/>
+    <use href="#cypress" transform="translate(157 331.5) scale(0.65)"/>
+    <use href="#cypress" transform="translate(163 330.5) scale(0.72)"/>
+  </g>
+
+  <!-- mid hills: olive green, cypress row and the villa on the ridge -->
+  <path fill="url(#tMid)"
+    d="M0 452 C80 428 150 418 230 436 C310 452 360 430 400 442 L400 600 L0 600 Z"/>
+  <g fill="#33422a" opacity="0.9">
+    <use href="#cypress" transform="translate(58 424) scale(1.05)"/>
+    <use href="#cypress" transform="translate(70 422.5) scale(1.2)"/>
+    <use href="#cypress" transform="translate(82 424.5) scale(1)"/>
+    <use href="#cypress" transform="translate(93 426) scale(1.15)"/>
+  </g>
+  <!-- little Tuscan farmhouse with tower -->
+  <g>
+    <rect x="312" y="425" width="16" height="9" fill="#e8d9b0"/>
+    <path d="M310.5 425 L320 419.5 L329.5 425 Z" fill="#b35a33"/>
+    <rect x="326" y="417" width="6" height="17" fill="#dcc99e"/>
+    <path d="M325 417 L329 413 L333 417 Z" fill="#a04f2c"/>
+    <rect x="316" y="429" width="3" height="5" fill="#6b5330"/>
+    <rect x="322" y="428" width="2.6" height="2.6" fill="#6b5330"/>
+  </g>
+
+  <!-- near hills: deep olive, big cypress cluster and field stripes -->
+  <path fill="url(#tNear)"
+    d="M0 545 C90 512 170 508 250 528 C320 543 370 520 400 532 L400 600 L0 600 Z"/>
+  <g fill="#243219">
+    <use href="#cypress" transform="translate(38 510) scale(1.7)"/>
+    <use href="#cypress" transform="translate(54 506) scale(2)"/>
+    <use href="#cypress" transform="translate(69 511) scale(1.6)"/>
+    <use href="#cypress" transform="translate(352 508) scale(1.85)"/>
+    <use href="#cypress" transform="translate(366 512) scale(1.5)"/>
+  </g>
+  <g fill="none" stroke="#64744a" stroke-width="3" opacity="0.35">
+    <path d="M60 570 C140 548 220 546 300 562"/>
+    <path d="M100 588 C180 566 260 564 340 580"/>
+  </g>
+</svg>

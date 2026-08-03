@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 36">
+  <!-- little Routemaster: two window rows, black wheels -->
+  <rect x="1" y="2" width="54" height="28" rx="4" fill="#c8102e"/>
+  <rect x="1" y="14.5" width="54" height="2" fill="#9c0b22"/>
+  <g fill="#dfe8f2">
+    <rect x="5" y="5" width="8" height="6" rx="1"/>
+    <rect x="16" y="5" width="8" height="6" rx="1"/>
+    <rect x="27" y="5" width="8" height="6" rx="1"/>
+    <rect x="38" y="5" width="8" height="6" rx="1"/>
+    <rect x="5" y="19" width="8" height="6" rx="1"/>
+    <rect x="16" y="19" width="8" height="6" rx="1"/>
+    <rect x="27" y="19" width="8" height="6" rx="1"/>
+    <rect x="45" y="17" width="8" height="9" rx="1"/>
+  </g>
+  <rect x="20" y="0.5" width="16" height="4" rx="1.5" fill="#f4f1e8"/>
+  <text x="28" y="3.8" font-family="Helvetica, Arial, sans-serif" font-size="3.2"
+    font-weight="bold" text-anchor="middle" fill="#333">LONDON</text>
+  <g fill="#1a1a1a">
+    <circle cx="13" cy="31" r="4.5"/>
+    <circle cx="43" cy="31" r="4.5"/>
+  </g>
+  <g fill="#555">
+    <circle cx="13" cy="31" r="1.8"/>
+    <circle cx="43" cy="31" r="1.8"/>
+  </g>
+</svg>

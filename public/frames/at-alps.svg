@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+  <!-- full-card alpine panorama for the Austria card. The three ranges are
+       OPAQUE with stepped tones (light haze far, dark silhouette near) and
+       irregular ridgelines — even transparency + repeated triangles reads
+       as a zigzag pattern instead of terrain. Only the sky is translucent
+       so the card color sets the night mood. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f4f8c" stop-opacity="0.95"/>
+      <stop offset="0.55" stop-color="#4a74ad" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#7ba3cd" stop-opacity="0.95"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.52" cy="0.95" r="0.7">
+      <stop offset="0" stop-color="#dcebf7" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#dcebf7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="far" x1="0" y1="0.45" x2="0" y2="1">
+      <stop offset="0" stop-color="#6d7995"/>
+      <stop offset="1" stop-color="#575f77"/>
+    </linearGradient>
+    <linearGradient id="mid" x1="0" y1="0.6" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a556d"/>
+      <stop offset="1" stop-color="#3b4457"/>
+    </linearGradient>
+    <linearGradient id="near" x1="0" y1="0.72" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d3646"/>
+      <stop offset="1" stop-color="#232b38"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="380" fill="url(#sky)"/>
+  <rect width="400" height="380" fill="url(#glow)"/>
+
+  <!-- far range: pale haze, gentle irregular ridge -->
+  <path fill="url(#far)"
+    d="M0 370 L30 330 L70 352 L110 300 L150 345 L205 285 L250 338 L300 310 L340 350 L400 320 L400 600 L0 600 Z"/>
+  <!-- snow caps: outer edges sit exactly on the ridge slopes -->
+  <g fill="#e8edf5">
+    <path d="M98.8 314.6 L110 300 L121.2 312.6 L110 319 Z" opacity="0.75"/>
+    <path d="M188.5 303 L205 285 L218.5 300.9 L203.5 308 Z" opacity="0.8"/>
+    <path d="M287 317.3 L300 310 L310.4 320.4 L298.7 323.9 Z" opacity="0.65"/>
+  </g>
+
+  <!-- mid range -->
+  <path fill="url(#mid)"
+    d="M0 470 L40 420 L95 455 L160 390 L215 448 L280 405 L330 452 L400 415 L400 600 L0 600 Z"/>
+  <g fill="#c9d3e2">
+    <path d="M144.4 405.6 L160 390 L173.2 403.9 L158.8 410.8 Z" opacity="0.7"/>
+    <path d="M265.7 414.5 L280 405 L291 415.3 L278.4 419.9 Z" opacity="0.55"/>
+  </g>
+
+  <!-- near range: dark silhouette anchoring the foot of the card -->
+  <path fill="url(#near)"
+    d="M0 560 L60 495 L130 555 L230 470 L320 545 L400 505 L400 600 L0 600 Z"/>
+</svg>

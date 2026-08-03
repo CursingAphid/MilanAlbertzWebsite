@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 20">
+  <!-- Roman arcade tile for the card's top strip: travertine entablature
+       and pillars, shaded arch openings. Half-pillars at both edges merge
+       into one pillar when the tile repeats. -->
+  <rect width="48" height="20" fill="#d6c49a"/>
+  <rect width="48" height="4.5" fill="#c4b084"/>
+  <rect y="4.5" width="48" height="1.2" fill="#8a7a55"/>
+  <!-- arch opening: rounded top, cut into the stone -->
+  <path fill="#4a3c28" fill-opacity="0.55"
+    d="M10 20 L10 13 A14 14 0 0 1 38 13 L38 20 Z"/>
+  <!-- pillar shading at the tile edges -->
+  <rect x="0" y="5.7" width="1.6" height="14.3" fill="#b5a276"/>
+  <rect x="46.4" y="5.7" width="1.6" height="14.3" fill="#b5a276"/>
+</svg>

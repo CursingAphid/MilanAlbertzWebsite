@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- round passport-style stamp, Italian edition: golden ink -->
+  <defs>
+    <path id="itTopArc" d="M50 50m-27 0a27 27 0 1 1 54 0"/>
+    <path id="itBottomArc" d="M50 50m-26 0a26 26 0 1 0 52 0"/>
+  </defs>
+  <g fill="none" stroke="#d9a916">
+    <circle cx="50" cy="50" r="46" stroke-width="2.6"/>
+    <circle cx="50" cy="50" r="41.5" stroke-width="1.2"/>
+  </g>
+  <g fill="#d9a916" font-family="Helvetica, Arial, sans-serif">
+    <text font-size="9.5" font-weight="bold" letter-spacing="2">
+      <textPath href="#itTopArc" startOffset="50%" text-anchor="middle">ITALIA</textPath>
+    </text>
+    <text font-size="6.5" font-weight="bold" letter-spacing="1">
+      <textPath href="#itBottomArc" startOffset="50%" text-anchor="middle">ROMA • MILANO</textPath>
+    </text>
+    <text x="50" y="53.5" font-size="12" font-weight="bold" letter-spacing="2" text-anchor="middle">CIAO</text>
+  </g>
+  <g stroke="#d9a916" stroke-width="1.1">
+    <line x1="34" y1="41.5" x2="66" y2="41.5"/>
+    <line x1="34" y1="58.5" x2="66" y2="58.5"/>
+  </g>
+</svg>

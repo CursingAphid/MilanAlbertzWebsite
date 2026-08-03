@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+  <!-- full-card London dusk for the England card: slate-indigo sky, a fog
+       band, three opaque silhouette layers (hazy far skyline, Big Ben +
+       the Eye, terraced rooftops) with warm lit windows. -->
+  <defs>
+    <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#262c48" stop-opacity="0.96"/>
+      <stop offset="0.55" stop-color="#3f4a6e" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#6b6a80" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="gFog" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c8d2e1" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#c8d2e1" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#c8d2e1" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="gFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#262d42"/>
+      <stop offset="1" stop-color="#1d2331"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="430" fill="url(#gSky)"/>
+
+  <!-- far skyline: hazy — Gherkin, St Paul's, the Shard among blocks -->
+  <g fill="#4b5471">
+    <rect x="10" y="370" width="26" height="30"/>
+    <rect x="42" y="378" width="20" height="22"/>
+    <path d="M70 400 C70 370 75 354 83 354 C91 354 96 370 96 400 Z"/>
+    <rect x="104" y="374" width="24" height="26"/>
+    <rect x="140" y="380" width="6" height="20"/>
+    <rect x="146" y="378" width="28" height="22"/>
+    <path d="M144 378 A16 14 0 0 1 176 378 Z"/>
+    <rect x="158" y="358" width="4" height="8"/>
+    <circle cx="160" cy="356" r="2"/>
+    <rect x="174" y="380" width="6" height="20"/>
+    <path d="M205 400 L219 322 L233 400 Z"/>
+    <rect x="244" y="372" width="22" height="28"/>
+    <rect x="272" y="366" width="18" height="34"/>
+    <rect x="296" y="378" width="30" height="22"/>
+    <rect x="332" y="370" width="22" height="30"/>
+    <rect x="358" y="380" width="42" height="20"/>
+    <rect x="0" y="398" width="400" height="202"/>
+  </g>
+
+  <rect y="330" width="400" height="100" fill="url(#gFog)"/>
+
+  <!-- mid layer: Big Ben, Westminster, the London Eye -->
+  <g fill="#333c58">
+    <rect x="30" y="330" width="22" height="140"/>
+    <path d="M28 330 L41 300 L54 330 Z"/>
+    <rect x="54" y="410" width="80" height="60"/>
+    <rect x="58" y="398" width="4" height="12"/>
+    <rect x="74" y="400" width="4" height="10"/>
+    <rect x="94" y="398" width="4" height="12"/>
+    <rect x="112" y="400" width="4" height="10"/>
+    <rect x="128" y="398" width="4" height="12"/>
+    <path d="M282 390 L272 470 L292 470 Z"/>
+    <path d="M318 390 L308 470 L328 470 Z"/>
+    <rect x="0" y="468" width="400" height="132"/>
+  </g>
+  <!-- the lit clock face, glowing at dusk -->
+  <circle cx="41" cy="356" r="8.5" fill="#e9d9a2"/>
+  <g stroke="#333c58" stroke-width="1.6">
+    <line x1="41" y1="356" x2="41" y2="350.5"/>
+    <line x1="41" y1="356" x2="45" y2="358"/>
+  </g>
+  <g fill="none" stroke="#333c58">
+    <circle cx="300" cy="390" r="55" stroke-width="5"/>
+    <circle cx="300" cy="390" r="6" stroke-width="4"/>
+    <g stroke-width="1.6">
+      <line x1="300" y1="335" x2="300" y2="445"/>
+      <line x1="245" y1="390" x2="355" y2="390"/>
+      <line x1="261" y1="351" x2="339" y2="429"/>
+      <line x1="339" y1="351" x2="261" y2="429"/>
+      <line x1="252.4" y1="362.5" x2="347.6" y2="417.5"/>
+      <line x1="347.6" y1="362.5" x2="252.4" y2="417.5"/>
+      <line x1="272.5" y1="342.4" x2="327.5" y2="437.6"/>
+      <line x1="327.5" y1="342.4" x2="272.5" y2="437.6"/>
+    </g>
+  </g>
+  <!-- Westminster windows -->
+  <g fill="#e8b04a" opacity="0.85">
+    <rect x="62" y="420" width="3" height="5"/>
+    <rect x="80" y="424" width="3" height="5"/>
+    <rect x="98" y="418" width="3" height="5"/>
+    <rect x="118" y="426" width="3" height="5"/>
+  </g>
+
+  <!-- front row: terraced houses, chimney pots, lit windows -->
+  <g fill="url(#gFront)">
+    <path d="M0 600 L0 528 L20 508 L40 528 L40 524 L60 524 L60 512 L64 512 L64 524 L80 524
+             L80 530 L100 512 L120 530 L120 522 L150 522 L150 508 L156 508 L156 522 L170 522
+             L170 528 L192 506 L214 528 L214 524 L240 524 L240 512 L246 512 L246 524 L262 524
+             L262 530 L284 510 L306 530 L306 522 L332 522 L332 508 L338 508 L338 522 L358 522
+             L358 528 L378 510 L400 528 L400 600 Z"/>
+  </g>
+  <g fill="#f0b95a" opacity="0.9">
+    <rect x="12" y="538" width="5" height="7"/>
+    <rect x="30" y="552" width="5" height="7"/>
+    <rect x="52" y="540" width="5" height="7"/>
+    <rect x="88" y="548" width="5" height="7"/>
+    <rect x="108" y="538" width="5" height="7"/>
+    <rect x="132" y="556" width="5" height="7"/>
+    <rect x="160" y="542" width="5" height="7"/>
+    <rect x="186" y="552" width="5" height="7"/>
+    <rect x="206" y="540" width="5" height="7"/>
+    <rect x="230" y="548" width="5" height="7"/>
+    <rect x="256" y="538" width="5" height="7"/>
+    <rect x="278" y="554" width="5" height="7"/>
+    <rect x="300" y="544" width="5" height="7"/>
+    <rect x="326" y="538" width="5" height="7"/>
+    <rect x="352" y="550" width="5" height="7"/>
+    <rect x="374" y="540" width="5" height="7"/>
+  </g>
+</svg>
