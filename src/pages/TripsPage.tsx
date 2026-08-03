@@ -965,6 +965,7 @@ interface CountryTheme {
   bgArt?: string // decorative image rendered in the card's background layer
   bgArtClass?: string // positioning/opacity class for bgArt
   titleArt?: string // small emblem shown next to the country title
+  cardClass?: string // extra classes on the card root (e.g. text outlining)
 }
 
 const COUNTRY_THEMES: Record<string, CountryTheme> = {
@@ -990,7 +991,7 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
   },
   NLD: {
     border: 'border-orange-500/70',
-    tint: 'bg-gradient-to-b from-orange-700/50 via-orange-900/20 to-blue-950/40',
+    tint: 'bg-gradient-to-b from-orange-600/65 via-orange-700/40 to-blue-950/40',
     strip: 'h-4 nl-skyline-strip',
     badge: 'text-orange-400',
     chipActive: 'bg-orange-500/15 border-orange-400 text-orange-300',
@@ -1003,6 +1004,21 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     bgArt: '/frames/nl-tulips.svg',
     bgArtClass: 'nl-tulips',
     titleArt: '/frames/nl-lion.svg',
+  },
+  FRA: {
+    border: 'border-blue-700/70',
+    // the tricolore runs vertically, so this card's wash is horizontal:
+    // blue on the left, a pale lift in the middle, red on the right
+    tint: 'bg-[linear-gradient(to_right,rgb(0_85_164/0.5)_0%,rgb(0_85_164/0.5)_24%,rgb(246_246_250/0.48)_40%,rgb(246_246_250/0.48)_60%,rgb(225_43_43/0.5)_76%,rgb(225_43_43/0.5)_100%)]',
+    strip: 'h-2 fr-flag-strip',
+    badge: 'text-blue-300',
+    chipActive: 'bg-blue-500/15 border-blue-300 text-blue-200',
+    chipIdle: 'border-blue-400/70 text-on-dark hover:border-blue-200 hover:text-blue-100',
+    flagClass: 'place-flag--fr',
+    frame: 'media-frame--fr',
+    extras: 'fr',
+    titleArt: '/frames/fr-rooster.svg',
+    cardClass: 'fr-outlined-text',
   },
   ESP: {
     border: 'border-red-700/80',
@@ -1475,10 +1491,11 @@ export default function TripsPage() {
   // Blocks the prev/next arrows (and their keyboard shortcuts) while the
   // camera is mid-flight, so spamming them can't queue up or interrupt
   // flights — the next step only fires once the current one has settled
-  // in the center (matches focusCountry's 1000ms fly duration).
-  const [countryStepBusy, setCountryStepBusy] = useState(false)
+  // in the center (matches focusCountry's 1000ms fly duration). A ref, not
+  // state: the keyboard listener's closure must always read the live value.
+  const countryStepBusyRef = useRef(false)
   const stepCountry = (dir: 1 | -1) => {
-    if (countryStepBusy) return
+    if (countryStepBusyRef.current) return
     const codes = activeCountries.map((v) => v.code)
     const current = panelCountry ?? selected
     const idx = current ? codes.indexOf(current.properties.iso3) : -1
@@ -1486,8 +1503,10 @@ export default function TripsPage() {
     const feature = polygonsData.find((f) => f.properties.iso3 === nextCode)
     if (!feature) return
     selectCountry(feature)
-    setCountryStepBusy(true)
-    window.setTimeout(() => setCountryStepBusy(false), 1000)
+    countryStepBusyRef.current = true
+    window.setTimeout(() => {
+      countryStepBusyRef.current = false
+    }, 1000)
   }
 
   // Keyboard: Escape closes the country, arrow keys step through visited
@@ -2201,9 +2220,9 @@ export default function TripsPage() {
           <div className="absolute inset-x-0 bottom-0 h-3/5 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
             <div
               data-testid="country-card"
-              className={`relative h-full flex flex-col bg-navbar border-0 border-t md:border-t-0 md:border-l ${
+              className={`relative h-full flex flex-col bg-[rgb(34_40_49/0.96)] border-0 border-t md:border-t-0 md:border-l ${
                 cardTheme?.border ?? 'border-accent'
-              } rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
+              } ${cardTheme?.cardClass ?? ''} rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
                 selected
                   ? 'opacity-100 translate-y-0 md:translate-x-0 pointer-events-auto'
                   : 'opacity-0 translate-y-full md:translate-y-0 md:translate-x-[120%]'
@@ -2245,6 +2264,17 @@ export default function TripsPage() {
                       <img src="/frames/br-garland.svg" alt="" className="br-garland" style={{ top: '0.5rem', left: '2%', width: '23%' }} />
                       <img src="/frames/br-garland.svg" alt="" className="br-garland" style={{ top: '0.5rem', right: '11%', width: '18%' }} />
                       <img src="/frames/br-stamp.svg" alt="" className="br-stamp hidden md:block" />
+                    </>
+                  )}
+                  {cardTheme?.extras === 'fr' && (
+                    <>
+                      <img
+                        src="/frames/fr-croissant.svg"
+                        alt=""
+                        className="fr-croissant hidden md:block w-11"
+                        style={{ top: '1.3rem', left: '2%' }}
+                      />
+                      <img src="/frames/fr-stamp.svg" alt="" className="fr-stamp hidden md:block" />
                     </>
                   )}
                   {cardTheme?.extras === 'es' && (

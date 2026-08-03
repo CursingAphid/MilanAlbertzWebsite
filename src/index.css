@@ -1039,6 +1039,53 @@
   opacity: 0.95;
 }
 
+/* --- French card extras --- */
+
+/* thin dark halo around text so it stays readable on the bright white band
+   (text-shadow inherits, so the card root applies it everywhere) */
+.fr-outlined-text {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 3px rgba(0, 0, 0, 0.4);
+}
+
+
+/* the tricolore's vertical bands along the card's top edge */
+.fr-flag-strip {
+  background: linear-gradient(to right, #0055a4 0% 33.3%, #f4f4f4 33.3% 66.6%, #e12b2b 66.6% 100%);
+}
+
+/* croissant by the title (desktop) */
+.fr-croissant {
+  position: absolute;
+  pointer-events: none;
+  transform: rotate(-10deg);
+}
+
+/* round passport-style stamp */
+.fr-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+
+/* gilded museum photo frame: layered gold with corner rosettes */
+.media-frame--fr {
+  padding: 3px;
+  border: 16px solid transparent;
+  border-image: url('/frames/fr-frame.svg') 48 / 16px stretch;
+  background: linear-gradient(135deg, #b8922e 0%, #dab84e 45%, #9a7820 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.media-frame--fr > div {
+  border-radius: 2px;
+}
+
 /* --- Spanish card extras --- */
 
 /* the flag's horizontal bands along the card's top edge */
@@ -1195,6 +1242,24 @@
 
 .place-flag--cn:not(.place-flag--home).place-flag--active .place-flag-ground {
   background: rgba(255, 215, 94, 0.75);
+}
+
+/* France: blue banner, white lettering */
+.place-flag--fr:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #2f6cc4 0%, #0055a4 45%, #003f7a 100%);
+}
+
+.place-flag--fr:not(.place-flag--home) .place-flag-ground {
+  background: rgba(0, 85, 164, 0.55);
+}
+
+.place-flag--fr:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #0055a4;
+  background: linear-gradient(135deg, #ffffff 0%, #e8eefb 100%);
+}
+
+.place-flag--fr:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
 }
 
 /* Spain: yellow banner, red lettering */

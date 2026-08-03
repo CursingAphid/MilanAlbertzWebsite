@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144">
+  <!-- gilded museum frame for border-image (slice 48): layered gold lines
+       with rosette medallions in the corners -->
+  <g fill="none">
+    <rect x="6" y="6" width="132" height="132" stroke="#8a6a1a" stroke-width="4"/>
+    <rect x="12" y="12" width="120" height="120" stroke="#e8c34a" stroke-width="3"/>
+    <rect x="26" y="26" width="92" height="92" stroke="#e8c34a" stroke-width="2"/>
+    <rect x="30" y="30" width="84" height="84" stroke="#8a6a1a" stroke-width="1.5"/>
+  </g>
+  <defs>
+    <g id="rosette">
+      <g fill="#e8c34a">
+        <ellipse rx="3" ry="7.5"/>
+        <ellipse rx="3" ry="7.5" transform="rotate(45)"/>
+        <ellipse rx="3" ry="7.5" transform="rotate(90)"/>
+        <ellipse rx="3" ry="7.5" transform="rotate(135)"/>
+      </g>
+      <circle r="3.4" fill="#8a6a1a"/>
+      <circle r="1.7" fill="#f4dd8a"/>
+    </g>
+  </defs>
+  <use href="#rosette" transform="translate(21 21)"/>
+  <use href="#rosette" transform="translate(123 21)"/>
+  <use href="#rosette" transform="translate(21 123)"/>
+  <use href="#rosette" transform="translate(123 123)"/>
+</svg>

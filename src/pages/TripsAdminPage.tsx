@@ -187,14 +187,21 @@ export default function TripsAdminPage() {
 
   // ---------- media ----------
 
-  const refreshMedia = async (countryCode: string, placeName: string) => {
+  // rescan=true re-lists the blob store for this prefix and updates the
+  // manifest (one billable list() call — use only after uploads); otherwise
+  // reads the manifest, which is free. The cache-buster skips the CDN cache.
+  const refreshMedia = async (countryCode: string, placeName: string, rescan = false) => {
     const prefix = mediaPrefix(countryCode, placeName)
     try {
-      // cache-buster: the public API response is CDN-cached, but the admin
-      // must always see the store's current contents (e.g. after uploads)
-      const res = await fetch(
-        `/api/place-media?prefix=${encodeURIComponent(prefix)}&fresh=${Date.now()}`
-      )
+      const res = rescan
+        ? await fetch('/api/place-media', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prefix }),
+          })
+        : await fetch(
+            `/api/place-media?prefix=${encodeURIComponent(prefix)}&fresh=${Date.now()}`
+          )
       if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
         const payload = await res.json()
         setMedia((prev) => ({ ...prev, [prefix]: payload.media ?? [] }))
@@ -226,7 +233,7 @@ export default function TripsAdminPage() {
           handleUploadUrl: '/api/media-upload',
         })
       }
-      await refreshMedia(countryCode, place.name)
+      await refreshMedia(countryCode, place.name, true)
       setStatus(`Uploaded ${files.length} file(s) to ${place.name}.`)
     } catch (err) {
       setStatus(`Upload failed: ${err instanceof Error ? err.message : String(err)}`)
