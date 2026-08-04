@@ -1153,6 +1153,244 @@
   border-radius: 2px;
 }
 
+/* --- Swiss card extras --- */
+
+/* full-card alpenglow (the cloud banks and the balloon drift via SMIL) */
+.ch-alpenglow-bg {
+  background: url('/frames/ch-alpenglow.svg') center bottom / cover no-repeat;
+}
+
+/* Swiss cross band along the card's top edge */
+.ch-cross-strip {
+  background: url('/frames/ch-cross.svg') repeat-x left top / auto 100%;
+}
+
+/* the last stars of the night, pulsing in the dawn sky */
+.ch-stars {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.ch-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: ch-star-pulse ease-in-out infinite;
+}
+
+@keyframes ch-star-pulse {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(0.65);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* watch-movement photo frame: brushed steel finished with Côtes de Genève */
+.media-frame--ch {
+  padding: 16px;
+  background: url('/textures/ch-steel.jpg');
+  /* the texture's 32px band pitch renders at 16px — one stripe per frame band */
+  background-size: 256px 256px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1.5px rgba(58, 66, 76, 0.9),
+    inset 0 2px 5px rgba(255, 255, 255, 0.55),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.media-frame--ch > div {
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 2px rgba(52, 60, 70, 0.95),
+    0 0 0 3.5px rgba(216, 35, 42, 0.6),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* the cowbell hanging in the card's top-left corner */
+.ch-bell {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.ch-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-6deg);
+  pointer-events: none;
+}
+
+/* Switzerland: silver banner with red lettering, inverting when active */
+.place-flag--ch:not(.place-flag--home) .place-flag-banner {
+  color: #b8161c;
+  background: linear-gradient(135deg, #ffffff 0%, #e8e6e2 45%, #c9c6c0 100%);
+}
+
+.place-flag--ch:not(.place-flag--home) .place-flag-ground {
+  background: rgba(232, 230, 226, 0.6);
+}
+
+.place-flag--ch:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #ffffff;
+  background: linear-gradient(135deg, #e8484d 0%, #d8232a 45%, #a3161c 100%);
+}
+
+.place-flag--ch:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(216, 35, 42, 0.7);
+}
+
+/* --- German card extras --- */
+
+/* full-card Schwarzwald (the steam train and lake mist animate via SMIL) */
+.de-schwarzwald-bg {
+  background: url('/frames/de-schwarzwald.svg') center bottom / cover no-repeat;
+}
+
+/* spruce forest strip along the card's top edge */
+.de-spruce-strip {
+  background: url('/frames/de-spruce.svg') repeat-x left top / auto 100%;
+}
+
+/* autumn leaves tumbling down the card */
+.de-leaves {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.de-leaf {
+  position: absolute;
+  top: -14px;
+  /* one round corner and one sharp corner reads as a leaf */
+  border-radius: 0 100% 0 100%;
+  animation: de-leaf-fall linear infinite;
+}
+
+@keyframes de-leaf-fall {
+  to {
+    transform: translate(var(--sx, 0), 104vh) rotate(var(--rot, 720deg));
+  }
+}
+
+/* half-timbered Fachwerk photo frame */
+.media-frame--de {
+  border: 18px solid transparent;
+  border-image: url('/frames/de-fachwerk.svg') 20 / 18px round;
+  background: #efe6d4;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.media-frame--de > div {
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 2.5px rgba(75, 53, 36, 0.9),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* the cuckoo clock hanging in the card's top-left corner */
+.de-clock {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.de-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-7deg);
+  pointer-events: none;
+}
+
+/* Germany: flag-red banner idle, gold when active */
+.place-flag--de:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #e04a4a 0%, #d62b30 45%, #a3181d 100%);
+}
+
+.place-flag--de:not(.place-flag--home) .place-flag-ground {
+  background: rgba(214, 43, 48, 0.55);
+}
+
+.place-flag--de:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #2a1f0a;
+  background: linear-gradient(135deg, #ffdc72 0%, #f0b429 100%);
+}
+
+.place-flag--de:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(240, 180, 41, 0.7);
+}
+
+/* --- Turkish card extras --- */
+
+/* full-card Antalya dusk (glints + gulet animate via SMIL inside the SVG) */
+.tr-antalya-bg {
+  background: url('/frames/tr-antalya.svg') center bottom / cover no-repeat;
+}
+
+/* kilim band along the card's top edge */
+.tr-kilim-strip {
+  background: url('/frames/tr-kilim.svg') repeat-x left top / auto 100%;
+}
+
+/* hammered copper photo frame, Turkish copperware style */
+.media-frame--tr {
+  padding: 16px;
+  background: url('/textures/tr-copper.jpg');
+  background-size: 280px 280px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 2px rgba(58, 32, 12, 0.6),
+    inset 0 2px 6px rgba(255, 220, 180, 0.45),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.media-frame--tr > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2px rgba(122, 74, 32, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* round passport-style stamp */
+.tr-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+/* Turkey: flag-red banner, white lettering */
+.place-flag--tr:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #f04a4a 0%, #e30a17 45%, #b00711 100%);
+}
+
+.place-flag--tr:not(.place-flag--home) .place-flag-ground {
+  background: rgba(227, 10, 23, 0.55);
+}
+
+.place-flag--tr:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #e30a17;
+  background: linear-gradient(135deg, #ffffff 0%, #fdeeee 100%);
+}
+
+.place-flag--tr:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
 /* --- Greek card extras --- */
 
 /* full-card Aegean afternoon (glitter + sailboat animate via SMIL inside
@@ -1505,6 +1743,12 @@
   pointer-events: none;
 }
 
+/* football resting in the card's top-left corner */
+.br-football {
+  position: absolute;
+  pointer-events: none;
+}
+
 /* round passport-style entry stamp */
 .br-stamp {
   position: absolute;
@@ -1516,17 +1760,48 @@
   pointer-events: none;
 }
 
-/* flag-colored photo frame: yellow outer, blue inner, losango corners */
+/* full-card Rio sunset (stars, bondinho and bay glints animate via SMIL) */
+.br-rio-bg {
+  background: url('/frames/br-rio.svg') center bottom / cover no-repeat;
+}
+
+/* carnival confetti drifting down the card's background layer */
+.br-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.br-confetto {
+  position: absolute;
+  top: -12px;
+  border-radius: 1px;
+  animation: br-confetti-fall linear infinite;
+}
+
+@keyframes br-confetti-fall {
+  to {
+    transform: translate(var(--sx, 0), 104vh) rotate(var(--rot, 540deg));
+  }
+}
+
+/* pedra portuguesa photo frame: the Copacabana pavement in miniature */
 .media-frame--br {
-  padding: 3px;
-  border: 15px solid transparent;
-  border-image: url('/frames/br-frame.svg') 48 / 15px stretch;
-  background: linear-gradient(135deg, #0e4d26 0%, #1b7a3f 45%, #0a3a1c 100%);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  background: url('/textures/br-mosaic.jpg');
+  background-size: 280px 280px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 2px rgba(36, 38, 42, 0.55),
+    inset 0 2px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.25);
 }
 
 .media-frame--br > div {
   border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(36, 38, 42, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.35);
 }
 
 /* Country-themed place flags (the home flag keeps its golden look).

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 18">
+  <!-- Schwarzwald strip tile: spruce silhouettes on a misty band. The edge
+       tree is drawn at both x=0 and x=26 so the row joins when repeated. -->
+  <defs>
+    <linearGradient id="dsMist" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e4e8e0"/>
+      <stop offset="1" stop-color="#b9c6bb"/>
+    </linearGradient>
+    <g id="dsTree">
+      <path d="M0 1.5 L3.4 8 L-3.4 8 Z"/>
+      <path d="M0 5 L4.2 13.5 L-4.2 13.5 Z"/>
+      <rect x="-0.7" y="13" width="1.4" height="2.5"/>
+    </g>
+    <g id="dsTreeSmall">
+      <path d="M0 5.5 L2.4 10.5 L-2.4 10.5 Z"/>
+      <path d="M0 8.5 L3 14.5 L-3 14.5 Z"/>
+      <rect x="-0.6" y="14" width="1.2" height="2"/>
+    </g>
+  </defs>
+  <rect width="26" height="18" fill="url(#dsMist)"/>
+  <g fill="#243a28">
+    <use href="#dsTreeSmall" x="8"/>
+    <use href="#dsTree" x="17" transform="scale(0.88 0.94) translate(2.3 0.9)"/>
+    <use href="#dsTree"/>
+    <use href="#dsTree" x="26"/>
+  </g>
+  <rect y="15.4" width="26" height="2.6" fill="#1a2a1d"/>
+</svg>

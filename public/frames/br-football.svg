@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <!-- classic football for the title row -->
+  <defs><clipPath id="fb"><circle cx="20" cy="20" r="17.5"/></clipPath></defs>
+  <circle cx="20" cy="20" r="17.5" fill="#f4f4f4"/>
+  <g clip-path="url(#fb)" fill="#1a1a1e">
+    <path d="M20.0 13.2 L13.5 17.9 L16.0 25.5 L24.0 25.5 L26.5 17.9 Z"/>
+    <path d="M20.0 8.9 L26.1 4.5 L23.8 -2.7 L16.2 -2.7 L13.9 4.5 Z"/>
+    <path d="M9.4 16.6 L7.1 9.4 L-0.4 9.4 L-2.7 16.6 L3.4 21.0 Z"/>
+    <path d="M13.5 29.0 L6.0 29.0 L3.6 36.1 L9.7 40.6 L15.8 36.1 Z"/>
+    <path d="M26.5 29.0 L24.2 36.1 L30.3 40.6 L36.4 36.1 L34.0 29.0 Z"/>
+    <path d="M30.6 16.6 L36.6 21.0 L42.7 16.6 L40.4 9.4 L32.9 9.4 Z"/>
+  </g>
+  <g stroke="#1a1a1e" stroke-width="1.4" clip-path="url(#fb)">
+    <line x1="20.0" y1="13.2" x2="20.0" y2="8.0"/>
+    <line x1="13.5" y1="17.9" x2="8.6" y2="16.3"/>
+    <line x1="16.0" y1="25.5" x2="12.9" y2="29.7"/>
+    <line x1="24.0" y1="25.5" x2="27.1" y2="29.7"/>
+    <line x1="26.5" y1="17.9" x2="31.4" y2="16.3"/>
+  </g>
+  <circle cx="20" cy="20" r="17.5" fill="none" stroke="#c8c8c8" stroke-width="1"/>
+</svg>

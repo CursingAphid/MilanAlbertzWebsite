@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18">
+  <!-- Swiss cross strip tile -->
+  <rect width="22" height="18" fill="#d8232a"/>
+  <g fill="#f6f4f0">
+    <rect x="9.4" y="4" width="3.2" height="10" rx="0.4"/>
+    <rect x="6" y="7.4" width="10" height="3.2" rx="0.4"/>
+  </g>
+  <rect y="16.2" width="22" height="1.8" fill="#a3161c"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+  <!-- Fachwerk tile for border-image (slice 20, drawn at ~18px with `round`):
+       a 3x3 grid of identical timber panels with Andreaskreuz braces. Each
+       panel's beams sit fully inside its 20x20 slice region, so slicing is
+       clean and repeating reads as a half-timbered wall. -->
+  <defs>
+    <g id="dePanel">
+      <rect x="1.5" y="1.5" width="17" height="17" stroke-width="2.9"/>
+      <path d="M4 4 L16 16 M16 4 L4 16" stroke-width="2.1"/>
+    </g>
+  </defs>
+  <rect width="60" height="60" fill="#efe6d4"/>
+  <g fill="none" stroke="#4b3524" stroke-linecap="square">
+    <use href="#dePanel"/>
+    <use href="#dePanel" x="20"/>
+    <use href="#dePanel" x="40"/>
+    <use href="#dePanel" y="20"/>
+    <use href="#dePanel" x="20" y="20"/>
+    <use href="#dePanel" x="40" y="20"/>
+    <use href="#dePanel" y="40"/>
+    <use href="#dePanel" x="20" y="40"/>
+    <use href="#dePanel" x="40" y="40"/>
+  </g>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- round passport-style stamp, Turkish edition: warm cream ink so it
+       reads on the card's dark harbor water; crescent and star below -->
+  <g fill="none" stroke="#f2e2c8" opacity="0.92">
+    <circle cx="50" cy="50" r="46" stroke-width="2.6"/>
+    <circle cx="50" cy="50" r="41.5" stroke-width="1.2"/>
+  </g>
+  <defs>
+    <path id="trTopArc" d="M50 50m-27 0a27 27 0 1 1 54 0"/>
+  </defs>
+  <g fill="#f2e2c8" opacity="0.92" font-family="Helvetica, Arial, sans-serif">
+    <text font-size="9" font-weight="bold" letter-spacing="1.5">
+      <textPath href="#trTopArc" startOffset="50%" text-anchor="middle">TÜRKİYE</textPath>
+    </text>
+    <text x="50" y="53.5" font-size="10" font-weight="bold" letter-spacing="1.5" text-anchor="middle">MERHABA</text>
+  </g>
+  <g fill="#f2e2c8" opacity="0.92">
+    <path d="M47 67 A7 7 0 1 0 47 81 A8.6 8.6 0 1 1 47 67 Z"/>
+    <path d="M54 71 L55.6 74.2 L59 75.4 L55.6 76.6 L54 79.8 L52.4 76.6 L49 75.4 L52.4 74.2 Z"/>
+  </g>
+  <g stroke="#f2e2c8" opacity="0.92" stroke-width="1.1">
+    <line x1="34" y1="41.5" x2="66" y2="41.5"/>
+    <line x1="34" y1="58.5" x2="66" y2="58.5"/>
+  </g>
+</svg>
