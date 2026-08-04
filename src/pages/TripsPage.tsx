@@ -60,7 +60,7 @@ const DEFAULT_POV = { lat: 30, lng: 5, altitude: 1.8 }
 // framing math below must treat that band as dead space, not usable canvas.
 const MOBILE_NAV_HEIGHT_PX = 64
 // fraction of the container height the bottom sheet occupies on mobile
-const MOBILE_CARD_FRACTION = 0.6
+const MOBILE_CARD_FRACTION = 0.5
 // Camera altitude limits (relative to globe radius). Distance = radius * (1 + altitude).
 // The floor must stay low enough that tightly packed place clusters
 // (e.g. Hong Kong/Macau/Shenzhen) can still be zoomed apart.
@@ -2005,10 +2005,6 @@ export default function TripsPage() {
             ref={containerRef}
             className={`relative w-full h-full cursor-grab active:cursor-grabbing transition-opacity duration-700 ease-in-out ${
               sceneVisible ? 'opacity-100' : 'opacity-0'
-            } ${
-              // on mobile the open card owns the screen — the globe can't be
-              // dragged/zoomed until it's closed (place flags stay tappable)
-              selected ? 'pointer-events-none md:pointer-events-auto' : ''
             }`}
           >
             {/* City hover tooltip, positioned imperatively next to the cursor */}
@@ -2251,7 +2247,7 @@ export default function TripsPage() {
           {/* Country info panel — on mobile it fills the bottom half (the
               globe shifts the selection into the top half); on desktop it
               fills the full right side, edge to edge */}
-          <div className="absolute inset-x-0 bottom-0 h-3/5 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
+          <div className="absolute inset-x-0 bottom-0 h-1/2 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
             <div
               data-testid="country-card"
               className={`relative h-full flex flex-col bg-[#222831] border-0 border-t md:border-t-0 md:border-l ${
