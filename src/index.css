@@ -1153,6 +1153,67 @@
   border-radius: 2px;
 }
 
+/* --- Greek card extras --- */
+
+/* full-card Aegean afternoon (glitter + sailboat animate via SMIL inside
+   the SVG so they stay anchored to the sea band) */
+.gr-aegean-bg {
+  background: url('/frames/gr-aegean.svg') center bottom / cover no-repeat;
+}
+
+/* Greek key along the card's top edge */
+.gr-meander-strip {
+  background: url('/frames/gr-meander.svg') repeat-x left top / auto 100%;
+}
+
+/* whitewashed island plaster frame with cobalt shutter-paint fillets */
+.media-frame--gr {
+  padding: 16px;
+  background: url('/textures/gr-plaster.jpg');
+  background-size: 260px 260px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 2px rgba(29, 79, 158, 0.5),
+    inset 0 2px 5px rgba(255, 255, 255, 0.7),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.18);
+}
+
+.media-frame--gr > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(36, 86, 168, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* round passport-style stamp */
+.gr-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+/* Greece: cobalt banner, white lettering */
+.place-flag--gr:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #3a72c8 0%, #2456a8 45%, #183f80 100%);
+}
+
+.place-flag--gr:not(.place-flag--home) .place-flag-ground {
+  background: rgba(36, 86, 168, 0.55);
+}
+
+.place-flag--gr:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #2456a8;
+  background: linear-gradient(135deg, #ffffff 0%, #eaf1fb 100%);
+}
+
+.place-flag--gr:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
 /* --- British card extras --- */
 
 /* full-card London dusk skyline */
@@ -1292,6 +1353,11 @@
 }
 
 /* --- French card extras --- */
+
+/* full-card Paris at l'heure bleue — replaces the flag wash */
+.fr-paris-bg {
+  background: url('/frames/fr-paris.svg') center bottom / cover no-repeat;
+}
 
 
 /* the tricolore's vertical bands along the card's top edge */

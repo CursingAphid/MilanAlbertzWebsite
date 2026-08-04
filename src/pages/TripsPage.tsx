@@ -3,7 +3,7 @@ import Globe from 'react-globe.gl'
 import type { GlobeMethods } from 'react-globe.gl'
 import * as THREE from 'three'
 import { geoArea, geoBounds, geoCentroid } from 'd3-geo'
-import { BadgeCheck, BarChart3, ChevronDown, ChevronLeft, ChevronRight, Flag, House, Image as ImageIcon, Maximize2, X } from 'lucide-react'
+import { BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, Flag, House, Image as ImageIcon, Maximize2, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import NavBar from '../components/NavBar'
 import SpaceBackground from '../components/SpaceBackground'
@@ -1025,6 +1025,22 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     titleArt: '/frames/at-eagle.svg',
     snow: true,
   },
+  GRC: {
+    border: 'border-blue-600/80',
+    // not the flag: an Aegean afternoon — glittering sea, white village,
+    // blue domes and an island windmill
+    tint: 'gr-aegean-bg',
+    strip: 'h-4 gr-meander-strip',
+    badge: 'text-sky-300',
+    chipActive: 'bg-blue-500/15 border-sky-300 text-sky-200',
+    chipIdle: 'border-blue-500/60 text-on-dark hover:border-sky-300 hover:text-sky-100',
+    flagClass: 'place-flag--gr',
+    frame: 'media-frame--gr',
+    extras: 'gr',
+    nativeLabels: { Greece: 'Ελλάδα' },
+    nativeClass: 'italic',
+    titleArt: '/frames/gr-eye.svg',
+  },
   GBR: {
     border: 'border-red-700/80',
     // not the flag: London at dusk — skyline silhouettes, fog and drizzle
@@ -1057,9 +1073,8 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
   },
   FRA: {
     border: 'border-blue-700/70',
-    // the tricolore runs vertically, so this card's wash is horizontal:
-    // blue on the left, a pale lift in the middle, red on the right
-    tint: 'bg-[linear-gradient(to_right,rgb(0_85_164/0.55)_0%,rgb(0_85_164/0.55)_30%,rgb(252_252_255/0.72)_37%,rgb(252_252_255/0.72)_63%,rgb(225_43_43/0.55)_70%,rgb(225_43_43/0.55)_100%)]',
+    // not the flag: Paris rooftops at l'heure bleue with the Eiffel Tower
+    tint: 'fr-paris-bg',
     strip: 'h-2 fr-flag-strip',
     badge: 'text-blue-300',
     chipActive: 'bg-blue-500/15 border-blue-300 text-blue-200',
@@ -1175,8 +1190,6 @@ export default function TripsPage() {
   const [globeReady, setGlobeReady] = useState(false)
   // The scene fades in as one once all layers have had time to build
   const [sceneVisible, setSceneVisible] = useState(false)
-  // Travel stats live behind a toggle to keep the hero compact
-  const [statsOpen, setStatsOpen] = useState(false)
 
   // Load the admin-managed dataset; falls back to the bundled data file
   useEffect(() => {
@@ -1968,20 +1981,8 @@ export default function TripsPage() {
   // or the country's own story when no place is selected
   const panelText = placeText ?? (selectedPlace ? undefined : countryText)
 
-  // Hero stats: countries visited, continents, share of the world
-  const stats = useMemo(() => {
-    if (countries.length === 0) return null
-    const visited = countries.filter((c) => visitedByCode.has(c.properties.iso3))
-    if (visited.length === 0) return null
-    return {
-      countries: visited.length,
-      continents: new Set(visited.map((c) => c.properties.continent)).size,
-      worldPct: Math.round((visited.length / countries.length) * 100),
-    }
-  }, [countries, visitedByCode])
-
   return (
-    <div ref={pageRef} className="h-dvh flex flex-col overflow-hidden relative z-10 bg-gradient-to-b from-purple-900 via-blue-900 to-black">
+    <div ref={pageRef} className="h-dvh flex flex-col overflow-hidden relative z-10 md:pt-16 bg-gradient-to-b from-purple-900 via-blue-900 to-black">
       {/* Same space backdrop as the home page's About section */}
       <SpaceBackground
         moonCard={{ title: t('trips.moonTitle'), text: t('trips.moonText') }}
@@ -1989,49 +1990,8 @@ export default function TripsPage() {
       />
       <NavBar />
 
-      {/* Hero Section — compact; hidden on mobile where every pixel counts;
-          the stats hide behind the chart button */}
-      <div className="hidden md:block w-full pt-16 pb-1.5 header-gradient-trips relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="text-lg md:text-xl font-bold text-white">{t('trips.hero.title')}</h1>
-          <p className="text-xs md:text-sm text-gray-200 max-w-3xl mx-auto">
-            {t('trips.hero.subtitle')}
-          </p>
-          {stats && (
-            <>
-              <button
-                type="button"
-                aria-label={t('trips.statsToggle')}
-                title={t('trips.statsToggle')}
-                onClick={() => setStatsOpen((open) => !open)}
-                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${
-                  statsOpen ? 'text-white' : 'text-gray-200 hover:text-white'
-                }`}
-              >
-                <BarChart3 className="h-5 w-5" />
-              </button>
-              {statsOpen && (
-                <div className="absolute right-4 top-full mt-2 z-30 inline-flex items-center gap-2 md:gap-3 rounded-full border border-white/20 bg-gray-900/90 px-4 md:px-5 py-1.5 text-sm text-gray-200 backdrop-blur-sm whitespace-nowrap">
-                  <span>
-                    <span className="font-bold text-white">{stats.countries}</span> {t('trips.stats.countries')}
-                  </span>
-                  <span className="opacity-50">·</span>
-                  <span>
-                    <span className="font-bold text-white">{stats.continents}</span> {t('trips.stats.continents')}
-                  </span>
-                  <span className="opacity-50">·</span>
-                  <span>
-                    <span className="font-bold text-white">{stats.worldPct}%</span> {t('trips.stats.world')}
-                  </span>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Globe Section — fills the remaining viewport height */}
-      <section className="flex-1 min-h-0 flex flex-col py-1.5">
+      <section className="flex-1 min-h-0 flex flex-col">
         <div className="relative overflow-hidden flex-1 min-h-0">
           {/* Loading veil — the scene stays hidden underneath until every
               layer (countries, relief, clouds) has had time to build, then
@@ -2401,6 +2361,9 @@ export default function TripsPage() {
                       />
                       <img src="/frames/fr-stamp.svg" alt="" className="fr-stamp hidden md:block" />
                     </>
+                  )}
+                  {cardTheme?.extras === 'gr' && (
+                    <img src="/frames/gr-stamp.svg" alt="" className="gr-stamp hidden md:block" />
                   )}
                   {cardTheme?.extras === 'gb' && (
                     <>

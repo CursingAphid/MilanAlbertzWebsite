@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 18">
+  <!-- Greek key tile: the spiral connects to the next tile through the
+       continuous top bar, so it repeats seamlessly -->
+  <rect width="14" height="18" fill="#1d4f9e"/>
+  <path d="M0 4 H14 V14 H6 V8 H10" fill="none" stroke="#f2f6fc" stroke-width="2"/>
+</svg>

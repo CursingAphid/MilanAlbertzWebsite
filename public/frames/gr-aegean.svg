@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600">
+  <!-- full-card Aegean afternoon for the Greece card: cobalt sky, glittering
+       sea with a drifting sailboat (SMIL, so it stays anchored to the sea
+       band at any card size), a whitewashed village with blue domes and an
+       island windmill, and dark harbor water below with faint reflections
+       (keeps the card's lower text areas readable). -->
+  <defs>
+    <linearGradient id="aSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c4e9c" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#7db4e8" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="aSea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6fc4d8"/>
+      <stop offset="1" stop-color="#2a6cb0"/>
+    </linearGradient>
+    <linearGradient id="aSand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#cdb488"/>
+      <stop offset="1" stop-color="#9c8257"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="250" fill="url(#aSky)"/>
+  <circle cx="330" cy="66" r="30" fill="#ffedb0" opacity="0.3"/>
+  <circle cx="330" cy="66" r="15" fill="#ffedb0"/>
+
+  <!-- far sea with wave hints (runs down behind the village so no card
+       background shows between rooftops) -->
+  <rect y="250" width="400" height="255" fill="url(#aSea)"/>
+  <g fill="none" stroke="#bfe6ef" stroke-width="1.5" opacity="0.3">
+    <path d="M0 285 Q100 281 200 285 T400 285"/>
+    <path d="M0 318 Q100 314 200 318 T400 318"/>
+    <path d="M0 352 Q100 348 200 352 T400 352"/>
+  </g>
+
+  <!-- sun glitter on the water -->
+  <g fill="#ffffff">
+    <ellipse cx="60" cy="268" rx="4" ry="1.2" opacity="0"><animate attributeName="opacity" values="0;0.8;0" dur="2.6s" begin="0s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="140" cy="262" rx="3" ry="1" opacity="0"><animate attributeName="opacity" values="0;0.7;0" dur="3.1s" begin="0.8s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="228" cy="270" rx="5" ry="1.3" opacity="0"><animate attributeName="opacity" values="0;0.85;0" dur="2.9s" begin="1.5s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="318" cy="264" rx="4" ry="1.1" opacity="0"><animate attributeName="opacity" values="0;0.9;0" dur="2.4s" begin="0.4s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="376" cy="276" rx="3" ry="1" opacity="0"><animate attributeName="opacity" values="0;0.7;0" dur="3.4s" begin="2.1s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="96" cy="296" rx="4" ry="1.2" opacity="0"><animate attributeName="opacity" values="0;0.75;0" dur="2.8s" begin="1.1s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="190" cy="304" rx="3.5" ry="1" opacity="0"><animate attributeName="opacity" values="0;0.8;0" dur="3.2s" begin="0.2s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="282" cy="298" rx="4.5" ry="1.2" opacity="0"><animate attributeName="opacity" values="0;0.7;0" dur="2.5s" begin="1.9s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="352" cy="308" rx="3" ry="1" opacity="0"><animate attributeName="opacity" values="0;0.75;0" dur="3s" begin="0.6s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="48" cy="330" rx="3.5" ry="1.1" opacity="0"><animate attributeName="opacity" values="0;0.7;0" dur="2.7s" begin="1.4s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="152" cy="340" rx="4" ry="1.2" opacity="0"><animate attributeName="opacity" values="0;0.65;0" dur="3.3s" begin="2.4s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="248" cy="336" rx="3" ry="1" opacity="0"><animate attributeName="opacity" values="0;0.7;0" dur="2.6s" begin="0.9s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="332" cy="344" rx="4" ry="1.1" opacity="0"><animate attributeName="opacity" values="0;0.6;0" dur="3.1s" begin="1.7s" repeatCount="indefinite"/></ellipse>
+    <ellipse cx="90" cy="366" rx="3.5" ry="1" opacity="0"><animate attributeName="opacity" values="0;0.6;0" dur="2.9s" begin="0.3s" repeatCount="indefinite"/></ellipse>
+  </g>
+
+  <!-- little sailboat drifting across the bay -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="-40 296; 440 290" dur="55s" repeatCount="indefinite"/>
+    <path d="M-11 4 L11 4 L6 9 L-6 9 Z" fill="#e8e4d8"/>
+    <line x1="0" y1="4" x2="0" y2="-14" stroke="#d8d4c8" stroke-width="1"/>
+    <path d="M1 -14 L1 2 L12 2 Z" fill="#ffffff"/>
+    <path d="M-1 -11 L-1 2 L-10 2 Z" fill="#f0ede2"/>
+  </g>
+
+  <!-- BACK ROW: hazy ridge of houses with the domes and the windmill -->
+  <g>
+    <path d="M324 380 L327 334 L341 334 L344 380 Z" fill="#e0dbcd"/>
+    <path d="M334 380 L335 334 L341 334 L344 380 Z" fill="#d4cfc0"/>
+    <path d="M322 334 L334 320 L346 334 Z" fill="#8a6a4a"/>
+    <g stroke="#ece7da" stroke-width="2">
+      <line x1="334" y1="329" x2="350" y2="313"/>
+      <line x1="334" y1="329" x2="350" y2="345"/>
+      <line x1="334" y1="329" x2="318" y2="313"/>
+      <line x1="334" y1="329" x2="318" y2="345"/>
+    </g>
+    <circle cx="334" cy="329" r="2.5" fill="#6a4a2a"/>
+  </g>
+  <g>
+    <rect x="0" y="378" width="26" height="90" fill="#e0dbcd"/>
+    <rect x="26" y="370" width="30" height="98" fill="#d4cfc0"/>
+    <rect x="56" y="384" width="24" height="84" fill="#e0dbcd"/>
+    <rect x="80" y="366" width="34" height="102" fill="#d4cfc0"/>
+    <rect x="114" y="380" width="28" height="88" fill="#e0dbcd"/>
+    <rect x="142" y="372" width="32" height="96" fill="#d4cfc0"/>
+    <rect x="174" y="386" width="26" height="82" fill="#e0dbcd"/>
+    <rect x="200" y="368" width="36" height="100" fill="#d4cfc0"/>
+    <rect x="236" y="382" width="26" height="86" fill="#e0dbcd"/>
+    <rect x="262" y="374" width="30" height="94" fill="#d4cfc0"/>
+    <rect x="292" y="386" width="22" height="82" fill="#e0dbcd"/>
+    <rect x="314" y="380" width="38" height="88" fill="#d4cfc0"/>
+    <rect x="352" y="376" width="28" height="92" fill="#e0dbcd"/>
+    <rect x="380" y="384" width="20" height="84" fill="#d4cfc0"/>
+  </g>
+  <rect x="118" y="358" width="18" height="26" fill="#e0dbcd"/>
+  <path d="M118 358 A9 7.5 0 0 1 136 358 Z" fill="#2f5eae"/>
+  <rect x="206" y="356" width="16" height="16" fill="#d4cfc0"/>
+  <path d="M206 356 A8 7 0 0 1 222 356 Z" fill="#2f5eae"/>
+
+  <!-- windows on the back row: smaller and muted with distance -->
+  <g fill="#35619f" opacity="0.65">
+    <rect x="10" y="392" width="4" height="7" rx="1.8"/>
+    <rect x="38" y="384" width="4" height="7" rx="1.8"/>
+    <rect x="64" y="396" width="4" height="7" rx="1.8"/>
+    <rect x="92" y="380" width="4" height="7" rx="1.8"/>
+    <rect x="124" y="394" width="4" height="7" rx="1.8"/>
+    <rect x="152" y="386" width="4" height="7" rx="1.8"/>
+    <rect x="182" y="398" width="4" height="7" rx="1.8"/>
+    <rect x="212" y="382" width="4" height="7" rx="1.8"/>
+    <rect x="246" y="394" width="4" height="7" rx="1.8"/>
+    <rect x="272" y="388" width="4" height="7" rx="1.8"/>
+    <rect x="300" y="398" width="4" height="7" rx="1.8"/>
+    <rect x="360" y="390" width="4" height="7" rx="1.8"/>
+    <rect x="386" y="396" width="4" height="7" rx="1.8"/>
+  </g>
+
+  <!-- FRONT ROW: bright cubes stepping down to the harbor -->
+  <g>
+    <rect x="0" y="430" width="44" height="75" fill="#f6f3ea"/>
+    <rect x="44" y="418" width="40" height="87" fill="#e9e5d8"/>
+    <rect x="56" y="406" width="18" height="12" fill="#f6f3ea"/>
+    <rect x="84" y="438" width="36" height="67" fill="#f6f3ea"/>
+    <rect x="120" y="424" width="42" height="81" fill="#e9e5d8"/>
+    <rect x="162" y="434" width="34" height="71" fill="#f6f3ea"/>
+    <rect x="196" y="416" width="46" height="89" fill="#e9e5d8"/>
+    <rect x="210" y="404" width="18" height="12" fill="#f6f3ea"/>
+    <rect x="242" y="432" width="38" height="73" fill="#f6f3ea"/>
+    <rect x="280" y="422" width="40" height="83" fill="#e9e5d8"/>
+    <rect x="320" y="440" width="34" height="65" fill="#f6f3ea"/>
+    <rect x="354" y="426" width="46" height="79" fill="#e9e5d8"/>
+  </g>
+  <!-- doors and windows on the front row -->
+  <g fill="#2456a8" opacity="0.9">
+    <rect x="16" y="452" width="6" height="11" rx="2.5"/>
+    <rect x="58" y="444" width="5" height="8" rx="2"/>
+    <rect x="98" y="458" width="6" height="12" rx="2.5"/>
+    <rect x="136" y="448" width="5" height="8" rx="2"/>
+    <rect x="174" y="456" width="6" height="11" rx="2.5"/>
+    <rect x="214" y="440" width="5" height="8" rx="2"/>
+    <rect x="256" y="452" width="6" height="12" rx="2.5"/>
+    <rect x="294" y="446" width="5" height="8" rx="2"/>
+    <rect x="332" y="460" width="5" height="9" rx="2"/>
+    <rect x="372" y="450" width="6" height="11" rx="2.5"/>
+    <rect x="30" y="486" width="7" height="14" rx="3"/>
+    <rect x="146" y="488" width="7" height="14" rx="3"/>
+    <rect x="262" y="486" width="7" height="14" rx="3"/>
+    <rect x="366" y="488" width="7" height="14" rx="3"/>
+  </g>
+  <!-- the beach below the village -->
+  <rect y="505" width="400" height="95" fill="url(#aSand)"/>
+  <g fill="none" stroke="#8a7148" stroke-width="1.5" opacity="0.18">
+    <path d="M0 534 Q100 530 200 534 T400 534"/>
+    <path d="M0 568 Q100 564 200 568 T400 568"/>
+  </g>
+  <!-- scattered pebbles -->
+  <g fill="#7d6742" opacity="0.4">
+    <ellipse cx="46" cy="546" rx="3" ry="1.4"/>
+    <ellipse cx="180" cy="580" rx="2.5" ry="1.2"/>
+    <ellipse cx="238" cy="540" rx="3.5" ry="1.5"/>
+    <ellipse cx="330" cy="586" rx="2.5" ry="1.2"/>
+    <ellipse cx="368" cy="548" rx="3" ry="1.3"/>
+  </g>
+  <!-- rowboat pulled ashore, resting on the sand -->
+  <ellipse cx="106" cy="560" rx="31" ry="3.5" fill="#6a5334" opacity="0.28"/>
+  <path d="M134 548 Q110 561 82 559 L78 546 Q102 553 134 548 Z" fill="#f2efe6"/>
+  <path d="M78 546 Q102 553 134 548" fill="none" stroke="#2456a8" stroke-width="3"/>
+  <!-- beach umbrella -->
+  <ellipse cx="304" cy="570" rx="22" ry="3.5" fill="#6a5334" opacity="0.22"/>
+  <line x1="300" y1="524" x2="300" y2="568" stroke="#6a5334" stroke-width="2"/>
+  <path d="M281 529 A19 13 0 0 1 319 529 Z" fill="#2456a8"/>
+  <g stroke="#f2f6fc" stroke-width="2" fill="none">
+    <path d="M300 516 Q291 520 288.5 529"/>
+    <path d="M300 516 Q309 520 311.5 529"/>
+  </g>
+  <circle cx="300" cy="514.5" r="1.8" fill="#1d3f8f"/>
+</svg>
