@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48">
+  <!-- Bohemian lion: silver double-tailed lion rampant on the red shield -->
+  <path d="M3 3 L37 3 L37 28 Q37 41 20 46 Q3 41 3 28 Z" fill="#d7141a"/>
+  <path d="M3 3 L37 3 L37 28 Q37 41 20 46 Q3 41 3 28 Z" fill="none" stroke="#8a0e12" stroke-width="1.6"/>
+  <g fill="#f4f4f0">
+    <!-- rearing body -->
+    <path d="M16 40 Q13 34 15 28 Q17 22 21 18 Q25 14 26 10 L30 13 Q29 18 25 23 Q22 27 21 32 Q20.5 36 22 40 Z"/>
+    <!-- head with open jaw -->
+    <path d="M25 8 Q29 5 32 7 Q34 9 33 12 L30 11 Q31 13 29 14 Q26 14 25 11 Z"/>
+    <!-- mane spikes -->
+    <path d="M25 9 L22 7 L24.5 11 Z"/>
+    <path d="M24 12 L21 11 L23.5 14 Z"/>
+    <!-- forelegs raised -->
+    <path d="M22 19 Q18 17 15 18 L15.5 20.5 Q19 20 21 21.5 Z"/>
+    <path d="M24 15 Q20 12.5 17 13 L17.5 15.5 Q21 15.5 23 17.5 Z"/>
+    <!-- the two tails, crossing -->
+    <path d="M16 38 Q10 36 9 30 Q8.5 26 11 23 Q10 28 13 30.5 Q15 32 15.5 35 Z"/>
+    <path d="M17 35 Q12 30 13.5 24 Q14.5 20 18 18.5 Q15 23 16.5 27 Q18 30 18.5 33 Z"/>
+    <!-- hind paw -->
+    <path d="M16 40 L22 40 L22.5 42.5 L15.5 42.5 Z"/>
+  </g>
+  <!-- gold crown -->
+  <path d="M26.5 5.5 L27.5 2 L29.5 4.5 L31.5 1.5 L33.5 4.5 L35.5 2 L36 5.8 Q31 7.6 26.5 5.5 Z" fill="#e8c34a"/>
+</svg>

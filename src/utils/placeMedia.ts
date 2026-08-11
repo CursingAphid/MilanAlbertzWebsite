@@ -18,6 +18,8 @@ export interface MediaItem {
   pathname: string
   size: number
   uploadedAt: string
+  /** attached client-side when country galleries are combined */
+  placeName?: string
 }
 
 export const isVideo = (pathname: string) => /\.(mp4|mov|m4v|webm)$/i.test(pathname)

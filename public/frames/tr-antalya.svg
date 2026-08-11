@@ -30,8 +30,8 @@
 
   <rect width="400" height="301" fill="url(#dSky)"/>
   <!-- crescent and star -->
-  <path d="M326 55 A10 10 0 1 0 326 75 A12.5 12.5 0 1 1 326 55 Z" fill="#f4e8d0" opacity="0.85"/>
-  <path d="M339 62 L340.8 65.6 L344.5 67 L340.8 68.4 L339 72 L337.2 68.4 L333.5 67 L337.2 65.6 Z" fill="#f4e8d0" opacity="0.8"/>
+  <path d="M58 200 A10 10 0 1 0 58 220 A12.5 12.5 0 1 1 58 200 Z" fill="#f4e8d0" opacity="0.85"/>
+  <path d="M71 207 L72.8 210.6 L76.5 212 L72.8 213.4 L71 217 L69.2 213.4 L65.5 212 L69.2 210.6 Z" fill="#f4e8d0" opacity="0.8"/>
 
   <g transform="translate(0 55)">
   <!-- the old town along the cliff top: jettied Ottoman houses -->

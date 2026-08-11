@@ -32,7 +32,9 @@
     "mediaFullscreen": "View full screen",
     "mediaClose": "Close",
     "prevCountry": "Previous country",
-    "nextCountry": "Next country"
+    "nextCountry": "Next country",
+    "showcaseOn": "Hide the card and admire the scene",
+    "showcaseOff": "Show the card again"
   },
   "hero": {
     "greeting": "Hi, I'm",

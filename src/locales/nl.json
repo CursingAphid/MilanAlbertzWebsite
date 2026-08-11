@@ -32,7 +32,9 @@
     "mediaFullscreen": "Volledig scherm",
     "mediaClose": "Sluiten",
     "prevCountry": "Vorig land",
-    "nextCountry": "Volgend land"
+    "nextCountry": "Volgend land",
+    "showcaseOn": "Verberg de kaart en bewonder de scène",
+    "showcaseOff": "Toon de kaart weer"
   },
   "hero": {
     "greeting": "Hoi, ik ben",

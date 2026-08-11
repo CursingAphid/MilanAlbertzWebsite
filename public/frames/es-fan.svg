@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 30">
+  <!-- abanico: a half-open folding fan — alternating pleats, dark guards,
+       gold rim, rivet at the pivot -->
+  <defs>
+    <g id="pleat">
+      <path d="M0 0 L-4.2 -24 L4.2 -24 Z"/>
+    </g>
+  </defs>
+  <g transform="translate(22 28)">
+    <use href="#pleat" transform="rotate(-64)" fill="#b02a3a"/>
+    <use href="#pleat" transform="rotate(-48)" fill="#f2e4c8"/>
+    <use href="#pleat" transform="rotate(-32)" fill="#b02a3a"/>
+    <use href="#pleat" transform="rotate(-16)" fill="#f2e4c8"/>
+    <use href="#pleat" fill="#b02a3a"/>
+    <use href="#pleat" transform="rotate(16)" fill="#f2e4c8"/>
+    <use href="#pleat" transform="rotate(32)" fill="#b02a3a"/>
+    <use href="#pleat" transform="rotate(48)" fill="#f2e4c8"/>
+    <use href="#pleat" transform="rotate(64)" fill="#b02a3a"/>
+    <!-- little blossoms on the cream pleats -->
+    <g fill="#c8342a">
+      <circle cx="-11.5" cy="-15.5" r="1.2"/>
+      <circle cx="-4" cy="-18.5" r="1.2"/>
+      <circle cx="4" cy="-18.5" r="1.2"/>
+      <circle cx="11.5" cy="-15.5" r="1.2"/>
+    </g>
+    <!-- gold rim following the open edge -->
+    <path d="M-21.5 -10.5 A24 24 0 0 1 21.5 -10.5" fill="none" stroke="#e8c34a" stroke-width="1.6"/>
+    <!-- guards and rivet -->
+    <path d="M0 0 L-22.2 -10.9" stroke="#4a3220" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M0 0 L22.2 -10.9" stroke="#4a3220" stroke-width="2.2" stroke-linecap="round"/>
+    <circle r="2.2" fill="#e8c34a"/>
+  </g>
+</svg>

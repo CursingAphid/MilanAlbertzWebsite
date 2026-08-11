@@ -971,22 +971,88 @@
 
 /* Chinese picture frame around the card slideshow (not the fullscreen
    lightbox): gold lattice with interlocking corner knots on red lacquer.
-   The lattice is an SVG applied as a 9-slice border-image, so the corner
-   knots stay intact while the lines stretch with the frame. */
+   Carved red lacquer with gold fillets. */
 .media-frame--cn {
-  padding: 3px;
-  border: 15px solid transparent;
-  border-image: url('/frames/cn-frame.svg') 48 / 15px stretch;
-  background: linear-gradient(135deg, #a01a0f 0%, #c8281a 45%, #7d1108 100%);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  background: url('/textures/cn-lacquer.jpg');
+  background-size: 280px 280px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 2px rgba(201, 162, 39, 0.5),
+    inset 0 2px 6px rgba(255, 190, 150, 0.3),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* square media corners suit the lattice better than the default rounding */
 .media-frame--cn > div {
   border-radius: 2px;
+  box-shadow:
+    0 0 0 2px rgba(201, 162, 39, 0.7),
+    0 0 10px rgba(0, 0, 0, 0.4);
 }
 
 /* --- Chinese card extras --- */
+
+/* per-place night scenes; the tint div is keyed, so each swap fades in */
+.card-tint {
+  animation: card-tint-fade 0.5s ease;
+}
+
+@keyframes card-tint-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.cn-china-bg {
+  background: url('/frames/cn-china.svg') center bottom / cover no-repeat;
+}
+
+.cn-hongkong-bg {
+  background: url('/frames/cn-hongkong.svg') center bottom / cover no-repeat;
+}
+
+.cn-macau-bg {
+  background: url('/frames/cn-macau.svg') center bottom / cover no-repeat;
+}
+
+/* sky lanterns: the one particle layer that RISES — warm glowing paper
+   shells climbing from below the card and swaying as they go */
+.cn-lanterns {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cn-lantern-up {
+  position: absolute;
+  bottom: -16px;
+  border-radius: 45% 45% 38% 38%;
+  box-shadow: 0 0 9px 2px rgba(255, 178, 74, 0.45);
+  animation: cn-lantern-rise linear infinite;
+}
+
+@keyframes cn-lantern-rise {
+  to {
+    transform: translate(var(--sx, 0), -112vh);
+  }
+}
+
+/* casino chip shown while Macau is selected */
+.cn-casino-chip {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.cn-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-11deg);
+  pointer-events: none;
+}
 
 /* calligraphic system fonts — no webfont download needed */
 .cn-calligraphy {
@@ -1020,7 +1086,7 @@
 /* red artist's seal (印章), stamped in the card's corner */
 .cn-seal {
   position: absolute;
-  right: 1.1rem;
+  left: 1.1rem;
   bottom: 1.1rem;
   pointer-events: none;
   padding: 8px 5px;
@@ -1039,12 +1105,14 @@
   opacity: 0.95;
 }
 
-/* thin dark halo around all country-card text — keeps it readable on any
-   themed wash (text-shadow inherits, so the card root applies it everywhere) */
+/* strong dark halo around all country-card text — keeps white text readable
+   on even the brightest scene (text-shadow inherits from the card root) */
 .card-text-halo {
   text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.6),
-    0 0 3px rgba(0, 0, 0, 0.4);
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 5px rgba(0, 0, 0, 0.85),
+    0 0 12px rgba(0, 0, 0, 0.65),
+    0 2px 18px rgba(0, 0, 0, 0.5);
 }
 
 /* --- Austrian card extras --- */
@@ -1246,6 +1314,183 @@
 
 .place-flag--ch:not(.place-flag--home).place-flag--active .place-flag-ground {
   background: rgba(216, 35, 42, 0.7);
+}
+
+/* --- Belgian card extras --- */
+
+/* full-card Grand-Place dusk (windows flicker via SMIL) */
+.be-brussels-bg {
+  background: url('/frames/be-brussels.svg') center bottom / cover no-repeat;
+}
+
+/* the tricolore along the card's top edge */
+.be-flag-strip {
+  background: linear-gradient(to right, #1a1a1a 0% 33.3%, #f2c500 33.3% 66.6%, #e03c31 66.6% 100%);
+}
+
+/* beer bubbles drifting up the card */
+.be-bubbles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.be-bubble {
+  position: absolute;
+  bottom: -12px;
+  border: 1.5px solid rgba(255, 214, 140, 0.55);
+  border-radius: 50%;
+  background: rgba(255, 214, 140, 0.08);
+  animation: be-bubble-rise linear infinite;
+}
+
+@keyframes be-bubble-rise {
+  to {
+    transform: translate(var(--sx, 0), -112vh);
+  }
+}
+
+/* dark-chocolate photo frame: a bar of tablets with a gilt fillet */
+.media-frame--be {
+  padding: 16px;
+  background: url('/textures/be-chocolate.jpg');
+  background-size: 190px 190px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 2px rgba(232, 195, 74, 0.4),
+    inset 0 2px 6px rgba(255, 214, 150, 0.25),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.media-frame--be > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2px rgba(232, 195, 74, 0.6),
+    0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+/* frites and waffle holding the card's top corners */
+.be-frites,
+.be-waffle {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.be-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+/* Belgium: black banner, gold lettering */
+.place-flag--be:not(.place-flag--home) .place-flag-banner {
+  color: #f2c500;
+  background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 45%, #000000 100%);
+}
+
+.place-flag--be:not(.place-flag--home) .place-flag-ground {
+  background: rgba(26, 26, 26, 0.6);
+}
+
+.place-flag--be:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #1a1a1a;
+  background: linear-gradient(135deg, #ffd83a 0%, #f2c500 100%);
+}
+
+.place-flag--be:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(242, 197, 0, 0.7);
+}
+
+/* --- Czech card extras --- */
+
+/* full-card Prague dusk (lamps flicker and the swan drifts via SMIL) */
+.cz-prague-bg {
+  background: url('/frames/cz-prague.svg') center bottom / cover no-repeat;
+}
+
+/* Orloj band along the card's top edge */
+.cz-orloj-strip {
+  background: url('/frames/cz-orloj-strip.svg') repeat-x left top / auto 100%;
+}
+
+/* linden petals drifting down the card */
+.cz-petals {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cz-petal {
+  position: absolute;
+  top: -10px;
+  border-radius: 60% 100% 60% 100%;
+  animation: cz-petal-fall linear infinite;
+}
+
+@keyframes cz-petal-fall {
+  to {
+    transform: translate(var(--sx, 0), 104vh) rotate(var(--rot, 480deg));
+  }
+}
+
+/* Bohemian cut-crystal photo frame */
+.media-frame--cz {
+  padding: 16px;
+  background: url('/textures/cz-crystal.jpg');
+  background-size: 128px 128px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1.5px rgba(120, 132, 148, 0.8),
+    inset 0 2px 6px rgba(255, 255, 255, 0.75),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.media-frame--cz > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(96, 108, 124, 0.9),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* the Orloj and the Bohemian lion holding the card's top corners */
+.cz-orloj,
+.cz-lion {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.cz-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+/* Czechia: garnet banner, white lettering; gold when active */
+.place-flag--cz:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #e04a50 0%, #d7141a 45%, #a30e13 100%);
+}
+
+.place-flag--cz:not(.place-flag--home) .place-flag-ground {
+  background: rgba(215, 20, 26, 0.55);
+}
+
+.place-flag--cz:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #2a1f0a;
+  background: linear-gradient(135deg, #ffdc72 0%, #e8c34a 100%);
+}
+
+.place-flag--cz:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(232, 195, 74, 0.7);
 }
 
 /* --- German card extras --- */
@@ -1659,17 +1904,38 @@
   transform: rotate(-12deg);
 }
 
-/* trencadís photo frame: Gaudí broken-tile mosaic, grout showing through */
+/* trencadís photo frame: generated Gaudí broken-tile mosaic */
 .media-frame--es {
-  padding: 4px;
-  border: 17px solid transparent;
-  border-image: url('/frames/es-frame.svg') 48 / 17px round;
-  background: #e9e2d4;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  padding: 16px;
+  background: url('/textures/es-trencadis.jpg');
+  background-size: 240px 240px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1.5px rgba(120, 110, 92, 0.7),
+    inset 0 2px 5px rgba(255, 255, 255, 0.55),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.25);
 }
 
 .media-frame--es > div {
   border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(90, 82, 68, 0.85),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* the two Spanish scenes; the card crossfades between them per place */
+.es-mediterranean-bg {
+  background: url('/frames/es-mediterranean.svg') center bottom / cover no-repeat;
+}
+
+.es-canarias-bg {
+  background: url('/frames/es-canarias.svg') center bottom / cover no-repeat;
+}
+
+/* abanico resting in the card's top-right corner */
+.es-fan {
+  position: absolute;
+  pointer-events: none;
 }
 
 /* --- Dutch card extras --- */
@@ -1737,14 +2003,14 @@
 
 /* --- Brazilian card extras --- */
 
-/* festa junina pennant garlands hanging from the strip */
-.br-garland {
-  position: absolute;
-  pointer-events: none;
+/* the flag's losango repeating along the card's top edge */
+.br-flag-strip {
+  background: url('/frames/br-flag.svg') repeat-x left top / auto 100%;
 }
 
-/* football resting in the card's top-left corner */
-.br-football {
+/* football and toucan holding the card's top corners */
+.br-football,
+.br-toucan {
   position: absolute;
   pointer-events: none;
 }

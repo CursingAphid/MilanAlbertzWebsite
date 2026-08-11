@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 18">
+  <!-- Orloj band tile: gold astronomical dial motifs on midnight blue —
+       a ringed dial alternating with a star, joined by the ecliptic line -->
+  <rect width="36" height="18" fill="#1a2450"/>
+  <line x1="0" y1="9" x2="36" y2="9" stroke="#8a742e" stroke-width="0.9"/>
+  <g fill="none" stroke="#e8c34a">
+    <circle cx="10" cy="9" r="5.6" stroke-width="1.2"/>
+    <circle cx="10" cy="9" r="3" stroke-width="0.9"/>
+  </g>
+  <g stroke="#e8c34a" stroke-width="0.9">
+    <line x1="10" y1="3.4" x2="10" y2="5.2"/>
+    <line x1="10" y1="12.8" x2="10" y2="14.6"/>
+    <line x1="4.4" y1="9" x2="6.2" y2="9"/>
+    <line x1="13.8" y1="9" x2="15.6" y2="9"/>
+  </g>
+  <circle cx="10" cy="9" r="1.1" fill="#e8c34a"/>
+  <path d="M27 4.6 L28.3 7.5 L31.4 7.9 L29.1 10 L29.7 13.1 L27 11.6 L24.3 13.1 L24.9 10 L22.6 7.9 L25.7 7.5 Z" fill="#e8c34a"/>
+</svg>

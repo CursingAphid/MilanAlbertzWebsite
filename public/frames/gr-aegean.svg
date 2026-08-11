@@ -20,8 +20,8 @@
   </defs>
 
   <rect width="400" height="250" fill="url(#aSky)"/>
-  <circle cx="330" cy="66" r="30" fill="#ffedb0" opacity="0.3"/>
-  <circle cx="330" cy="66" r="15" fill="#ffedb0"/>
+  <circle cx="330" cy="202" r="30" fill="#ffedb0" opacity="0.3"/>
+  <circle cx="330" cy="202" r="15" fill="#ffedb0"/>
 
   <!-- far sea with wave hints (runs down behind the village so no card
        background shows between rooftops) -->
