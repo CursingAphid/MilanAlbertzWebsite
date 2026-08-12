@@ -1008,7 +1008,8 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
   },
   NLD: {
     border: 'border-orange-500/70',
-    tint: 'bg-gradient-to-b from-orange-600/65 via-orange-700/40 to-blue-950/40',
+    // not the flag: golden hour on an Amsterdam gracht
+    tint: 'nl-amsterdam-bg',
     strip: 'h-4 nl-skyline-strip',
     badge: 'text-orange-400',
     chipActive: 'border-orange-400 text-orange-300',
@@ -1018,8 +1019,6 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     extras: 'nl',
     nativeLabels: { Netherlands: 'Nederland' },
     nativeClass: 'italic',
-    bgArt: '/frames/nl-tulips.svg',
-    bgArtClass: 'nl-tulips',
     titleArt: '/frames/nl-lion.svg',
   },
   AUT: {
@@ -1184,6 +1183,20 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     nativeLabels: { Spain: 'España' },
     nativeClass: 'italic',
     titleArt: '/frames/es-bull.svg',
+  },
+  HRV: {
+    border: 'border-red-600/70',
+    // not the flag: Adriatic summer over a walled old town
+    tint: 'hr-adriatic-bg',
+    strip: 'h-3 hr-checker-strip',
+    badge: 'text-red-300',
+    chipActive: 'border-red-300 text-red-200',
+    chipIdle: 'border-red-700/60 text-on-dark hover:border-red-300 hover:text-red-200',
+    flagClass: 'place-flag--hr',
+    frame: 'media-frame--hr',
+    extras: 'hr',
+    nativeLabels: { Croatia: 'Hrvatska' },
+    nativeClass: 'italic',
   },
   BEL: {
     border: 'border-yellow-600/70',
@@ -2739,6 +2752,23 @@ export default function TripsPage() {
                   >
                     {showcase ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </button>
+                  {cardTheme?.extras === 'hr' && (
+                    <>
+                      <img
+                        src="/frames/hr-cravat.svg"
+                        alt=""
+                        className="hr-cravat hidden md:block w-9"
+                        style={{ top: '1rem', left: '2.4rem' }}
+                      />
+                      <img
+                        src="/frames/hr-lavender.svg"
+                        alt=""
+                        className="hr-lavender hidden md:block w-9"
+                        style={{ top: '1rem', right: '2.4rem' }}
+                      />
+                      <img src="/frames/hr-stamp.svg" alt="" className="hr-stamp hidden md:block" />
+                    </>
+                  )}
                   {cardTheme?.extras === 'be' && (
                     <>
                       <img

@@ -147,17 +147,24 @@ out.append('\n'.join(parts))
 
 # ---- the cobbled square ----
 out.append(f'''  <rect y="{SQUARE}" width="{W}" height="{H - SQUARE}" fill="url(#beCobble)"/>''')
-parts = ['  <g fill="none" stroke="#5f5244" stroke-width="1.5" opacity="0.55">']
-yy = SQUARE + 14
+rng3 = random.Random(31)
+stones = ['#4e4336', '#544838', '#483d30', '#57493a']
+parts = ['  <g>']
+yy = SQUARE + 12
 row = 0
-while yy < H + 10:
-    off = 14 if row % 2 else 0
-    xx = -10 + off
-    while xx < W + 10:
-        r = 14 + row * 2.2
-        parts.append(f'    <path d="M{xx:.1f} {yy:.1f} A{r:.1f} {r * 0.42:.1f} 0 0 1 {xx + r * 2:.1f} {yy:.1f}"/>')
-        xx += r * 2
-    yy += 10 + row * 2.4
+while yy < H + 18:
+    scale = 1 + row * 0.24
+    sw, sh = 17 * scale, 8.5 * scale
+    off = sw / 2 if row % 2 else 0
+    xx = -12 + off
+    while xx < W + 12:
+        jx, jy = rng3.uniform(-1.5, 1.5), rng3.uniform(-1, 1)
+        fill = rng3.choice(stones)
+        parts.append(f'    <ellipse cx="{xx + jx:.1f}" cy="{yy + jy:.1f}" rx="{sw * 0.48:.1f}" ry="{sh * 0.5:.1f}" fill="{fill}"/>')
+        if rng3.random() < 0.4:  # a worn-smooth glint on some setts
+            parts.append(f'    <ellipse cx="{xx + jx - sw * 0.1:.1f}" cy="{yy + jy - sh * 0.16:.1f}" rx="{sw * 0.26:.1f}" ry="{sh * 0.2:.1f}" fill="#6a5c48" opacity="0.5"/>')
+        xx += sw + 3.5 * scale
+    yy += sh + 4.5 * scale
     row += 1
 parts.append('  </g>')
 out.append('\n'.join(parts))

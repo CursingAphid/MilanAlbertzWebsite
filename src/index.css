@@ -1316,6 +1316,73 @@
   background: rgba(216, 35, 42, 0.7);
 }
 
+/* --- Croatian card extras --- */
+
+/* Adriatic summer over the walled old town (gulls, sailboat, flag: SMIL) */
+.hr-adriatic-bg {
+  background: url('/frames/hr-adriatic.svg') center bottom / cover no-repeat;
+}
+
+/* šahovnica along the card's top edge */
+.hr-checker-strip {
+  background: url('/frames/hr-checker.svg') repeat-x left top / auto 100%;
+}
+
+/* pale Adriatic limestone photo frame: coursed ashlar blocks */
+.media-frame--hr {
+  padding: 16px;
+  background: url('/textures/hr-stone.jpg');
+  background-size: 220px 220px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1.5px rgba(120, 110, 92, 0.75),
+    inset 0 2px 5px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.22);
+}
+
+.media-frame--hr > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(90, 82, 68, 0.85),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* cravat and lavender holding the card's top corners */
+.hr-cravat,
+.hr-lavender {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.hr-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+/* Croatia: chequered-red banner, white lettering */
+.place-flag--hr:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #ea4a5c 0%, #dd1c34 45%, #a80e24 100%);
+}
+
+.place-flag--hr:not(.place-flag--home) .place-flag-ground {
+  background: rgba(221, 28, 52, 0.55);
+}
+
+.place-flag--hr:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #dd1c34;
+  background: linear-gradient(135deg, #ffffff 0%, #fceef0 100%);
+}
+
+.place-flag--hr:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
 /* --- Belgian card extras --- */
 
 /* full-card Grand-Place dusk (windows flicker via SMIL) */
@@ -1939,6 +2006,11 @@
 }
 
 /* --- Dutch card extras --- */
+
+/* golden hour on the gracht (the rondvaart glides via SMIL) */
+.nl-amsterdam-bg {
+  background: url('/frames/nl-amsterdam.svg') center bottom / cover no-repeat;
+}
 
 /* canal-house gable skyline along the card's top edge */
 .nl-skyline-strip {
