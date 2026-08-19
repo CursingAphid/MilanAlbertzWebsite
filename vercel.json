@@ -1,4 +1,22 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "milanalbertz.com" }
+      ],
+      "destination": "https://milanalbertz.nl/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "www.milanalbertz.com" }
+      ],
+      "destination": "https://milanalbertz.nl/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/((?!api/|@|.*\\..*).*)", "destination": "/index.html" }
   ],
