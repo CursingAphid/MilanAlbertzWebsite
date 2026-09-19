@@ -17,6 +17,25 @@ export default defineConfig({
     }),
     ViteImageOptimizer({
       includePublic: true,
+      // The trips card backgrounds in public/frames are CSS backgrounds that
+      // size themselves from their viewBox, and several draw glints that
+      // start at opacity="0" and animate in via SMIL — svgo's defaults
+      // would strip both, so those two passes stay off.
+      svg: {
+        multipass: true,
+        plugins: [
+          {
+            name: 'preset-default',
+            params: {
+              overrides: {
+                removeViewBox: false,
+                removeHiddenElems: false
+              }
+            }
+          },
+          'sortAttrs'
+        ]
+      },
       jpg: { quality: 72, progressive: true },
       jpeg: { quality: 72, progressive: true },
       png: { quality: 70 },

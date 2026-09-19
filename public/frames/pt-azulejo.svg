@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+  <!-- azulejo tile: cobalt on glazed white — a curved four-point star in
+       the middle and quarter-fans in the corners, which join into full
+       rosettes where the tiles meet along the strip -->
+  <rect width="18" height="18" fill="#f3f5f7"/>
+  <rect x="0.3" y="0.3" width="17.4" height="17.4" fill="none" stroke="#c9d3de" stroke-width="0.6"/>
+  <g fill="#1b4f9c">
+    <path d="M0 0 H3.4 A3.4 3.4 0 0 1 0 3.4 Z"/>
+    <path d="M18 0 V3.4 A3.4 3.4 0 0 1 14.6 0 Z"/>
+    <path d="M18 18 H14.6 A3.4 3.4 0 0 1 18 14.6 Z"/>
+    <path d="M0 18 V14.6 A3.4 3.4 0 0 1 3.4 18 Z"/>
+    <path d="M9 2.6 Q9.9 8.1 15.4 9 Q9.9 9.9 9 15.4 Q8.1 9.9 2.6 9 Q8.1 8.1 9 2.6 Z"/>
+  </g>
+  <g fill="#f3f5f7">
+    <path d="M0 0 H1.7 A1.7 1.7 0 0 1 0 1.7 Z"/>
+    <path d="M18 0 V1.7 A1.7 1.7 0 0 1 16.3 0 Z"/>
+    <path d="M18 18 H16.3 A1.7 1.7 0 0 1 18 16.3 Z"/>
+    <path d="M0 18 V16.3 A1.7 1.7 0 0 1 1.7 18 Z"/>
+  </g>
+  <circle cx="9" cy="9" r="1.3" fill="#6a9ad8"/>
+  <g fill="#3a7bd0">
+    <circle cx="9" cy="1.5" r="0.7"/>
+    <circle cx="9" cy="16.5" r="0.7"/>
+    <circle cx="1.5" cy="9" r="0.7"/>
+    <circle cx="16.5" cy="9" r="0.7"/>
+  </g>
+</svg>

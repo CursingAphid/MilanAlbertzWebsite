@@ -24,7 +24,7 @@
     "remotePatterns": [
       { "protocol": "https", "hostname": "*.public.blob.vercel-storage.com" }
     ],
-    "sizes": [640, 2048],
+    "sizes": [640, 2048, 3072, 3840],
     "formats": ["image/avif", "image/webp"],
     "minimumCacheTTL": 2592000
   }

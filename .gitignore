@@ -28,3 +28,5 @@ dist-ssr
 *.sln
 *.sw?
 .env*
+tools/mouse-jiggler/mouse-jiggler
+tools/mouse-jiggler/jiggle.log

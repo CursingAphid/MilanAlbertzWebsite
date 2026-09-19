@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 56">
+  <!-- the Galo de Barcelos: a black rooster with a scarlet comb, a heart
+       on his chest and hand-painted flourishes, up on his little stand -->
+  <rect x="12" y="50.5" width="20" height="5" rx="1.5" fill="#3a2a22"/>
+  <rect x="14" y="50.5" width="16" height="1.2" fill="#6a4632"/>
+  <g stroke="#f2c230" stroke-width="1.7" stroke-linecap="round" fill="none">
+    <path d="M19 41.5 L17.5 50.5"/>
+    <path d="M25 41.5 L26.5 50.5"/>
+    <path d="M17.5 50.5 L15 50.5 M17.5 50.5 L19.5 50.5"/>
+    <path d="M26.5 50.5 L24.5 50.5 M26.5 50.5 L29 50.5"/>
+  </g>
+  <!-- tail feathers sweeping up and back -->
+  <g stroke="#1c1c1e" stroke-width="4.2" stroke-linecap="round" fill="none">
+    <path d="M13 31 C5 25 3 15 9 6"/>
+    <path d="M13 32 C1 30 0 17 5 12"/>
+    <path d="M14 33 C6 36 2 27 3.5 20"/>
+  </g>
+  <g>
+    <circle cx="9" cy="6" r="2.1" fill="#d8342a"/>
+    <circle cx="5" cy="12" r="2" fill="#f2c230"/>
+    <circle cx="3.5" cy="20" r="2" fill="#2a6bd0"/>
+    <circle cx="6" cy="16.5" r="1.1" fill="#ffffff"/>
+    <circle cx="8.5" cy="10" r="1" fill="#ffffff"/>
+  </g>
+  <!-- body, wing, neck and head -->
+  <ellipse cx="22" cy="34" rx="11" ry="9" fill="#1c1c1e"/>
+  <path d="M27 29 Q31 22 32 16" stroke="#1c1c1e" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+  <circle cx="33" cy="14" r="5" fill="#1c1c1e"/>
+  <path d="M15 33 Q22 27 30 32 Q23 39 15 33 Z" fill="#2a2a30"/>
+  <path d="M17 33 Q22 30 27.5 32.5" fill="none" stroke="#f2c230" stroke-width="0.9"/>
+  <path d="M17.5 35 Q22 32.5 27 34.5" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.9"/>
+  <path d="M18.5 37 Q22 35 26 36.5" fill="none" stroke="#2a6bd0" stroke-width="0.9"/>
+  <!-- the heart on his chest -->
+  <path d="M29.5 32.5 C27.2 30.2 26.8 27.4 28.6 27 C29.5 26.8 30.3 27.6 30.4 28.3 C30.5 27.6 31.3 26.8 32.2 27 C34 27.4 33.6 30.2 30.6 32.5 Z" fill="#d8342a" transform="translate(-4 3)"/>
+  <!-- painted dots -->
+  <g>
+    <circle cx="14.5" cy="30" r="0.9" fill="#f2c230"/>
+    <circle cx="16" cy="39.5" r="0.9" fill="#d8342a"/>
+    <circle cx="22" cy="41.5" r="0.9" fill="#ffffff"/>
+    <circle cx="28" cy="39.5" r="0.9" fill="#2a6bd0"/>
+    <circle cx="31" cy="35.5" r="0.9" fill="#f2c230"/>
+  </g>
+  <!-- comb, wattle, beak and eye -->
+  <path d="M29 10.5 L30.2 5 L31.8 9.4 L33.2 3.6 L34.8 9.4 L36.4 5.4 L37.4 10.5 Z" fill="#d8342a"/>
+  <path d="M35.6 17.2 Q36.8 22.4 33.6 21.4 Q33.4 18.6 35.6 17.2 Z" fill="#d8342a"/>
+  <path d="M37.4 12.6 L42.6 14.4 L37.4 16.2 Z" fill="#f2c230"/>
+  <circle cx="34.6" cy="13" r="1.4" fill="#ffffff"/>
+  <circle cx="35" cy="13.1" r="0.75" fill="#1c1c1e"/>
+</svg>

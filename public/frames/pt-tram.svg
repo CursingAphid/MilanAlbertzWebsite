@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 44">
+  <!-- a Lisbon Remodelado tram in miniature: cream roof and window band
+       over a yellow body, five windows, the 28 board up front, a trolley
+       pole reaching for the wire -->
+  <line x1="30" y1="12" x2="45" y2="2" stroke="#3a2a22" stroke-width="1.3" stroke-linecap="round"/>
+  <circle cx="45.5" cy="1.8" r="1.1" fill="#3a2a22"/>
+  <path d="M6 13 Q30 5 54 13 L54 15 L6 15 Z" fill="#e8e3d6"/>
+  <path d="M8 12.6 Q30 6.2 52 12.6" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.6"/>
+  <rect x="6" y="14" width="48" height="12" fill="#f4f1e8"/>
+  <rect x="6" y="25" width="48" height="10" rx="1" fill="#f4c430"/>
+  <rect x="6" y="25" width="48" height="1.4" fill="#c8961e"/>
+  <g fill="#2c3440">
+    <rect x="9" y="16" width="7" height="8" rx="0.8"/>
+    <rect x="18" y="16" width="7" height="8" rx="0.8"/>
+    <rect x="27" y="16" width="7" height="8" rx="0.8"/>
+    <rect x="36" y="16" width="7" height="8" rx="0.8"/>
+    <rect x="45" y="16" width="7" height="8" rx="0.8"/>
+  </g>
+  <g fill="#ffffff" opacity="0.22">
+    <rect x="10" y="17" width="2" height="6" rx="0.6"/>
+    <rect x="19" y="17" width="2" height="6" rx="0.6"/>
+    <rect x="28" y="17" width="2" height="6" rx="0.6"/>
+    <rect x="37" y="17" width="2" height="6" rx="0.6"/>
+    <rect x="46" y="17" width="2" height="6" rx="0.6"/>
+  </g>
+  <g stroke="#3a2a22" stroke-width="0.7" opacity="0.45">
+    <line x1="17" y1="15" x2="17" y2="35"/>
+    <line x1="44" y1="15" x2="44" y2="35"/>
+  </g>
+  <rect x="44" y="9" width="9" height="4.6" rx="0.8" fill="#f2f2ee"/>
+  <text x="48.5" y="12.7" font-family="Helvetica, Arial, sans-serif" font-size="3.6" font-weight="bold" fill="#2a2624" text-anchor="middle">28</text>
+  <circle cx="54.5" cy="29.5" r="1.6" fill="#fff3cc"/>
+  <circle cx="54.5" cy="29.5" r="3.4" fill="#ffe9b0" opacity="0.25"/>
+  <rect x="8" y="35" width="44" height="3" fill="#5a3a2c"/>
+  <g fill="#2a2624">
+    <circle cx="14" cy="39" r="2.8"/>
+    <circle cx="22" cy="39" r="2.8"/>
+    <circle cx="38" cy="39" r="2.8"/>
+    <circle cx="46" cy="39" r="2.8"/>
+  </g>
+  <g fill="#8a8072">
+    <circle cx="14" cy="39" r="1.1"/>
+    <circle cx="22" cy="39" r="1.1"/>
+    <circle cx="38" cy="39" r="1.1"/>
+    <circle cx="46" cy="39" r="1.1"/>
+  </g>
+</svg>

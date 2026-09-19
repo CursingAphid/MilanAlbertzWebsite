@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 40">
+  <!-- a copita of port: tulip bowl, ruby wine, the rim catching light -->
+  <path d="M4.5 3.5 Q4.5 22 12 24.5 Q19.5 22 19.5 3.5 Z" fill="#f6f1e6" opacity="0.22"/>
+  <path d="M5.9 11 Q6.3 20.8 12 22.8 Q17.7 20.8 18.1 11 Z" fill="#7a1230"/>
+  <path d="M5.9 11 Q12 13.4 18.1 11 Q12 9.2 5.9 11 Z" fill="#a3203f"/>
+  <path d="M4.5 3.5 Q4.5 22 12 24.5 Q19.5 22 19.5 3.5" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.55"/>
+  <line x1="4.5" y1="3.5" x2="19.5" y2="3.5" stroke="#ffffff" stroke-width="1.1" opacity="0.7" stroke-linecap="round"/>
+  <path d="M7.4 6 Q7 13.5 9.4 18.5" fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.45" stroke-linecap="round"/>
+  <rect x="11" y="24" width="2" height="10" fill="#dfe8ee" opacity="0.85"/>
+  <ellipse cx="12" cy="35.5" rx="7" ry="2.1" fill="#dfe8ee" opacity="0.85"/>
+  <ellipse cx="12" cy="35.1" rx="4.5" ry="1" fill="#ffffff" opacity="0.5"/>
+</svg>

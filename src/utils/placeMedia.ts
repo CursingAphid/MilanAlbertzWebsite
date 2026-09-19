@@ -30,5 +30,7 @@ export const isVideo = (pathname: string) => /\.(mp4|mov|m4v|webm)$/i.test(pathn
  * originals, and the blob store is only hit on optimizer cache misses.
  * In dev the optimizer doesn't run, so the original URL is used.
  */
-export const optimizedUrl = (url: string, width: 640 | 2048) =>
-  import.meta.env.DEV ? url : `/_vercel/image?url=${encodeURIComponent(url)}&w=${width}&q=75`
+export const optimizedUrl = (url: string, width: 640 | 2048 | 3072 | 3840, quality = 75) =>
+  import.meta.env.DEV
+    ? url
+    : `/_vercel/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`

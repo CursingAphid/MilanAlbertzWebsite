@@ -968,6 +968,8 @@ interface CountryTheme {
   bgArt?: string // decorative image rendered in the card's background layer
   bgArtClass?: string // positioning/opacity class for bgArt
   titleArt?: string // small emblem shown next to the country title
+  titleArtClass?: string // extra classes on the emblem — a right margin when a
+  // corner prop (see `extras`) is pinned where the emblem would otherwise sit
   cardClass?: string // extra classes on the card root (e.g. text outlining)
   snow?: boolean // gentle snowfall in the card's background layer
   rain?: boolean // slanted drizzle in the card's background layer
@@ -1183,6 +1185,47 @@ const COUNTRY_THEMES: Record<string, CountryTheme> = {
     nativeLabels: { Spain: 'España' },
     nativeClass: 'italic',
     titleArt: '/frames/es-bull.svg',
+    // the abanico is pinned in the top-right corner; step the bull inward
+    titleArtClass: 'md:mr-[4.5rem]',
+  },
+  PRT: {
+    border: 'border-sky-700/70',
+    // not the flag: Porto at dusk — the Ribeira and Gaia's lodges either
+    // side of the Dom Luís I bridge, the metro crossing its top deck,
+    // rabelos on the Douro; Lisbon crossfades to Alfama and a tram 28
+    tint: 'pt-porto-bg',
+    placeTints: { Lisbon: 'pt-lisbon-bg' },
+    strip: 'h-4 pt-azulejo-strip',
+    badge: 'text-sky-300',
+    chipActive: 'border-sky-300 text-sky-100',
+    chipIdle: 'border-sky-700/70 text-on-dark hover:border-sky-300 hover:text-sky-100',
+    flagClass: 'place-flag--pt',
+    frame: 'media-frame--pt',
+    extras: 'pt',
+    nativeLabels: { Lisbon: 'Lisboa' },
+    nativeClass: 'italic',
+    titleArt: '/frames/pt-armillary.svg',
+    // the Galo is pinned in the top-right corner; step the sphere inward
+    titleArtClass: 'md:mr-[4.5rem]',
+  },
+  HUN: {
+    border: 'border-emerald-700/70',
+    // not the flag: Budapest at night — the Chain Bridge outlined in lights
+    // between Castle Hill and the floodlit Parliament, all of it mirrored
+    // in the Danube; tram 2 runs the embankment, the Sikló climbs the hill
+    tint: 'hu-budapest-bg',
+    strip: 'h-4 hu-kalocsa-strip',
+    badge: 'text-amber-300',
+    chipActive: 'border-amber-300 text-amber-200',
+    chipIdle: 'border-emerald-700/70 text-on-dark hover:border-amber-300 hover:text-amber-200',
+    flagClass: 'place-flag--hu',
+    frame: 'media-frame--hu',
+    extras: 'hu',
+    nativeLabels: { Hungary: 'Magyarország' },
+    nativeClass: 'italic',
+    titleArt: '/frames/hu-crown.svg',
+    // the Rubik's cube is pinned in the top-right corner; step the crown inward
+    titleArtClass: 'md:mr-[4.5rem]',
   },
   HRV: {
     border: 'border-red-600/70',
@@ -1281,10 +1324,16 @@ export default function TripsPage() {
   // Slideshow position within the selected place's media + lightbox state
   const [mediaIndex, setMediaIndex] = useState(0)
   const [mediaFullscreen, setMediaFullscreen] = useState(false)
-  // swipe-to-close tracking for the mobile lightbox
-  const lightboxTouchY = useRef<number | null>(null)
+  // Single-finger swipe-to-close tracking for the mobile lightbox. Pinches
+  // clear this ref so lifting either finger can never dismiss the image.
+  const lightboxTouchStart = useRef<{ x: number; y: number } | null>(null)
   // Which media URLs have finished downloading (skeleton pulse until then)
   const [mediaLoaded, setMediaLoaded] = useState<Record<string, boolean>>({})
+  // Fullscreen starts with the already-small/cached card image. A decoded
+  // high-resolution copy then fades over it without delaying the lightbox.
+  const [fullscreenHighResLoaded, setFullscreenHighResLoaded] = useState<Record<string, boolean>>(
+    {}
+  )
   const [hovered, setHovered] = useState<CountryFeature | null>(null)
   const [selected, setSelected] = useState<CountryFeature | null>(null)
   // Keeps the last selection so the panel stays filled while fading out
@@ -2851,6 +2900,57 @@ export default function TripsPage() {
                       <img src="/frames/es-stamp.svg" alt="" className="es-stamp hidden md:block" />
                     </>
                   )}
+                  {cardTheme?.extras === 'pt' && (
+                    <>
+                      <img
+                        src="/frames/pt-tram.svg"
+                        alt=""
+                        className="pt-tram hidden md:block w-12"
+                        style={{ top: '1.2rem', left: '2.4rem' }}
+                      />
+                      {/* what's on the table depends on the city */}
+                      {selectedPlace?.name === 'Porto' && (
+                        <img
+                          src="/frames/pt-port-glass.svg"
+                          alt=""
+                          className="pt-port-glass hidden md:block w-6"
+                          style={{ top: '1rem', left: '6.2rem' }}
+                        />
+                      )}
+                      {selectedPlace?.name === 'Lisbon' && (
+                        <img
+                          src="/frames/pt-sardine.svg"
+                          alt=""
+                          className="pt-sardine hidden md:block w-12"
+                          style={{ top: '1.7rem', left: '6rem' }}
+                        />
+                      )}
+                      <img
+                        src="/frames/pt-galo.svg"
+                        alt=""
+                        className="pt-galo hidden md:block w-11"
+                        style={{ top: '0.9rem', right: '2.4rem' }}
+                      />
+                      <img src="/frames/pt-stamp.svg" alt="" className="pt-stamp hidden md:block" />
+                    </>
+                  )}
+                  {cardTheme?.extras === 'hu' && (
+                    <>
+                      <img
+                        src="/frames/hu-paprika.svg"
+                        alt=""
+                        className="hu-paprika hidden md:block w-9"
+                        style={{ top: '0.6rem', left: '2.6rem' }}
+                      />
+                      <img
+                        src="/frames/hu-rubik.svg"
+                        alt=""
+                        className="hu-rubik hidden md:block w-11"
+                        style={{ top: '1rem', right: '2.4rem' }}
+                      />
+                      <img src="/frames/hu-stamp.svg" alt="" className="hu-stamp hidden md:block" />
+                    </>
+                  )}
                   {cardTheme?.extras === 'nl' && (
                     <>
                       <div className="nl-windmill hidden md:block" style={{ top: '1.3rem', left: '2.6rem' }}>
@@ -2887,9 +2987,14 @@ export default function TripsPage() {
                         </span>
                       )}
                     </div>
-                    {/* the country emblem sits at the row's far right edge */}
+                    {/* the country emblem sits at the row's far right edge,
+                        unless the theme steps it inward past a corner prop */}
                     {cardTheme?.titleArt && (
-                      <img src={cardTheme.titleArt} alt="" className="h-7 md:h-9 w-auto shrink-0" />
+                      <img
+                        src={cardTheme.titleArt}
+                        alt=""
+                        className={`h-7 md:h-9 w-auto shrink-0 ${cardTheme.titleArtClass ?? ''}`}
+                      />
                     )}
                   </div>
                   {/* close handle: a pull tab sticking out of the card like
@@ -3157,17 +3262,38 @@ export default function TripsPage() {
           return (
             <div
               className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
-              onClick={() => setMediaFullscreen(false)}
-              onTouchStart={(e) => {
-                lightboxTouchY.current = e.touches[0].clientY
-              }}
-              onTouchEnd={(e) => {
-                // swipe up or down closes the lightbox (mobile)
-                const start = lightboxTouchY.current
-                lightboxTouchY.current = null
-                if (start != null && Math.abs(e.changedTouches[0].clientY - start) > 70) {
+              onClick={(e) => {
+                // Mobile lightboxes close only through the downward gesture;
+                // desktop users can still click the backdrop.
+                if (e.target === e.currentTarget && window.matchMedia('(min-width: 768px)').matches) {
                   setMediaFullscreen(false)
                 }
+              }}
+              onTouchStart={(e) => {
+                lightboxTouchStart.current =
+                  e.touches.length === 1
+                    ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+                    : null
+              }}
+              onTouchMove={(e) => {
+                // A second finger means the user is pinching, not dismissing.
+                if (e.touches.length !== 1) lightboxTouchStart.current = null
+              }}
+              onTouchEnd={(e) => {
+                const start = lightboxTouchStart.current
+                lightboxTouchStart.current = null
+                // Only a completed, mostly vertical, single-finger swipe down
+                // dismisses. A pinch ends one finger at a time (touches.length
+                // remains non-zero), so it is explicitly excluded here.
+                if (!start || e.touches.length !== 0 || e.changedTouches.length !== 1) return
+                const deltaX = e.changedTouches[0].clientX - start.x
+                const deltaY = e.changedTouches[0].clientY - start.y
+                if (deltaY > 70 && deltaY > Math.abs(deltaX) * 1.25) {
+                  setMediaFullscreen(false)
+                }
+              }}
+              onTouchCancel={() => {
+                lightboxTouchStart.current = null
               }}
             >
               {isVideo(item.pathname) ? (
@@ -3180,13 +3306,49 @@ export default function TripsPage() {
                   className="max-w-full max-h-full object-contain"
                 />
               ) : (
-                <img
-                  key={item.url}
-                  src={optimizedUrl(item.url, 2048)}
-                  alt={selectedPlace?.name ?? panelCountry?.properties.name ?? ''}
+                <div
+                  className="relative flex max-w-full max-h-full"
                   onClick={(e) => e.stopPropagation()}
-                  className="max-w-full max-h-full object-contain"
-                />
+                >
+                  <img
+                    key={`${item.url}-preview`}
+                    src={optimizedUrl(item.url, 640)}
+                    alt={selectedPlace?.name ?? panelCountry?.properties.name ?? ''}
+                    decoding="async"
+                    fetchPriority="high"
+                    className={`block max-w-full max-h-full object-contain ${
+                      fullscreenHighResLoaded[item.url] ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  />
+                  <img
+                    key={`${item.url}-full`}
+                    src={optimizedUrl(item.url, 2048, 82)}
+                    srcSet={`${optimizedUrl(item.url, 2048, 82)} 2048w, ${optimizedUrl(
+                      item.url,
+                      3072,
+                      82
+                    )} 3072w, ${optimizedUrl(item.url, 3840, 82)} 3840w`}
+                    sizes="100vw"
+                    alt=""
+                    aria-hidden="true"
+                    decoding="async"
+                    fetchPriority="auto"
+                    onLoad={(event) => {
+                      const image = event.currentTarget
+                      void image
+                        .decode()
+                        .catch(() => undefined)
+                        .then(() =>
+                          setFullscreenHighResLoaded((loaded) =>
+                            loaded[item.url] ? loaded : { ...loaded, [item.url]: true }
+                          )
+                        )
+                    }}
+                    className={`absolute inset-0 w-full h-full object-contain ${
+                      fullscreenHighResLoaded[item.url] ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  />
+                </div>
               )}
               {!selectedPlace && item.placeName && (
                 <span className="absolute bottom-4 left-4 rounded-md bg-black/60 px-2.5 py-1 text-sm md:text-base font-medium text-white pointer-events-none">

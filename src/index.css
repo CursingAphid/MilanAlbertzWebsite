@@ -2005,6 +2005,211 @@
   pointer-events: none;
 }
 
+/* --- Portuguese card extras --- */
+
+/* Porto at dusk: the Dom Luís I bridge over the Douro (the metro crosses
+   the top deck, rabelos drift, lamps and windows flicker via SMIL) */
+.pt-porto-bg {
+  background: url('/frames/pt-porto.svg') center bottom / cover no-repeat;
+}
+
+/* Lisbon crossfades in for its place: Alfama rooftops and a tram 28 */
+.pt-lisbon-bg {
+  background: url('/frames/pt-lisbon.svg') center bottom / cover no-repeat;
+}
+
+/* azulejo tiles along the card's top edge */
+.pt-azulejo-strip {
+  background: url('/frames/pt-azulejo.svg') repeat-x left top / auto 100%;
+}
+
+/* azulejo photo frame: one course of hand-set cobalt tiles all round */
+.media-frame--pt {
+  padding: 16px;
+  background: url('/textures/pt-azulejo.jpg');
+  background-size: 128px 128px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1.5px rgba(27, 79, 156, 0.55),
+    inset 0 2px 5px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.22);
+}
+
+.media-frame--pt > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(27, 79, 156, 0.85),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* the tram rocking on its rails in the top-left corner, the Galo de
+   Barcelos pecking away in the top-right */
+.pt-tram {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: pt-tram-rock 3.4s ease-in-out infinite;
+}
+
+@keyframes pt-tram-rock {
+  0%,
+  100% {
+    transform: rotate(-1.4deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
+  }
+}
+
+.pt-galo {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: pt-galo-peck 6s ease-in-out infinite;
+}
+
+@keyframes pt-galo-peck {
+  0%,
+  72%,
+  100% {
+    transform: rotate(0);
+  }
+  80% {
+    transform: rotate(-7deg) translateY(2px);
+  }
+  86% {
+    transform: rotate(-1deg);
+  }
+  92% {
+    transform: rotate(-5deg) translateY(1px);
+  }
+}
+
+/* the copita of port (Porto) or the festival sardine (Lisbon) beside it */
+.pt-port-glass,
+.pt-sardine {
+  position: absolute;
+  pointer-events: none;
+}
+
+.pt-sardine {
+  transform: rotate(-12deg);
+}
+
+/* round passport-style stamp */
+.pt-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+/* Portugal: azulejo-blue banner, white lettering; white with blue text
+   when active */
+.place-flag--pt:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #3a7bd0 0%, #1b4f9c 45%, #123a75 100%);
+}
+
+.place-flag--pt:not(.place-flag--home) .place-flag-ground {
+  background: rgba(27, 79, 156, 0.55);
+}
+
+.place-flag--pt:not(.place-flag--home).place-flag--active .place-flag-banner {
+  color: #1b4f9c;
+  background: linear-gradient(135deg, #ffffff 0%, #e9f0fa 100%);
+}
+
+.place-flag--pt:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+/* --- Hungarian card extras --- */
+
+/* Budapest at night: the Chain Bridge, Castle Hill and the Parliament
+   mirrored in the Danube (tram, funicular, boat and stars move via SMIL) */
+.hu-budapest-bg {
+  background: url('/frames/hu-budapest.svg') center bottom / cover no-repeat;
+}
+
+/* Kalocsa embroidery along the card's top edge */
+.hu-kalocsa-strip {
+  background: url('/frames/hu-kalocsa.svg') repeat-x left top / auto 100%;
+}
+
+/* Zsolnay roof-tile photo frame: one course of glazed lozenges all round */
+.media-frame--hu {
+  padding: 16px;
+  background: url('/textures/hu-zsolnay.jpg');
+  background-size: 128px 128px;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1.5px rgba(47, 138, 106, 0.6),
+    inset 0 2px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.25);
+}
+
+.media-frame--hu > div {
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 2.5px rgba(60, 52, 40, 0.85),
+    0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+/* the paprika string swaying from its hook top-left, the Rubik's cube
+   sitting top-right */
+.hu-paprika {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: 50% 4%;
+  animation: hu-paprika-sway 4.6s ease-in-out infinite;
+}
+
+@keyframes hu-paprika-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.hu-rubik {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* round passport-style stamp */
+.hu-stamp {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 86px;
+  opacity: 0.9;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+/* Hungary: red banner, white lettering; green when active */
+.place-flag--hu:not(.place-flag--home) .place-flag-banner {
+  background: linear-gradient(135deg, #e04a4a 0%, #c8102e 45%, #8a0c20 100%);
+}
+
+.place-flag--hu:not(.place-flag--home) .place-flag-ground {
+  background: rgba(200, 16, 46, 0.55);
+}
+
+.place-flag--hu:not(.place-flag--home).place-flag--active .place-flag-banner {
+  background: linear-gradient(135deg, #3fa060 0%, #2e7a3c 45%, #1f5a2c 100%);
+}
+
+.place-flag--hu:not(.place-flag--home).place-flag--active .place-flag-ground {
+  background: rgba(46, 122, 60, 0.7);
+}
+
 /* --- Dutch card extras --- */
 
 /* golden hour on the gracht (the rondvaart glides via SMIL) */
