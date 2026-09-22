@@ -20,6 +20,19 @@ import { kvGet } from './_utils.js'
 import { INTER_400_WOFF_BASE64, INTER_800_WOFF_BASE64 } from './_fonts.js'
 import { describe, originOf, parseTarget } from './_og-data.js'
 
+// Satori shapes text with harfbuzzjs, which reads its wasm from disk next to
+// its own module at runtime — a read the function bundler can't see, so the
+// file would be missing in production (ENOENT hb.wasm). Reading it here via
+// a static path is what the bundler's asset tracing looks for; it lands in
+// the bundle at the same relative location harfbuzzjs expects. `includeFiles`
+// can't do this: it ignores node_modules paths.
+const HB_WASM = path.join(process.cwd(), 'node_modules', 'harfbuzzjs', 'hb.wasm')
+try {
+  fs.readFileSync(HB_WASM)
+} catch {
+  // only matters at bundle time; at runtime harfbuzzjs does its own loading
+}
+
 const WIDTH = 1200
 const HEIGHT = 630
 // the 400x600 scene scaled to the card's width and cropped to the band

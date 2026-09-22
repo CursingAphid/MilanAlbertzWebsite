@@ -3,7 +3,10 @@
     {
       "source": "/:path*",
       "has": [
-        { "type": "host", "value": "milanalbertz.com" }
+        {
+          "type": "host",
+          "value": "milanalbertz.com"
+        }
       ],
       "destination": "https://milanalbertz.nl/:path*",
       "permanent": true
@@ -11,7 +14,10 @@
     {
       "source": "/:path*",
       "has": [
-        { "type": "host", "value": "www.milanalbertz.com" }
+        {
+          "type": "host",
+          "value": "www.milanalbertz.com"
+        }
       ],
       "destination": "https://milanalbertz.nl/:path*",
       "permanent": true
@@ -29,7 +35,10 @@
       ],
       "destination": "/api/trips-preview"
     },
-    { "source": "/((?!api/|@|.*\\..*).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/|@|.*\\..*).*)",
+      "destination": "/index.html"
+    }
   ],
   "functions": {
     "api/og.js": {
@@ -38,10 +47,21 @@
   },
   "images": {
     "remotePatterns": [
-      { "protocol": "https", "hostname": "*.public.blob.vercel-storage.com" }
+      {
+        "protocol": "https",
+        "hostname": "*.public.blob.vercel-storage.com"
+      }
     ],
-    "sizes": [640, 2048, 3072, 3840],
-    "formats": ["image/avif", "image/webp"],
+    "sizes": [
+      640,
+      2048,
+      3072,
+      3840
+    ],
+    "formats": [
+      "image/avif",
+      "image/webp"
+    ],
     "minimumCacheTTL": 2592000
   }
 }

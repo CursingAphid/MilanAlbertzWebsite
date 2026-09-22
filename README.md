@@ -112,5 +112,16 @@ country's scene and name. Two routes do this:
 
 Which scene stands for which country lives in `api/_og-data.js`; keep it in
 step with `COUNTRY_THEMES` when a card gets a new scene. `vercel dev` does
-not apply the user-agent rewrite, so check it on a deployment:
-`curl -A Twitterbot https://milanalbertz.nl/trips?country=HUN | grep og:image`.
+not apply the user-agent rewrite, so check it on a deployment (the apex
+redirects to `www`):
+
+```sh
+curl -A Twitterbot 'https://www.milanalbertz.nl/trips?country=HUN' | grep og:image
+curl -sI 'https://www.milanalbertz.nl/api/og?country=HUN' | grep -i 'content-type'
+```
+
+`api/og.js` reads `node_modules/harfbuzzjs/hb.wasm` through a static path on
+purpose: Satori's text shaper loads that file at runtime and the function
+bundler only packs it when it sees such a read (`includeFiles` ignores
+`node_modules`). Messaging apps cache previews per URL, so after a fix,
+test with a URL you haven't shared before.
