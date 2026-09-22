@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import LanguageSelector from './LanguageSelector'
 
 export default function NavBar() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -34,7 +33,6 @@ export default function NavBar() {
             <Link to="/trips" className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-on-dark hover:text-accent">
               {t('nav.trips')}
             </Link>
-            <LanguageSelector />
           </div>
           {/* Mobile hamburger */}
           <div className="flex items-center md:hidden">
@@ -88,9 +86,6 @@ export default function NavBar() {
               >
                 {t('nav.trips')}
               </Link>
-              <div className="px-3 py-2">
-                <LanguageSelector />
-              </div>
             </div>
           </div>
         )}

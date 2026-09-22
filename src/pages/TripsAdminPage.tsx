@@ -473,23 +473,13 @@ export default function TripsAdminPage() {
                           </label>
                         </div>
                         <label className="block">
-                          <span className="text-xs text-muted-on-dark">Card text (English)</span>
+                          <span className="text-xs text-muted-on-dark">Card text</span>
                           <textarea
                             value={country.description ?? ''}
                             onChange={(e) => updateCountry(country.code, { description: e.target.value })}
                             rows={3}
                             className={`w-full mt-1 ${inputCls} leading-relaxed`}
                             placeholder="Free text shown on this country's card"
-                          />
-                        </label>
-                        <label className="block">
-                          <span className="text-xs text-muted-on-dark">Card text (Dutch)</span>
-                          <textarea
-                            value={country.descriptionNl ?? ''}
-                            onChange={(e) => updateCountry(country.code, { descriptionNl: e.target.value })}
-                            rows={3}
-                            className={`w-full mt-1 ${inputCls} leading-relaxed`}
-                            placeholder="Dutch version — shown when the site is in Dutch (falls back to English)"
                           />
                         </label>
 
@@ -568,14 +558,7 @@ export default function TripsAdminPage() {
                                     onChange={(e) => updatePlace(country.code, index, { description: e.target.value })}
                                     rows={2}
                                     className={`w-full mt-2 ${inputCls} leading-relaxed`}
-                                    placeholder="Text shown when this place is selected — English (optional)"
-                                  />
-                                  <textarea
-                                    value={place.descriptionNl ?? ''}
-                                    onChange={(e) => updatePlace(country.code, index, { descriptionNl: e.target.value })}
-                                    rows={2}
-                                    className={`w-full mt-2 ${inputCls} leading-relaxed`}
-                                    placeholder="Dutch version (optional — falls back to English)"
+                                    placeholder="Text shown when this place is selected (optional)"
                                   />
                                   {items.length > 0 && (
                                     <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">

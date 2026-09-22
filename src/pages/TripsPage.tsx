@@ -1284,10 +1284,8 @@ const shuffled = <T,>(items: T[]): T[] => {
 }
 
 export default function TripsPage() {
-  const { t, i18n } = useTranslation()
-  // Pick the Dutch text when the site runs in Dutch, falling back to English
-  const localText = (item?: { description?: string; descriptionNl?: string }) =>
-    i18n.language?.startsWith('nl') ? item?.descriptionNl || item?.description : item?.description
+  const { t } = useTranslation()
+  const localText = (item?: { description?: string }) => item?.description
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const pageRef = useRef<HTMLDivElement | null>(null)
