@@ -471,6 +471,62 @@ export default function TripsAdminPage() {
                               className={`w-full mt-1 ${inputCls}`}
                             />
                           </label>
+                          {/* the card's fact tiles */}
+                          <label className="block">
+                            <span className="text-xs text-muted-on-dark">Capital</span>
+                            <input
+                              type="text"
+                              value={country.capital ?? ''}
+                              onChange={(e) => updateCountry(country.code, { capital: e.target.value || undefined })}
+                              className={`w-full mt-1 ${inputCls}`}
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-xs text-muted-on-dark">Population</span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              value={country.population ?? ''}
+                              onChange={(e) =>
+                                updateCountry(country.code, {
+                                  population: Number.isFinite(e.target.valueAsNumber)
+                                    ? Math.max(0, Math.round(e.target.valueAsNumber))
+                                    : undefined,
+                                })
+                              }
+                              className={`w-full mt-1 ${inputCls}`}
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-xs text-muted-on-dark">Area (km²)</span>
+                            <input
+                              type="number"
+                              min={0}
+                              step="any"
+                              value={country.areaKm2 ?? ''}
+                              onChange={(e) =>
+                                updateCountry(country.code, {
+                                  areaKm2: Number.isFinite(e.target.valueAsNumber)
+                                    ? Math.max(0, e.target.valueAsNumber)
+                                    : undefined,
+                                })
+                              }
+                              className={`w-full mt-1 ${inputCls}`}
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-xs text-muted-on-dark">Currency (ISO code, e.g. EUR or HUF)</span>
+                            <input
+                              type="text"
+                              value={country.currency ?? ''}
+                              maxLength={3}
+                              onChange={(e) =>
+                                updateCountry(country.code, { currency: e.target.value.toUpperCase() || undefined })
+                              }
+                              className={`w-full mt-1 ${inputCls}`}
+                            />
+                          </label>
                         </div>
                         <label className="block">
                           <span className="text-xs text-muted-on-dark">Card text</span>
@@ -529,6 +585,22 @@ export default function TripsAdminPage() {
                                       }
                                       className={`w-28 ${inputCls}`}
                                       placeholder="Longitude"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={place.population ?? ''}
+                                      min={0}
+                                      step={1}
+                                      onChange={(e) =>
+                                        updatePlace(country.code, index, {
+                                          population: Number.isFinite(e.target.valueAsNumber)
+                                            ? Math.max(0, Math.round(e.target.valueAsNumber))
+                                            : undefined,
+                                        })
+                                      }
+                                      className={`w-32 ${inputCls}`}
+                                      placeholder="Population"
+                                      title="Residents, shown as a fact tile on the card"
                                     />
                                     <label className={`inline-flex items-center gap-1.5 text-sm border border-accent text-accent hover:bg-chip rounded-lg px-3 py-1.5 cursor-pointer transition-colors ${busy ? 'opacity-50 pointer-events-none' : ''}`}>
                                       <Upload className="h-3.5 w-3.5" />

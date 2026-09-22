@@ -14,6 +14,8 @@ export interface VisitedPlace {
   lng: number
   /** Free text shown in the country card when this place is selected. */
   description?: string
+  /** Residents (city, island or region as appropriate) for the facts tiles. */
+  population?: number
 }
 
 export interface VisitedCountry {
@@ -21,6 +23,12 @@ export interface VisitedCountry {
   note?: string
   /** Free text shown in the country card — write whatever you like. */
   description?: string
+  /** Static facts for the card's tiles (filled by script, editable in the admin). */
+  population?: number
+  capital?: string
+  areaKm2?: number
+  /** ISO 4217 currency code, e.g. "EUR" or "HUF" — the card looks up symbol, name and rate. */
+  currency?: string
   places?: VisitedPlace[]
 }
 

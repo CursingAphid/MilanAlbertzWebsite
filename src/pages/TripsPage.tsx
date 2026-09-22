@@ -3,7 +3,38 @@ import Globe from 'react-globe.gl'
 import type { GlobeMethods } from 'react-globe.gl'
 import * as THREE from 'three'
 import { geoArea, geoBounds, geoCentroid } from 'd3-geo'
-import { BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, Eye, EyeOff, Flag, House, Image as ImageIcon, Maximize2, X } from 'lucide-react'
+import {
+  BadgeCheck,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Cloud,
+  Coins,
+  Landmark,
+  Map as MapIcon,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudMoon,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Eye,
+  EyeOff,
+  Flag,
+  House,
+  Image as ImageIcon,
+  MapPin,
+  Maximize2,
+  Moon,
+  Navigation,
+  Search,
+  Sun,
+  Users,
+  X,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import NavBar from '../components/NavBar'
 import SpaceBackground from '../components/SpaceBackground'
@@ -60,7 +91,9 @@ const DEFAULT_POV = { lat: 30, lng: 5, altitude: 1.8 }
 // framing math below must treat that band as dead space, not usable canvas.
 const MOBILE_NAV_HEIGHT_PX = 64
 // fraction of the container height the bottom sheet occupies on mobile
-const MOBILE_CARD_FRACTION = 0.5
+// Share of the viewport the mobile bottom sheet takes (the globe gets the
+// rest); must match the sheet's height class on the card container.
+const MOBILE_CARD_FRACTION = 0.4
 // Camera altitude limits (relative to globe radius). Distance = radius * (1 + altitude).
 // The floor must stay low enough that tightly packed place clusters
 // (e.g. Hong Kong/Macau/Shenzhen) can still be zoomed apart.
@@ -943,6 +976,386 @@ const sailBoats = (boats: Boat[], isLand: LandTest, radius: number, t: number, d
   }
 }
 
+// ---------- place facts ----------
+
+// Kerkrade: the baseline for "distance from home".
+const HOME = { lat: 50.8658, lng: 6.0625 }
+
+/** Great-circle distance in kilometres. */
+const distanceKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+  const R = 6371
+  const rad = (d: number) => (d * Math.PI) / 180
+  const dLat = rad(b.lat - a.lat)
+  const dLng = rad(b.lng - a.lng)
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+
+/** 17 500 000 -> "17.5M", 155 000 -> "155k", 3 100 -> "3.1k", 900 -> "900". */
+const compactNumber = (n: number) => {
+  if (n >= 1e6) return `${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '')}M`
+  if (n >= 1e4) return `${Math.round(n / 1e3)}k`
+  if (n >= 1e3) return `${(n / 1e3).toFixed(1).replace(/\.0$/, '')}k`
+  return String(n)
+}
+
+// Current conditions for a place, from Open-Meteo: free, keyless, allows
+// browser calls, and takes several coordinates in one request.
+interface PlaceWeather {
+  temperature: number
+  weatherCode: number
+  isDay: boolean
+  /** IANA zone, for the local clock */
+  timezone: string
+  fetchedAt: number
+}
+
+interface OpenMeteoLocation {
+  timezone: string
+  current?: { temperature_2m: number; weather_code: number; is_day: number }
+}
+
+const WEATHER_TTL_MS = 15 * 60 * 1000
+const weatherCache = new Map<string, PlaceWeather>()
+const weatherKey = (p: { lat: number; lng: number }) => `${p.lat.toFixed(3)},${p.lng.toFixed(3)}`
+
+/** Fetches the given places in one call and files them in weatherCache. */
+async function fetchWeather(places: { lat: number; lng: number }[]) {
+  const params = new URLSearchParams({
+    latitude: places.map((p) => p.lat).join(','),
+    longitude: places.map((p) => p.lng).join(','),
+    current: 'temperature_2m,weather_code,is_day',
+    forecast_days: '1',
+    timezone: 'auto',
+  })
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`)
+  if (!res.ok) throw new Error(`weather ${res.status}`)
+  const json = await res.json()
+  // one location comes back as an object, several as an array, in request order
+  const list: OpenMeteoLocation[] = Array.isArray(json) ? json : [json]
+  const now = Date.now()
+  list.forEach((loc, i) => {
+    const place = places[i]
+    if (!place || !loc?.current) return
+    weatherCache.set(weatherKey(place), {
+      temperature: loc.current.temperature_2m,
+      weatherCode: loc.current.weather_code,
+      isDay: loc.current.is_day === 1,
+      timezone: loc.timezone,
+      fetchedAt: now,
+    })
+  })
+}
+
+/** WMO weather code -> icon, day/night aware for clear and partly cloudy. */
+const weatherIcon = (code: number, isDay: boolean): LucideIcon => {
+  if (code === 0) return isDay ? Sun : Moon
+  if (code <= 2) return isDay ? CloudSun : CloudMoon
+  if (code === 3) return Cloud
+  if (code <= 48) return CloudFog
+  if (code <= 57) return CloudDrizzle
+  if (code <= 67) return CloudRain
+  if (code <= 77) return CloudSnow
+  if (code <= 82) return CloudRain
+  if (code <= 86) return CloudSnow
+  return CloudLightning
+}
+
+interface FactTile {
+  key: string
+  label: string
+  icon: LucideIcon
+  /** null while the value is still loading — shows a skeleton */
+  value: string | null
+  /** small second line under the value */
+  sub?: string
+}
+
+// ---------- currency ----------
+
+/** Symbol and name per ISO 4217 code; anything else falls back to the code. */
+const CURRENCIES: Record<string, { symbol: string; name: string }> = {
+  EUR: { symbol: '€', name: 'Euro' },
+  GBP: { symbol: '£', name: 'British pound' },
+  CHF: { symbol: 'CHF', name: 'Swiss franc' },
+  CZK: { symbol: 'Kč', name: 'Czech koruna' },
+  HUF: { symbol: 'Ft', name: 'Hungarian forint' },
+  TRY: { symbol: '₺', name: 'Turkish lira' },
+  BRL: { symbol: 'R$', name: 'Brazilian real' },
+  CNY: { symbol: '¥', name: 'Chinese yuan' },
+  USD: { symbol: '$', name: 'US dollar' },
+  PLN: { symbol: 'zł', name: 'Polish złoty' },
+  DKK: { symbol: 'kr', name: 'Danish krone' },
+  SEK: { symbol: 'kr', name: 'Swedish krona' },
+  NOK: { symbol: 'kr', name: 'Norwegian krone' },
+  JPY: { symbol: '¥', name: 'Japanese yen' },
+}
+
+// Daily exchange rates against the euro, keyless and callable from the
+// browser. The CDN-hosted currency-api file is the primary source (a static
+// file on jsDelivr, so about as available as it gets); the open
+// ExchangeRate-API endpoint is the fallback. Fetched once per session.
+const RATES_TTL_MS = 6 * 60 * 60 * 1000
+let euroRatesCache: { rates: Record<string, number>; fetchedAt: number } | null = null
+
+const upperKeys = (rates: Record<string, number>) =>
+  Object.fromEntries(Object.entries(rates).map(([k, v]) => [k.toUpperCase(), v]))
+
+async function fetchEuroRates() {
+  let rates: Record<string, number> | undefined
+  try {
+    const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.min.json')
+    if (res.ok) rates = upperKeys(((await res.json()) as { eur?: Record<string, number> }).eur ?? {})
+  } catch {
+    // fall through to the second source
+  }
+  if (!rates || Object.keys(rates).length === 0) {
+    const res = await fetch('https://open.er-api.com/v6/latest/EUR')
+    if (!res.ok) throw new Error(`rates ${res.status}`)
+    rates = ((await res.json()) as { rates?: Record<string, number> }).rates ?? {}
+  }
+  euroRatesCache = { rates, fetchedAt: Date.now() }
+  return rates
+}
+
+/** "1 € ≈ 395 Ft", with the decimals the size of the number calls for. */
+const formatEuroRate = (rate: number, symbol: string) => {
+  const digits = rate >= 100 ? 0 : rate >= 10 ? 1 : 2
+  return `1 € ≈ ${rate.toFixed(digits)} ${symbol}`
+}
+
+/**
+ * Fact tiles: icons and values only, no prose. Pressing a tile reveals its
+ * label in a tooltip; a press anywhere else dismisses it. `column` stacks
+ * them (desktop, next to the photo), `grid` lays them two across (mobile).
+ * `resetKey` closes any open tooltip when the subject changes.
+ */
+function FactTiles({
+  tiles,
+  layout,
+  accentClass,
+  className,
+  resetKey,
+}: {
+  tiles: FactTile[]
+  layout: 'column' | 'grid'
+  accentClass: string
+  className?: string
+  resetKey: unknown
+}) {
+  const [openKey, setOpenKey] = useState<string | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => setOpenKey(null), [resetKey])
+  useEffect(() => {
+    if (!openKey) return
+    const close = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpenKey(null)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [openKey])
+
+  return (
+    <div
+      ref={rootRef}
+      className={`${layout === 'column' ? 'flex flex-col gap-2 w-48' : 'grid grid-cols-2 gap-2'} ${className ?? ''}`}
+    >
+      {tiles.map(({ key, label, icon: Icon, value, sub }, i) => (
+        <button
+          key={key}
+          type="button"
+          // each frosted tile is its own stacking context, so the open one
+          // is lifted above its neighbours for its tooltip to show
+          className={`fact-tile text-on-dark ${openKey === key ? 'z-20' : ''}`}
+          aria-label={`${label}: ${value ?? '…'}${sub ? `, ${sub}` : ''}`}
+          aria-expanded={openKey === key}
+          onClick={() => setOpenKey((k) => (k === key ? null : key))}
+        >
+          <Icon className={`h-5 w-5 shrink-0 ${accentClass}`} aria-hidden="true" />
+          {value === null ? (
+            <span className="fact-tile-skeleton media-skeleton" />
+          ) : (
+            <span className="min-w-0 flex flex-col leading-tight">
+              <span className="font-semibold tabular-nums whitespace-nowrap">{value}</span>
+              {sub && <span className="text-xs text-muted-on-dark truncate">{sub}</span>}
+            </span>
+          )}
+          {openKey === key && (
+            <span
+              role="tooltip"
+              // in the two-column grid a centered tooltip would run off the
+              // card, so it hangs from the tile's outer edge instead
+              className={`absolute top-full z-10 mt-2 whitespace-nowrap rounded-md border border-gray-600 bg-gray-900/95 px-2.5 py-1 text-xs font-medium text-on-dark shadow-lg ${
+                layout === 'grid' ? (i % 2 === 0 ? 'left-0' : 'right-0') : 'left-1/2 -translate-x-1/2'
+              }`}
+            >
+              {label}
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+interface FactLabels {
+  weather: string
+  time: string
+  distance: string
+  population: string
+}
+
+/**
+ * A place's tiles: weather and temperature, local time, distance from
+ * home and population.
+ */
+function PlaceFacts({
+  place,
+  weather,
+  now,
+  accentClass,
+  labels,
+  layout,
+  className,
+}: {
+  place: VisitedPlace
+  weather: PlaceWeather | undefined
+  now: number
+  accentClass: string
+  labels: FactLabels
+  layout: 'column' | 'grid'
+  className?: string
+}) {
+  const clock = weather
+    ? new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: weather.timezone })
+    : null
+  const tiles: FactTile[] = [
+    {
+      key: 'weather',
+      label: labels.weather,
+      icon: weather ? weatherIcon(weather.weatherCode, weather.isDay) : Cloud,
+      value: weather ? `${Math.round(weather.temperature)}°` : null,
+    },
+    { key: 'time', label: labels.time, icon: Clock, value: clock ? clock.format(now) : null },
+    {
+      key: 'distance',
+      label: labels.distance,
+      icon: Navigation,
+      value: `${Math.round(distanceKm(HOME, place)).toLocaleString('en')} km`,
+    },
+  ]
+  if (place.population) {
+    tiles.push({ key: 'population', label: labels.population, icon: Users, value: compactNumber(place.population) })
+  }
+  return <FactTiles tiles={tiles} layout={layout} accentClass={accentClass} className={className} resetKey={place} />
+}
+
+interface CountryFactLabels {
+  population: string
+  capital: string
+  area: string
+  currency: string
+}
+
+// the yardstick for the area tile
+const NL_AREA_KM2 = 41_850
+
+/**
+ * A country's tiles: population, capital, area as a multiple of the
+ * Netherlands and currency (with its name and today's rate against the
+ * euro). Static facts that aren't stored are left out rather than shown as
+ * a skeleton; only the exchange rate loads.
+ */
+function CountryFacts({
+  country,
+  iso3,
+  euroRates,
+  accentClass,
+  labels,
+  layout,
+  className,
+}: {
+  country: VisitedCountry | undefined
+  iso3: string
+  /** rates per euro, undefined while loading */
+  euroRates: Record<string, number> | undefined
+  accentClass: string
+  labels: CountryFactLabels
+  layout: 'column' | 'grid'
+  className?: string
+}) {
+  const tiles: FactTile[] = []
+  if (country?.population) {
+    tiles.push({ key: 'population', label: labels.population, icon: Users, value: compactNumber(country.population) })
+  }
+  if (country?.capital) tiles.push({ key: 'capital', label: labels.capital, icon: Landmark, value: country.capital })
+  if (country?.areaKm2) {
+    const ratio = country.areaKm2 / NL_AREA_KM2
+    tiles.push({
+      key: 'area',
+      label: labels.area,
+      icon: MapIcon,
+      value:
+        iso3 === 'NLD'
+          ? `${Math.round(country.areaKm2).toLocaleString('en')} km²`
+          : `${ratio.toFixed(ratio >= 10 ? 0 : ratio >= 1 ? 1 : 2)}× NL`,
+    })
+  }
+  if (country?.currency) {
+    const code = country.currency.toUpperCase()
+    const info = CURRENCIES[code] ?? { symbol: code, name: code }
+    const rate = euroRates?.[code]
+    tiles.push({
+      key: 'currency',
+      label: labels.currency,
+      icon: Coins,
+      // the euro needs no rate; anything else shows today's rate, or a
+      // skeleton until the rates have arrived
+      value: code === 'EUR' ? info.symbol : euroRates ? formatEuroRate(rate ?? NaN, info.symbol) : null,
+      sub: info.name,
+    })
+  }
+  return <FactTiles tiles={tiles} layout={layout} accentClass={accentClass} className={className} resetKey={iso3} />
+}
+
+// ---------- search ----------
+
+// What the search box can land on: a visited country, or one of its places.
+type SearchHit =
+  | { kind: 'country'; label: string; alt: string[]; code: string; feature: CountryFeature }
+  | {
+      kind: 'place'
+      label: string
+      alt: string[]
+      code: string
+      country: string
+      feature: CountryFeature
+      place: VisitedPlace
+    }
+
+/** Case- and accent-insensitive form for matching ("Kraków" -> "krakow"). */
+const fold = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+
+/**
+ * How well a (folded) query matches any of the labels: 0 when a label starts
+ * with it, 1 when one of a label's words does, 2 when it merely appears
+ * somewhere, Infinity when it doesn't match at all.
+ */
+const matchRank = (query: string, ...labels: string[]) => {
+  let best = Infinity
+  for (const raw of labels) {
+    const label = fold(raw)
+    if (label.startsWith(query)) return 0
+    if (label.split(/[\s-]+/).some((word) => word.startsWith(query))) best = Math.min(best, 1)
+    else if (label.includes(query)) best = Math.min(best, 2)
+  }
+  return best
+}
+
 // ---------- per-country card themes ----------
 
 // Some countries get a personalized card: a tinted wash, a flag-colored top
@@ -1285,7 +1698,6 @@ const shuffled = <T,>(items: T[]): T[] => {
 
 export default function TripsPage() {
   const { t } = useTranslation()
-  const localText = (item?: { description?: string }) => item?.description
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const pageRef = useRef<HTMLDivElement | null>(null)
@@ -1856,6 +2268,91 @@ export default function TripsPage() {
     )
   }, [selected, selectedPlace])
 
+  // ---------- search ----------
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchHighlight, setSearchHighlight] = useState(0)
+  // On mobile the box is folded into a round button until tapped, so the
+  // small globe zone isn't dominated by an input; desktop shows it always.
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
+
+  // Everything the box can find: visited countries and their places, with
+  // the cards' native names as extra match targets ("Lisboa" finds Lisbon).
+  const searchIndex = useMemo<SearchHit[]>(() => {
+    const byCode = new Map(polygonsData.map((f) => [f.properties.iso3, f]))
+    const hits: SearchHit[] = []
+    for (const v of activeCountries) {
+      const feature = byCode.get(v.code)
+      if (!feature) continue
+      const native = COUNTRY_THEMES[v.code]?.nativeLabels ?? {}
+      const name = feature.properties.name
+      hits.push({ kind: 'country', label: name, alt: native[name] ? [native[name]] : [], code: v.code, feature })
+      for (const place of v.places ?? []) {
+        hits.push({
+          kind: 'place',
+          label: place.name,
+          alt: native[place.name] ? [native[place.name]] : [],
+          code: v.code,
+          country: name,
+          feature,
+          place,
+        })
+      }
+    }
+    return hits
+  }, [polygonsData, activeCountries])
+
+  // Best matches first: prefix beats word-prefix beats substring, countries
+  // before places at the same rank, then alphabetical. Capped so "a" doesn't
+  // unroll the whole atlas.
+  const searchResults = useMemo(() => {
+    const q = fold(searchQuery.trim())
+    if (!q) return []
+    return searchIndex
+      .map((hit) => ({ hit, rank: matchRank(q, hit.label, ...hit.alt) }))
+      .filter((r) => r.rank !== Infinity)
+      .sort(
+        (a, b) =>
+          a.rank - b.rank ||
+          (a.hit.kind === 'country' ? 0 : 1) - (b.hit.kind === 'country' ? 0 : 1) ||
+          a.hit.label.localeCompare(b.hit.label)
+      )
+      .slice(0, 8)
+      .map((r) => r.hit)
+  }, [searchQuery, searchIndex])
+
+  const closeSearch = () => {
+    setSearchQuery('')
+    setSearchOpen(false)
+    setSearchHighlight(0)
+    setMobileSearchOpen(false)
+    searchInputRef.current?.blur()
+  }
+
+  const expandMobileSearch = () => {
+    setMobileSearchOpen(true)
+    // the input is display:none until the state applies; focus it next frame
+    requestAnimationFrame(() => searchInputRef.current?.focus())
+  }
+
+  const pickSearchHit = (hit: SearchHit) => {
+    closeSearch()
+    if (hit.kind === 'country') {
+      selectCountry(hit.feature)
+      return
+    }
+    if (selected?.properties.iso3 === hit.code) {
+      // already on this country, so its place list is current: zoom straight in
+      focusPlace(hit.place)
+    } else {
+      // open the country first; the pending-place effect above then flies to
+      // the place once the selection has applied, exactly like a deep link
+      pendingPlaceRef.current = { code: hit.code, slug: placeSlug(hit.place.name) }
+      selectCountry(hit.feature)
+    }
+  }
+
   // Theme modifier class for the selected country's place flags
   const themeFlagRef = useRef('')
   useEffect(() => {
@@ -2125,12 +2622,52 @@ export default function TripsPage() {
     }
   }, [placeMedia, mediaIndex, mediaLoaded])
 
-  const panelPlaces = panelCountry
-    ? visitedByCode.get(panelCountry.properties.iso3)?.places ?? []
-    : []
+  // memoized: the weather effect below keys off this array's identity
+  const panelPlaces = useMemo(
+    () => (panelCountry ? visitedByCode.get(panelCountry.properties.iso3)?.places ?? [] : []),
+    [panelCountry, visitedByCode]
+  )
   useEffect(() => {
     setShowcase(false)
   }, [selected])
+
+  // ---------- place facts: live weather for the open country's places ----------
+  const [weatherByKey, setWeatherByKey] = useState<Record<string, PlaceWeather>>({})
+  useEffect(() => {
+    if (panelPlaces.length === 0) return
+    const now = Date.now()
+    const stale = panelPlaces.filter((p) => {
+      const w = weatherCache.get(weatherKey(p))
+      return !w || now - w.fetchedAt > WEATHER_TTL_MS
+    })
+    if (stale.length === 0) return
+    let cancelled = false
+    fetchWeather(stale)
+      .then(() => {
+        if (!cancelled) setWeatherByKey(Object.fromEntries(weatherCache))
+      })
+      .catch(() => {
+        // the tiles keep their skeleton; the globe isn't a weather service
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [panelPlaces])
+  const selectedWeather = selectedPlace ? weatherByKey[weatherKey(selectedPlace)] : undefined
+  // the local clock ticks while a place is open
+  const [nowMs, setNowMs] = useState(() => Date.now())
+  useEffect(() => {
+    if (!selectedPlace) return
+    setNowMs(Date.now())
+    const id = window.setInterval(() => setNowMs(Date.now()), 30_000)
+    return () => window.clearInterval(id)
+  }, [selectedPlace])
+  const factLabels: FactLabels = {
+    weather: t('trips.factWeather'),
+    time: t('trips.factTime'),
+    distance: t('trips.factDistance'),
+    population: t('trips.factPopulation'),
+  }
 
   const cardTheme = panelCountry ? COUNTRY_THEMES[panelCountry.properties.iso3] : undefined
   // fades the card's content away in showcase mode (the toggle stays)
@@ -2245,13 +2782,38 @@ export default function TripsPage() {
       })),
     []
   )
-  const placeText = selectedPlace ? localText(selectedPlace) : undefined
-  const countryText = panelCountry
-    ? localText(visitedByCode.get(panelCountry.properties.iso3))
-    : undefined
-  // what the media area's text column shows: the selected place's story,
-  // or the country's own story when no place is selected
-  const panelText = placeText ?? (selectedPlace ? undefined : countryText)
+  // the visited-country record behind the open card, for its fact tiles
+  const panelVisited = panelCountry ? visitedByCode.get(panelCountry.properties.iso3) : undefined
+  // euro exchange rates for the currency tile, fetched the first time a
+  // non-euro country opens and kept for the session
+  const [euroRates, setEuroRates] = useState<Record<string, number> | undefined>(
+    () => euroRatesCache?.rates
+  )
+  useEffect(() => {
+    const code = panelVisited?.currency?.toUpperCase()
+    if (!code || code === 'EUR') return
+    if (euroRatesCache && Date.now() - euroRatesCache.fetchedAt < RATES_TTL_MS) {
+      setEuroRates(euroRatesCache.rates)
+      return
+    }
+    let cancelled = false
+    fetchEuroRates()
+      .then((rates) => {
+        if (!cancelled) setEuroRates(rates)
+      })
+      .catch(() => {
+        // the tile keeps its skeleton
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [panelVisited])
+  const countryFactLabels: CountryFactLabels = {
+    population: t('trips.factPopulation'),
+    capital: t('trips.factCapital'),
+    area: t('trips.factArea'),
+    currency: t('trips.factCurrency'),
+  }
 
   return (
     <div ref={pageRef} className="h-dvh flex flex-col overflow-hidden relative z-10 md:pt-16 bg-gradient-to-b from-purple-900 via-blue-900 to-black">
@@ -2271,6 +2833,131 @@ export default function TripsPage() {
           {!sceneVisible && (
             <div className="absolute inset-0 flex items-center justify-center text-muted-on-dark pointer-events-none">
               {t('trips.loading')}
+            </div>
+          )}
+          {/* Search: finds visited countries and their places on both
+              layouts. On mobile it's a round button under the fixed nav (the
+              page has no top padding there) that expands into the field;
+              on desktop the field sits in the free top-left corner. */}
+          {sceneVisible && !mobileSearchOpen && (
+            <button
+              type="button"
+              aria-label={t('trips.searchLabel')}
+              onClick={expandMobileSearch}
+              className="md:hidden absolute top-[4.75rem] left-3 z-30 rounded-full border border-gray-600 bg-gray-900/85 backdrop-blur-sm p-2.5 text-on-dark active:bg-white/10 transition-colors"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          )}
+          {sceneVisible && (
+            <div
+              className={`absolute top-[4.75rem] md:top-3 left-3 z-30 md:w-80 ${
+                mobileSearchOpen ? 'w-[calc(100%-1.5rem)]' : 'hidden md:block'
+              }`}
+            >
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-on-dark" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setSearchOpen(true)
+                    setSearchHighlight(0)
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                  // delayed so a tap on a result lands before the list goes;
+                  // an empty field folds back into the mobile button
+                  onBlur={() => {
+                    const empty = searchQuery.trim() === ''
+                    window.setTimeout(() => {
+                      setSearchOpen(false)
+                      if (empty) setMobileSearchOpen(false)
+                    }, 150)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      closeSearch()
+                      return
+                    }
+                    if (searchResults.length === 0) return
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault()
+                      setSearchHighlight((i) => (i + 1) % searchResults.length)
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault()
+                      setSearchHighlight((i) => (i - 1 + searchResults.length) % searchResults.length)
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault()
+                      pickSearchHit(searchResults[Math.min(searchHighlight, searchResults.length - 1)])
+                    }
+                  }}
+                  placeholder={t('trips.searchPlaceholder')}
+                  aria-label={t('trips.searchLabel')}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="w-full rounded-xl border border-gray-600 bg-gray-900/90 backdrop-blur-sm pl-9 pr-9 py-2 text-sm md:text-base text-on-dark placeholder:text-muted-on-dark focus:outline-none focus:border-accent transition-colors"
+                />
+                {/* clears the query, or on mobile folds an empty field away */}
+                <button
+                  type="button"
+                  aria-label={t('trips.searchClear')}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (searchQuery) {
+                      setSearchQuery('')
+                      setSearchHighlight(0)
+                      searchInputRef.current?.focus()
+                    } else {
+                      closeSearch()
+                    }
+                  }}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-on-dark hover:text-on-dark transition-colors ${
+                    searchQuery ? '' : 'md:hidden'
+                  }`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {searchOpen && searchQuery.trim() && (
+                <ul
+                  role="listbox"
+                  className="mt-2 overflow-hidden rounded-xl border border-gray-600 bg-gray-900/95 backdrop-blur-sm shadow-xl"
+                >
+                  {searchResults.length === 0 ? (
+                    <li className="px-3 py-2 text-sm md:text-base text-muted-on-dark">{t('trips.searchNoResults')}</li>
+                  ) : (
+                    searchResults.map((hit, i) => (
+                      <li key={`${hit.kind}-${hit.code}-${hit.label}`} role="option" aria-selected={i === searchHighlight}>
+                        <button
+                          type="button"
+                          // a mousedown would blur the input and drop the list
+                          // before the click lands
+                          onMouseDown={(e) => e.preventDefault()}
+                          onMouseEnter={() => setSearchHighlight(i)}
+                          onClick={() => pickSearchHit(hit)}
+                          className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm md:text-base transition-colors ${
+                            i === searchHighlight ? 'bg-white/10 text-accent' : 'text-on-dark'
+                          }`}
+                        >
+                          {hit.kind === 'country' && /^[A-Za-z]{2}$/.test(hit.feature.properties.iso2) ? (
+                            <span className={`fi fi-${hit.feature.properties.iso2.toLowerCase()} rounded text-base shrink-0`} />
+                          ) : hit.kind === 'country' ? (
+                            <Flag className="h-4 w-4 shrink-0 text-muted-on-dark" />
+                          ) : (
+                            <MapPin className="h-4 w-4 shrink-0 text-muted-on-dark" />
+                          )}
+                          <span className="truncate">{hit.label}</span>
+                          {hit.kind === 'place' && (
+                            <span className="ml-auto truncate pl-3 text-xs md:text-sm text-muted-on-dark">{hit.country}</span>
+                          )}
+                        </button>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
             </div>
           )}
           <div
@@ -2519,7 +3206,7 @@ export default function TripsPage() {
           {/* Country info panel — on mobile it fills the bottom half (the
               globe shifts the selection into the top half); on desktop it
               fills the full right side, edge to edge */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
+          <div className="absolute inset-x-0 bottom-0 h-[40%] md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
             <div
               data-testid="country-card"
               className={`relative h-full flex flex-col bg-[#222831] border-0 border-t md:border-t-0 md:border-l ${
@@ -3025,17 +3712,6 @@ export default function TripsPage() {
                     <div className="mt-2 text-sm md:text-base text-muted-on-dark">{t('trips.notVisited')}</div>
                   )}
 
-                  {/* country text normally lives in the media area's right
-                      column; this fallback is only for countries without any
-                      places (so no media row renders at all) */}
-                  {!selectedPlace && countryText && panelPlaces.length === 0 && (
-                    <p
-                      className="hidden md:block mt-4 text-sm md:text-base text-on-dark leading-relaxed whitespace-pre-line border-t border-gray-700 pt-4"
-                    >
-                      {countryText}
-                    </p>
-                  )}
-
                   {panelPlaces.length > 0 && (
                     <div className={`mt-5 md:mt-7 ${contentCls}`}>
                       <h4 className="text-sm md:text-base font-semibold text-on-dark mb-2 md:mb-3">
@@ -3095,8 +3771,7 @@ export default function TripsPage() {
                       place selected it shows every photo from the country's
                       places combined. While the media list or the current
                       image is still loading, its shape pulses as a skeleton. */}
-                  {(selectedPlace || panelPlaces.length > 0) &&
-                  (placeMedia === null || placeMedia.length > 0 || panelText) ? (
+                  {panelCountry ? (
                     <div className={`hidden md:flex mt-4 flex-1 min-h-0 flex-row items-stretch gap-4 ${contentCls}`}>
                       {placeMedia === null ? (
                         <div className="h-[85%] self-center aspect-[3/4] max-w-full shrink-0 rounded-lg media-skeleton flex items-center justify-center">
@@ -3155,20 +3830,10 @@ export default function TripsPage() {
                         </button>
                         {placeMedia.length > 1 && (
                           <>
-                            {/* Instagram-style progress bars (full width on
-                                mobile — no fullscreen button there) */}
-                            <div className="absolute top-2 left-2 right-2 md:right-10 flex gap-1 pointer-events-none">
-                              {placeMedia.map((m, i) => (
-                                <div
-                                  key={m.url}
-                                  className={`h-1 flex-1 rounded-full transition-colors ${
-                                    i === Math.min(mediaIndex, placeMedia.length - 1)
-                                      ? 'bg-white/90'
-                                      : 'bg-white/30'
-                                  }`}
-                                />
-                              ))}
-                            </div>
+                            {/* position counter in the top-left corner */}
+                            <span className="absolute top-2 left-2 rounded-md bg-black/55 px-2 py-0.5 text-xs font-medium tabular-nums text-white pointer-events-none">
+                              {Math.min(mediaIndex, placeMedia.length - 1) + 1}/{placeMedia.length}
+                            </span>
                             {/* mobile: tap the photo's left/right side to flip */}
                             <button
                               type="button"
@@ -3208,11 +3873,30 @@ export default function TripsPage() {
                       </div>
                       </div>
                       ) : null}
-                      {panelText && (
-                        <div className="flex-1 min-w-0 h-[85%] self-center overflow-y-auto text-base text-on-dark leading-relaxed whitespace-pre-line">
-                          {panelText}
-                        </div>
-                      )}
+                      {/* facts, no prose: one centered column in the same
+                          85%-high box as the photo, so it starts level with
+                          the photo's top edge */}
+                      <div className="flex-1 min-w-0 h-[85%] self-center flex justify-center items-start">
+                        {selectedPlace ? (
+                          <PlaceFacts
+                            place={selectedPlace}
+                            weather={selectedWeather}
+                            now={nowMs}
+                            accentClass={cardTheme?.badge ?? 'text-accent'}
+                            labels={factLabels}
+                            layout="column"
+                          />
+                        ) : (
+                          <CountryFacts
+                            country={panelVisited}
+                            iso3={panelCountry.properties.iso3}
+                            euroRates={euroRates}
+                            accentClass={cardTheme?.badge ?? 'text-accent'}
+                            labels={countryFactLabels}
+                            layout="column"
+                          />
+                        )}
+                      </div>
                     </div>
                   ) : (
                     /* Flexible space for future content */
@@ -3222,10 +3906,26 @@ export default function TripsPage() {
                   {/* mobile: the card is text-first — the story scrolls, and
                       a photo button opens the gallery straight in fullscreen */}
                   <div className={`md:hidden mt-3 flex-1 min-h-0 flex flex-col gap-3 ${contentCls}`}>
-                    {panelText && (
-                      <div className="flex-1 min-h-0 overflow-y-auto text-sm text-on-dark leading-relaxed whitespace-pre-line">
-                        {panelText}
-                      </div>
+                    {selectedPlace ? (
+                      <PlaceFacts
+                        place={selectedPlace}
+                        weather={selectedWeather}
+                        now={nowMs}
+                        accentClass={cardTheme?.badge ?? 'text-accent'}
+                        labels={factLabels}
+                        layout="grid"
+                        className="text-sm"
+                      />
+                    ) : (
+                      <CountryFacts
+                        country={panelVisited}
+                        iso3={panelCountry.properties.iso3}
+                        euroRates={euroRates}
+                        accentClass={cardTheme?.badge ?? 'text-accent'}
+                        labels={countryFactLabels}
+                        layout="grid"
+                        className="text-sm"
+                      />
                     )}
                     {placeMedia === null ? (
                       <div className="h-11 rounded-lg media-skeleton" />
@@ -3261,7 +3961,8 @@ export default function TripsPage() {
             <div
               className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
               onClick={(e) => {
-                // Mobile lightboxes close only through the downward gesture;
+                // On mobile the lightbox closes via the cross or the
+                // swipe-down gesture, never a stray tap on the backdrop;
                 // desktop users can still click the backdrop.
                 if (e.target === e.currentTarget && window.matchMedia('(min-width: 768px)').matches) {
                   setMediaFullscreen(false)
@@ -3353,31 +4054,30 @@ export default function TripsPage() {
                   {item.placeName}
                 </span>
               )}
-              {/* desktop only — on mobile a swipe closes the lightbox */}
+              {/* close cross on every size — on mobile it sits alongside the
+                  swipe-down gesture, kept clear of the notch by the safe-area
+                  inset and sized for a thumb */}
               <button
                 type="button"
                 aria-label={t('trips.mediaClose')}
-                onClick={() => setMediaFullscreen(false)}
-                className="hidden md:block absolute right-4 top-4 rounded-full bg-black/60 hover:bg-black/80 text-white p-2 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMediaFullscreen(false)
+                }}
+                className="absolute z-10 right-3 md:right-4 rounded-full bg-black/60 hover:bg-black/80 active:bg-black/90 text-white p-3 md:p-2 transition-colors"
+                style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
               >
-                <X className="h-6 w-6" />
+                <X className="h-7 w-7 md:h-6 md:w-6" />
               </button>
               {placeMedia.length > 1 && (
                 <>
-                  {/* Instagram-style progress bars (full width on mobile —
-                      no close button there) */}
-                  <div className="absolute top-4 left-4 right-4 md:right-16 flex gap-1 pointer-events-none">
-                    {placeMedia.map((m, i) => (
-                      <div
-                        key={m.url}
-                        className={`h-1 flex-1 rounded-full transition-colors ${
-                          i === Math.min(mediaIndex, placeMedia.length - 1)
-                            ? 'bg-white/90'
-                            : 'bg-white/30'
-                        }`}
-                      />
-                    ))}
-                  </div>
+                  {/* position counter top-left, level with the close cross */}
+                  <span
+                    className="absolute left-4 rounded-md bg-black/55 px-2.5 py-1 text-sm font-medium tabular-nums text-white pointer-events-none"
+                    style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
+                  >
+                    {Math.min(mediaIndex, placeMedia.length - 1) + 1}/{placeMedia.length}
+                  </span>
                   {/* mobile: tap left/right side to flip */}
                   <button
                     type="button"

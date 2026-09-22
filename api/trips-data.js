@@ -17,7 +17,9 @@ const isValidPlace = (p) =>
   typeof p.lng === 'number' &&
   p.lng >= -180 &&
   p.lng <= 180 &&
-  (p.description === undefined || (typeof p.description === 'string' && p.description.length <= 5000))
+  (p.description === undefined || (typeof p.description === 'string' && p.description.length <= 5000)) &&
+  (p.population === undefined ||
+    (Number.isInteger(p.population) && p.population >= 0 && p.population <= 2_000_000_000))
 
 const isValidCountry = (c) =>
   c &&
@@ -25,6 +27,11 @@ const isValidCountry = (c) =>
   /^[A-Z]{3}$/.test(c.code) &&
   (c.note === undefined || (typeof c.note === 'string' && c.note.length <= 300)) &&
   (c.description === undefined || (typeof c.description === 'string' && c.description.length <= 5000)) &&
+  (c.population === undefined ||
+    (Number.isInteger(c.population) && c.population >= 0 && c.population <= 2_000_000_000)) &&
+  (c.capital === undefined || (typeof c.capital === 'string' && c.capital.length <= 100)) &&
+  (c.areaKm2 === undefined || (typeof c.areaKm2 === 'number' && c.areaKm2 >= 0 && c.areaKm2 <= 20_000_000)) &&
+  (c.currency === undefined || (typeof c.currency === 'string' && c.currency.length <= 12)) &&
   (c.places === undefined ||
     (Array.isArray(c.places) && c.places.length <= 200 && c.places.every(isValidPlace)))
 
