@@ -95,6 +95,15 @@ const MOBILE_NAV_HEIGHT_PX = 64
 // viewport), so the globe gets whatever is left. This is the estimate used
 // for camera framing until the sheet has actually been measured.
 const MOBILE_CARD_FRACTION = 0.45
+
+// Users who ask for reduced motion get a still globe: no drifting clouds,
+// sailing boats or orbiting satellite (the card scenes and CSS animations
+// are handled in index.css under the same media query). Live query, so a
+// change in system settings applies on the next frame.
+const reducedMotionQuery =
+  typeof window !== 'undefined' && 'matchMedia' in window
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null
 // Camera altitude limits (relative to globe radius). Distance = radius * (1 + altitude).
 // The floor must stay low enough that tightly packed place clusters
 // (e.g. Hong Kong/Macau/Shenzhen) can still be zoomed apart.
@@ -2010,6 +2019,11 @@ export default function TripsPage() {
           updateMoonCovered()
         }
         const radius = globe.getGlobeRadius()
+        // everything below is decorative motion — skipped for reduced motion
+        if (reducedMotionQuery?.matches) {
+          raf = requestAnimationFrame(tick)
+          return
+        }
         sailBoats(boatsRef.current, landMaskRef.current, radius, t, dt)
         // clouds drift slowly eastward
         if (cloudsRef.current) cloudsRef.current.rotation.y += dt * 0.004

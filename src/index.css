@@ -2713,3 +2713,53 @@
 /* Layer 2 - smaller leaves silhouette slightly below */
 /* Disable extra pseudo-layer, we now draw all 3 on ::before */
 .leaves-top-divider::after { content: none; }
+
+/* ---------------------------------------------------------------------
+   Reduced motion. The card scenes swap to motionless twins (the same
+   pictures with their SMIL stripped, built by scripts/build-static-frames.py),
+   every prop, particle, flag and skeleton animation is removed rather than
+   paused (paused would freeze the scene crossfade at opacity 0), and the
+   particle layers hide entirely. The globe's own drift is gated in
+   TripsPage.tsx with the same media query. */
+@media (prefers-reduced-motion: reduce) {
+  [data-testid='country-card'] *,
+  .place-flag-banner,
+  .place-flag-inner,
+  .space-moon-anchor *,
+  .meteor-streak {
+    animation: none !important;
+  }
+
+  .at-snow,
+  .be-bubbles,
+  .br-confetti,
+  .ch-stars,
+  .cn-lanterns,
+  .cz-petals,
+  .de-leaves,
+  .gb-rain {
+    display: none;
+  }
+
+  .at-alps-bg { background-image: url('/frames/at-alps-static.svg'); }
+  .be-brussels-bg { background-image: url('/frames/be-brussels-static.svg'); }
+  .br-rio-bg { background-image: url('/frames/br-rio-static.svg'); }
+  .ch-alpenglow-bg { background-image: url('/frames/ch-alpenglow-static.svg'); }
+  .cn-china-bg { background-image: url('/frames/cn-china-static.svg'); }
+  .cn-hongkong-bg { background-image: url('/frames/cn-hongkong-static.svg'); }
+  .cn-macau-bg { background-image: url('/frames/cn-macau-static.svg'); }
+  .cz-prague-bg { background-image: url('/frames/cz-prague-static.svg'); }
+  .de-schwarzwald-bg { background-image: url('/frames/de-schwarzwald-static.svg'); }
+  .es-canarias-bg { background-image: url('/frames/es-canarias-static.svg'); }
+  .es-mediterranean-bg { background-image: url('/frames/es-mediterranean-static.svg'); }
+  .fr-paris-bg { background-image: url('/frames/fr-paris-static.svg'); }
+  .gb-london-bg { background-image: url('/frames/gb-london-static.svg'); }
+  .gr-aegean-bg { background-image: url('/frames/gr-aegean-static.svg'); }
+  .hr-adriatic-bg { background-image: url('/frames/hr-adriatic-static.svg'); }
+  .hu-budapest-bg { background-image: url('/frames/hu-budapest-static.svg'); }
+  .it-tuscany-bg { background-image: url('/frames/it-tuscany-static.svg'); }
+  .nl-amsterdam-bg { background-image: url('/frames/nl-amsterdam-static.svg'); }
+  .pt-lisbon-bg { background-image: url('/frames/pt-lisbon-static.svg'); }
+  .pt-porto-bg { background-image: url('/frames/pt-porto-static.svg'); }
+  .tr-antalya-bg { background-image: url('/frames/tr-antalya-static.svg'); }
+}

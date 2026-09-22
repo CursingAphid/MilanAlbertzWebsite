@@ -74,4 +74,43 @@ export default defineConfig([
 ```
 =======
 # MilanAlbertzWebsite
->>>>>>> b686f3889ce9da7aff3a629d18d4a43495290568
+
+## Trips: uploading photos
+
+Drop the photos for one place into `~/Downloads/trip-photo-uploads` and run,
+from the project root:
+
+```sh
+node scripts/upload-photos.mjs PRT Lisbon
+node scripts/upload-photos.mjs AUT "Zell am See" --dir ~/Pictures/austria
+node scripts/upload-photos.mjs ESP "Gran Canaria" --dry-run
+```
+
+The script re-encodes to 1600px JPEG (macOS `sips`), uploads each file once
+with a random suffix, and merges the new entries into the KV media manifest
+in album order. It refuses unknown places (add them in `/trips/admin` first),
+skips files already in that gallery, never calls the Blob `list()` API and
+never deletes anything. `--dry-run` shows the plan without touching anything.
+
+## Trips: card scenes
+
+Card backgrounds are generated SVGs in `public/frames/` built by the
+`scripts/build-*.py` scripts. After regenerating any scene, run
+`python3 scripts/build-static-frames.py` to refresh the motionless twins
+served under `prefers-reduced-motion` and used by the link previews.
+
+## Trips: link previews
+
+Sharing `/trips?country=HUN` (or `&place=budapest`) unfurls with the
+country's scene and name. Two routes do this:
+
+- `api/og.js` renders the 1200×630 PNG (Satori + resvg, fonts embedded in
+  `api/_fonts.js`, scene from the `-static` twin).
+- `api/trips-preview.js` serves an HTML page with the Open Graph tags.
+  `vercel.json` rewrites `/trips` to it for known link-unfurling user agents
+  only; browsers keep getting the static SPA.
+
+Which scene stands for which country lives in `api/_og-data.js`; keep it in
+step with `COUNTRY_THEMES` when a card gets a new scene. `vercel dev` does
+not apply the user-agent rewrite, so check it on a deployment:
+`curl -A Twitterbot https://milanalbertz.nl/trips?country=HUN | grep og:image`.

@@ -18,8 +18,24 @@
     }
   ],
   "rewrites": [
+    {
+      "source": "/trips",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|Twitterbot|WhatsApp|Slackbot|LinkedInBot|Discordbot|TelegramBot|Pinterest|Mastodon|Bluesky|Googlebot|bingbot|Applebot|Embedly|SkypeUriPreview|Iframely|redditbot|Snapchat|vkShare).*"
+        }
+      ],
+      "destination": "/api/trips-preview"
+    },
     { "source": "/((?!api/|@|.*\\..*).*)", "destination": "/index.html" }
   ],
+  "functions": {
+    "api/og.js": {
+      "includeFiles": "public/frames/*-static.svg"
+    }
+  },
   "images": {
     "remotePatterns": [
       { "protocol": "https", "hostname": "*.public.blob.vercel-storage.com" }
