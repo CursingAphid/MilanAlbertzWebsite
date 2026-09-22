@@ -2940,7 +2940,8 @@ export default function TripsPage() {
               {searchOpen && searchQuery.trim() && (
                 <ul
                   role="listbox"
-                  className="mt-2 overflow-hidden rounded-xl border border-gray-600 bg-gray-900/95 backdrop-blur-sm shadow-xl"
+                  // capped so the list stays above the on-screen keyboard
+                  className="mt-2 max-h-[50dvh] overflow-y-auto rounded-xl border border-gray-600 bg-gray-900/95 backdrop-blur-sm shadow-xl"
                 >
                   {searchResults.length === 0 ? (
                     <li className="px-3 py-2 text-sm md:text-base text-muted-on-dark">{t('trips.searchNoResults')}</li>
@@ -3232,7 +3233,11 @@ export default function TripsPage() {
               className={`relative md:h-full max-h-[70dvh] md:max-h-none flex flex-col bg-[#222831] border-0 border-t md:border-t-0 md:border-l ${
                 cardTheme?.border ?? 'border-accent'
               } ${cardTheme?.cardClass ?? ''} card-text-halo rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
-                selected
+                // While the mobile search field is expanded the sheet slides
+                // away like an unselected card: the keyboard would otherwise
+                // push it up over the suggestions. It returns when the search
+                // folds, or with the new selection when a result is picked.
+                selected && !mobileSearchOpen
                   ? 'opacity-100 translate-y-0 md:translate-x-0 pointer-events-auto'
                   : 'opacity-0 translate-y-full md:translate-y-0 md:translate-x-[120%]'
               }`}
