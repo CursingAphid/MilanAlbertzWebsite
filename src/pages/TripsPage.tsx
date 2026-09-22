@@ -2914,7 +2914,10 @@ export default function TripsPage() {
                   aria-label={t('trips.searchLabel')}
                   autoComplete="off"
                   spellCheck={false}
-                  className="w-full rounded-xl border border-gray-600 bg-gray-900/90 backdrop-blur-sm pl-9 pr-9 py-2 text-sm md:text-base text-on-dark placeholder:text-muted-on-dark focus:outline-none focus:border-accent transition-colors"
+                  // 16px on every size: iOS Safari zooms the page into any
+                  // focused input with a smaller font, which then leaves the
+                  // layout scrolled sideways
+                  className="w-full rounded-xl border border-gray-600 bg-gray-900/90 backdrop-blur-sm pl-9 pr-9 py-2 text-base text-on-dark placeholder:text-muted-on-dark focus:outline-none focus:border-accent transition-colors"
                 />
                 {/* clears the query, or on mobile folds an empty field away */}
                 <button
