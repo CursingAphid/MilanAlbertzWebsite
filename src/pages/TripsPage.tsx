@@ -91,9 +91,10 @@ const DEFAULT_POV = { lat: 30, lng: 5, altitude: 1.8 }
 // framing math below must treat that band as dead space, not usable canvas.
 const MOBILE_NAV_HEIGHT_PX = 64
 // fraction of the container height the bottom sheet occupies on mobile
-// Share of the viewport the mobile bottom sheet takes (the globe gets the
-// rest); must match the sheet's height class on the card container.
-const MOBILE_CARD_FRACTION = 0.4
+// The mobile bottom sheet sizes to its content (capped at 70% of the
+// viewport), so the globe gets whatever is left. This is the estimate used
+// for camera framing until the sheet has actually been measured.
+const MOBILE_CARD_FRACTION = 0.45
 // Camera altitude limits (relative to globe radius). Distance = radius * (1 + altitude).
 // The floor must stay low enough that tightly packed place clusters
 // (e.g. Hong Kong/Macau/Shenzhen) can still be zoomed apart.
@@ -1700,6 +1701,21 @@ export default function TripsPage() {
   const { t } = useTranslation()
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  // The mobile sheet's real height as a fraction of the globe area, kept
+  // current by a ResizeObserver; null until first measured. Camera framing
+  // and the moon offset read it in place of MOBILE_CARD_FRACTION.
+  const mobileCardRef = useRef<HTMLDivElement | null>(null)
+  const mobileSheetFracRef = useRef<number | null>(null)
+  useEffect(() => {
+    const el = mobileCardRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      const H = containerRef.current?.clientHeight || window.innerHeight
+      if (H > 0) mobileSheetFracRef.current = Math.min(0.8, el.offsetHeight / H)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   const pageRef = useRef<HTMLDivElement | null>(null)
   // The DOM moon fades out while the globe's disc covers its screen spot
   const [moonCovered, setMoonCovered] = useState(false)
@@ -1938,7 +1954,7 @@ export default function TripsPage() {
     }
     const H = containerRef.current?.clientHeight || window.innerHeight
     const navFrac = MOBILE_NAV_HEIGHT_PX / H
-    const zoneBottomFrac = 1 - MOBILE_CARD_FRACTION
+    const zoneBottomFrac = 1 - (mobileSheetFracRef.current ?? MOBILE_CARD_FRACTION)
     // shift the display center up from 0.5 to the midpoint of [navFrac, zoneBottomFrac]
     viewOffsetTargetRef.current = { x: 0, y: 0.5 - (navFrac + zoneBottomFrac) / 2 }
   }, [selected])
@@ -2089,7 +2105,8 @@ export default function TripsPage() {
     // desktop: fit into the left half beside the panel; mobile: fit into the
     // strip above the bottom-sheet card, minus the fixed navbar's dead band
     const H = size.height || (typeof window !== 'undefined' ? window.innerHeight : 800)
-    const mobileZoneFrac = Math.max(0, (1 - MOBILE_CARD_FRACTION) - MOBILE_NAV_HEIGHT_PX / H)
+    const sheetFrac = mobileSheetFracRef.current ?? MOBILE_CARD_FRACTION
+    const mobileZoneFrac = Math.max(0, (1 - sheetFrac) - MOBILE_NAV_HEIGHT_PX / H)
     const targetV = desktop ? 0.82 : mobileZoneFrac * 0.8 // fraction of viewport height to fill
     const targetH = desktop ? 0.53 : 0.85 // fraction of viewport width
     const altitude = Math.min(
@@ -3206,10 +3223,13 @@ export default function TripsPage() {
           {/* Country info panel — on mobile it fills the bottom half (the
               globe shifts the selection into the top half); on desktop it
               fills the full right side, edge to edge */}
-          <div className="absolute inset-x-0 bottom-0 h-[40%] md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
+          <div className="absolute inset-x-0 bottom-0 md:inset-x-auto md:bottom-auto md:right-0 md:top-0 md:h-full md:w-[45%] pointer-events-none z-30">
             <div
+              ref={mobileCardRef}
               data-testid="country-card"
-              className={`relative h-full flex flex-col bg-[#222831] border-0 border-t md:border-t-0 md:border-l ${
+              // mobile: as tall as its content, never more than 70% of the
+              // viewport (the section below scrolls if it must)
+              className={`relative md:h-full max-h-[70dvh] md:max-h-none flex flex-col bg-[#222831] border-0 border-t md:border-t-0 md:border-l ${
                 cardTheme?.border ?? 'border-accent'
               } ${cardTheme?.cardClass ?? ''} card-text-halo rounded-t-2xl md:rounded-none p-4 md:p-6 shadow-2xl backdrop-blur-sm transition-all duration-700 ease-in-out ${
                 selected
@@ -3905,7 +3925,7 @@ export default function TripsPage() {
 
                   {/* mobile: the card is text-first — the story scrolls, and
                       a photo button opens the gallery straight in fullscreen */}
-                  <div className={`md:hidden mt-3 flex-1 min-h-0 flex flex-col gap-3 ${contentCls}`}>
+                  <div className={`md:hidden mt-3 flex-1 min-h-0 overflow-y-auto flex flex-col gap-3 ${contentCls}`}>
                     {selectedPlace ? (
                       <PlaceFacts
                         place={selectedPlace}
